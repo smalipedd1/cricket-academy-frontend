@@ -1,18 +1,29 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const CoachDashboard = () => {
   const [data, setData] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
     axios.get('https://cricket-academy-backend.onrender.com/api/dashboard?role=coach', {
       headers: {
-        Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ZGU5MThmMzE0YTU0NzQ3NTU0Y2E5MiIsInJvbGUiOiJjb2FjaCIsImlhdCI6MTc1OTg1Mjc4NiwiZXhwIjoxNzU5ODU2Mzg2fQ.OUrF7RsG2Pd4R4FT-9Cz3CKih7RJDcwBMo5nSxMYKRI'
+        Authorization: `Bearer ${token}`
       }
     })
     .then(res => setData(res.data))
-    .catch(err => console.error(err));
-  }, []);
+    .catch(err => {
+      console.error(err);
+      navigate('/login');
+    });
+  }, [navigate]);
 
   if (!data) return <div>Loading dashboard...</div>;
 
@@ -29,6 +40,10 @@ const CoachDashboard = () => {
           </li>
         ))}
       </ul>
+      <button onClick={() => {
+        localStorage.removeItem('token');
+        navigate('/login');
+      }}>Logout</button>
     </div>
   );
 };
