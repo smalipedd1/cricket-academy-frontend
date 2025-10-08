@@ -13,14 +13,18 @@ const Login = () => {
   const handleLogin = async (e) => {
   e.preventDefault();
   try {
-    const endpoint = role === 'admin' ? '/api/login' : '/api/coach/login';
+    const endpoint =
+      role === 'admin' ? '/api/login' :
+      role === 'coach' ? '/api/coach/login' :
+      '/api/player/login'; // ✅ includes player route
+
     const res = await axios.post(`https://cricket-academy-backend.onrender.com${endpoint}`, {
-      username,
+      username, // ✅ use 'username' for all roles
       password
     });
 
     localStorage.setItem('token', res.data.token);
-    localStorage.setItem('role', role); // Save role for routing
+    localStorage.setItem('role', role);
 
     if (role === 'coach') {
       navigate('/dashboard');
@@ -30,10 +34,9 @@ const Login = () => {
       navigate('/player/dashboard');
     }
   } catch (err) {
-  console.error('Login error:', err.response?.data || err.message);
-  setError('Invalid credentials');
-}
-
+    console.error('Login error:', err.response?.data || err.message);
+    setError(err.response?.data?.message || 'Invalid credentials');
+  }
 };
 
   return (

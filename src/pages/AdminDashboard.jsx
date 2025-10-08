@@ -8,37 +8,37 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+    if (!token) return navigate('/login');
 
     axios.get('https://cricket-academy-backend.onrender.com/api/admin/dashboard', {
       headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(res => setData(res.data))
-    .catch(err => {
-      console.error('Admin dashboard error:', err.response?.data || err.message);
-      navigate('/login');
-    });
+    }).then(res => setData(res.data)).catch(() => navigate('/login'));
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
+    localStorage.clear();
     navigate('/login');
   };
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
-      <div className="bg-white p-6 rounded shadow-md max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 className="text-3xl font-bold mb-6 text-blue-700">Admin Dashboard</h1>
         {data ? (
           <>
-            <p className="mb-2">Welcome, <strong>{data.name}</strong></p>
-            <p>Total Players: <strong>{data.totalPlayers}</strong></p>
-            <p>Total Coaches: <strong>{data.totalCoaches}</strong></p>
-            <p>Upcoming Sessions: <strong>{data.upcomingSessions}</strong></p>
+            <p className="text-lg mb-4">Welcome, <strong>{data.name}</strong></p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-yellow-50 p-4 rounded-lg shadow text-yellow-800 font-semibold">
+                Total Players: {data.totalPlayers}
+              </div>
+              <div className="bg-purple-50 p-4 rounded-lg shadow text-purple-800 font-semibold">
+                Total Coaches: {data.totalCoaches}
+              </div>
+              <div className="bg-green-50 p-4 rounded-lg shadow text-green-800 font-semibold">
+                Upcoming Sessions: {data.upcomingSessions}
+              </div>
+            </div>
           </>
         ) : (
           <p>Loading dashboard...</p>
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
 
         <button
           onClick={handleLogout}
-          className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
         >
           Logout
         </button>

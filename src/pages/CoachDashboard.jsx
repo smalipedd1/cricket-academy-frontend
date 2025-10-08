@@ -8,45 +8,38 @@ const CoachDashboard = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
-    }
+    if (!token) return navigate('/login');
 
     axios.get('https://cricket-academy-backend.onrender.com/api/coach/dashboard-lite', {
       headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(res => setData(res.data))
-    .catch(err => {
-      console.error('Dashboard error:', err.response?.data || err.message);
-      navigate('/login');
-    });
+    }).then(res => setData(res.data)).catch(() => navigate('/login'));
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
+    localStorage.clear();
     navigate('/login');
   };
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
-      <div className="bg-white p-6 rounded shadow-md max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Coach Dashboard</h1>
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 className="text-3xl font-bold mb-6 text-blue-700">Coach Dashboard</h1>
         {data ? (
           <>
-            <p className="mb-2">Welcome, <strong>{data.name}</strong></p>
+            <p className="text-lg mb-4">Welcome, <strong>{data.name}</strong></p>
 
-            <h2 className="text-xl font-semibold mb-2">Assigned Sessions</h2>
-            <ul className="list-disc pl-5 mb-4">
-              {data.assignedSessions.map((s, i) => (
-                <li key={i}>
-                  {s.date} – {s.focusArea} ({s.players} players)
-                </li>
-              ))}
-            </ul>
+            <div className="bg-blue-50 p-4 rounded-lg shadow mb-4">
+              <h2 className="text-xl font-semibold text-blue-800 mb-2">Assigned Sessions</h2>
+              <ul className="list-disc pl-5 text-blue-900">
+                {data.assignedSessions.map((s, i) => (
+                  <li key={i}>{s.date} – {s.focusArea} ({s.players} players)</li>
+                ))}
+              </ul>
+            </div>
 
-            <p className="text-lg">Feedback Pending: <strong>{data.feedbackPending}</strong></p>
+            <div className="bg-green-100 text-green-800 px-4 py-2 rounded-full font-semibold inline-block">
+              Feedback Pending: {data.feedbackPending}
+            </div>
           </>
         ) : (
           <p>Loading dashboard...</p>
@@ -54,7 +47,7 @@ const CoachDashboard = () => {
 
         <button
           onClick={handleLogout}
-          className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
         >
           Logout
         </button>

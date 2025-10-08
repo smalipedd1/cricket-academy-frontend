@@ -12,6 +12,8 @@ function App() {
         <Route path="/dashboard" element={<CoachDashboard />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/player/dashboard" element={<PlayerDashboard />} />
+        <Route path="/coach/dashboard" element={<CoachDashboard />} />
+	<Route path="/admin/dashboard" element={<AdminDashboard />} />
       </Routes>
     </Router>
   );
