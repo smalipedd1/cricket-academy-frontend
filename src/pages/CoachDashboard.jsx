@@ -13,14 +13,12 @@ const CoachDashboard = () => {
       return;
     }
 
-    axios.get('https://cricket-academy-backend.onrender.com/api/dashboard?role=coach', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+    axios.get('https://cricket-academy-backend.onrender.com/api/coach/dashboard-lite', {
+      headers: { Authorization: `Bearer ${token}` }
     })
     .then(res => setData(res.data))
     .catch(err => {
-      console.error(err);
+      console.error('Dashboard error:', err.response?.data || err.message);
       navigate('/login');
     });
   }, [navigate]);
@@ -38,20 +36,22 @@ const CoachDashboard = () => {
         {data ? (
           <>
             <p className="mb-2">Welcome, <strong>{data.name}</strong></p>
-            <p className="mb-2">Total Sessions: <strong>{data.totalSessions}</strong></p>
-            <p className="mb-4">Total Players: <strong>{data.totalPlayers}</strong></p>
-            <h2 className="text-xl font-semibold mb-2">Recent Sessions</h2>
-            <ul className="list-disc pl-5">
-              {data.recentSessions.map((s, i) => (
+
+            <h2 className="text-xl font-semibold mb-2">Assigned Sessions</h2>
+            <ul className="list-disc pl-5 mb-4">
+              {data.assignedSessions.map((s, i) => (
                 <li key={i}>
-                  {s.date} – {s.focusArea} ({s.playerCount} players)
+                  {s.date} – {s.focusArea} ({s.players} players)
                 </li>
               ))}
             </ul>
+
+            <p className="text-lg">Feedback Pending: <strong>{data.feedbackPending}</strong></p>
           </>
         ) : (
           <p>Loading dashboard...</p>
         )}
+
         <button
           onClick={handleLogout}
           className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
