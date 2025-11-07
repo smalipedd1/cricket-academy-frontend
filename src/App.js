@@ -17,6 +17,9 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* ✅ Add this route to fix blank page */}
+        <Route path="/" element={<Navigate to="/login" />} />
+
         <Route path="/login" element={<Login />} />
 
         <Route
