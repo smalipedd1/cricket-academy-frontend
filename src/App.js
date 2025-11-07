@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import Login from './pages/login';
 import CoachDashboard from './pages/CoachDashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -11,15 +12,20 @@ import CoachPlayerProfile from './pages/CoachPlayerProfile';
 import PlayerSessionView from './pages/PlayerSessionView';
 
 function App() {
-  const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role')?.toLowerCase();
+  const [token, setToken] = useState(null);
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    const storedRole = localStorage.getItem('role')?.toLowerCase();
+    setToken(storedToken);
+    setRole(storedRole);
+  }, []);
 
   return (
     <Router>
       <Routes>
-        {/* ✅ Add this route to fix blank page */}
         <Route path="/" element={<Navigate to="/login" />} />
-
         <Route path="/login" element={<Login />} />
 
         <Route
