@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [role, setRole] = useState('player');
@@ -6,6 +7,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     setLoading(true);
@@ -32,16 +34,17 @@ export default function Login() {
       if (!res.ok) throw new Error(data.error || 'Login failed');
 
       localStorage.setItem('token', data.token);
-	localStorage.setItem('role', role.toLowerCase()); // ✅ normalize and store
+      localStorage.setItem('role', role.toLowerCase());
 
-console.log('✅ Logged in as:', role);
-console.log('🔐 Token:', data.token);
+      console.log('✅ Logged in as:', role);
+      console.log('🔐 Token:', data.token);
 
-      // ✅ Role-based redirect
-      window.location.href =
+      // ✅ Role-based redirect using React Router
+      navigate(
         role === 'admin' ? '/admin/dashboard' :
         role === 'coach' ? '/coach/dashboard' :
-        '/player/dashboard';
+        '/player/dashboard'
+      );
     } catch (err) {
       setError(err.message);
     } finally {
