@@ -112,7 +112,6 @@ const AdminDashboard = () => {
             <>
               <p className="text-lg">Welcome Admin <strong>{data.name}</strong></p>
 
-              {/* Summary Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-yellow-50 p-4 rounded-lg shadow text-yellow-800 font-semibold">
                   Total Players: {data.totalPlayers}
@@ -125,91 +124,9 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* Navigation Buttons */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                <div className="bg-white border border-blue-100 rounded-lg p-6 shadow-sm">
-                  <h2 className="text-xl font-semibold mb-4 text-blue-700">Manage Coaches</h2>
-                  <button
-                    onClick={() => {
-                      setShowCoachList(true);
-                      setShowPlayerList(false);
-                      setSelectedCoach(null);
-                      setEditedCoach({});
-                      setIsAddingCoach(false);
-                      setSelectedPlayer(null);
-                      setEditedPlayer({});
-                      setIsAddingPlayer(false);
-                    }}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  >
-                    View & Update Coaches
-                  </button>
-                </div>
-
-                <div className="bg-white border border-green-100 rounded-lg p-6 shadow-sm">
-                  <h2 className="text-xl font-semibold mb-4 text-green-700">Manage Players</h2>
-                  <button
-                    onClick={() => {
-                      setShowPlayerList(true);
-                      setShowCoachList(false);
-                      setSelectedPlayer(null);
-                      setEditedPlayer({});
-                      setIsAddingPlayer(false);
-                      setSelectedCoach(null);
-                      setEditedCoach({});
-                      setIsAddingCoach(false);
-                    }}
-                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                  >
-                    View & Update Players
-                  </button>
-                </div>
-
-                <div className="bg-white border border-purple-100 rounded-lg p-6 shadow-sm">
-                  <h2 className="text-xl font-semibold mb-4 text-purple-700">Manage Sessions</h2>
-                  <button
-                    onClick={() => {
-                      setShowCoachList(false);
-                      setShowPlayerList(false);
-                      setSelectedCoach(null);
-                      setEditedCoach({});
-                      setIsAddingCoach(false);
-                      setSelectedPlayer(null);
-                      setEditedPlayer({});
-                      setIsAddingPlayer(false);
-                      navigate('/admin/sessions');
-                    }}
-                    className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-                  >
-                    View & Update Sessions
-                  </button>
-                </div>
-              </div>
-              {/* Coach List */}
               {showCoachList && (
                 <div className="mt-10 bg-white p-6 rounded shadow space-y-4">
                   <h2 className="text-xl font-bold text-blue-700">Coach List</h2>
-                  <button
-                    onClick={() => {
-                      setIsAddingCoach(true);
-                      setSelectedCoach(null);
-                      setEditedCoach({
-                        username: '',
-                        password: '',
-                        firstName: '',
-                        lastName: '',
-                        specialization: '',
-                        experienceYears: '',
-                        emailAddress: '',
-                        phoneNumber: '',
-                        coachId: '',
-                        status: 'Active',
-                      });
-                    }}
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                  >
-                    Add New Coach
-                  </button>
                   <ul className="mt-4 space-y-2">
                     {coaches.map((coach) => (
                       <li
@@ -218,20 +135,52 @@ const AdminDashboard = () => {
                         onClick={() => {
                           setSelectedCoach(coach);
                           setEditedCoach(coach);
-                          setIsAddingCoach(false);
                         }}
                       >
-                        {coach.firstName} {coach.lastName} — {coach.specialization}
+                        {coach.firstName} {coach.lastName}
                       </li>
                     ))}
                   </ul>
 
                   {selectedCoach && (
                     <div className="mt-6 space-y-4">
-                      <h3 className="text-lg font-semibold text-blue-600">Edit Coach</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Coach form fields */}
-                        {/* ...unchanged from previous version... */}
+                        <input
+                          type="text"
+                          value={editedCoach.firstName}
+                          onChange={(e) => setEditedCoach({ ...editedCoach, firstName: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                        <input
+                          type="text"
+                          value={editedCoach.lastName}
+                          onChange={(e) => setEditedCoach({ ...editedCoach, lastName: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                        <input
+                          type="text"
+                          value={editedCoach.specialization}
+                          onChange={(e) => setEditedCoach({ ...editedCoach, specialization: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                        <input
+                          type="text"
+                          value={editedCoach.phoneNumber}
+                          onChange={(e) => setEditedCoach({ ...editedCoach, phoneNumber: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                        <input
+                          type="email"
+                          value={editedCoach.emailAddress}
+                          onChange={(e) => setEditedCoach({ ...editedCoach, emailAddress: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                        <input
+                          type="text"
+                          value={editedCoach.status}
+                          onChange={(e) => setEditedCoach({ ...editedCoach, status: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
                       </div>
                       <button
                         onClick={handleCoachUpdate}
@@ -243,32 +192,9 @@ const AdminDashboard = () => {
                   )}
                 </div>
               )}
-
-              {/* Player List */}
               {showPlayerList && (
                 <div className="mt-10 bg-white p-6 rounded shadow space-y-4">
                   <h2 className="text-xl font-bold text-green-700">Player List</h2>
-                  <button
-                    onClick={() => {
-                      setIsAddingPlayer(true);
-                      setSelectedPlayer(null);
-                      setEditedPlayer({
-                        username: '',
-                        password: '',
-                        firstName: '',
-                        lastName: '',
-                        age: '',
-                        emailAddress: '',
-                        role: 'Batsman',
-                        academyLevel: 'Beginner',
-                        cricclubsID: '',
-                        status: 'Active',
-                      });
-                    }}
-                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                  >
-                    Add New Player
-                  </button>
                   <ul className="mt-4 space-y-2">
                     {players.map((player) => (
                       <li
@@ -277,20 +203,58 @@ const AdminDashboard = () => {
                         onClick={() => {
                           setSelectedPlayer(player);
                           setEditedPlayer(player);
-                          setIsAddingPlayer(false);
                         }}
                       >
-                        {player.firstName} {player.lastName} — {player.role}
+                        {player.firstName} {player.lastName}
                       </li>
                     ))}
                   </ul>
 
                   {selectedPlayer && (
                     <div className="mt-6 space-y-4">
-                      <h3 className="text-lg font-semibold text-green-600">Edit Player</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Player form fields */}
-                        {/* ...unchanged from previous version... */}
+                        <input
+                          type="text"
+                          value={editedPlayer.firstName}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, firstName: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                        <input
+                          type="text"
+                          value={editedPlayer.lastName}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, lastName: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                        <input
+                          type="text"
+                          value={editedPlayer.role}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, role: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                        <input
+                          type="text"
+                          value={editedPlayer.academyLevel}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, academyLevel: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                        <input
+                          type="email"
+                          value={editedPlayer.emailAddress}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, emailAddress: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                        <input
+                          type="text"
+                          value={editedPlayer.cricclubsID}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, cricclubsID: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                        <input
+                          type="text"
+                          value={editedPlayer.status}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, status: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
                       </div>
                       <button
                         onClick={handlePlayerUpdate}
