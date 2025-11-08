@@ -130,7 +130,6 @@ const CoachDashboard = () => {
           </div>
         </div>
       )}
-      )}
 
       {showSessions && (
         <div className="space-y-4">
