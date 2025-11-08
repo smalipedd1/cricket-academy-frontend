@@ -14,6 +14,7 @@ import PlayerSessionView from './pages/PlayerSessionView';
 function AppRoutes() {
   const [token, setToken] = useState(null);
   const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
 
   useEffect(() => {
@@ -21,7 +22,10 @@ function AppRoutes() {
     const storedRole = localStorage.getItem('role')?.toLowerCase();
     setToken(storedToken);
     setRole(storedRole);
-  }, [location.pathname]); // ✅ Re-run on route change
+    setLoading(false);
+  }, [location.pathname]);
+
+  if (loading) return null; // ⏳ Prevent premature route rendering
 
   return (
     <Routes>
