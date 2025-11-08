@@ -37,6 +37,7 @@ const CoachPlayerList = () => {
               <p className="text-gray-600">Academy Level: {player.academyLevel ?? 'N/A'}</p>
               <p className="text-gray-600">Status: {player.status ?? 'N/A'}</p>
 
+
               <button
                 onClick={() => navigate(`/coach/player/${player._id}`)}
                 className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
