@@ -81,23 +81,19 @@ const CoachFeedbackSummary = () => {
     );
   });
 
-  const validEntries = filteredEntries.filter((e) => {
-    const rating = e.rating?.[skill];
-    return rating !== undefined && rating !== null && rating > 0;
-  });
-
   const chartData = {
-    labels: validEntries.map((e) => new Date(e.date).toLocaleDateString()),
+    labels: filteredEntries.map((e) => new Date(e.date).toLocaleDateString()),
     datasets: [
       {
         label: `${skill.charAt(0).toUpperCase() + skill.slice(1)} Progress`,
-        data: validEntries.map((e) => e.rating[skill]),
+        data: filteredEntries.map((e) => e.rating?.[skill] ?? null),
         borderColor: '#7c3aed',
         backgroundColor: 'rgba(124,58,237,0.1)',
         tension: 0.3,
       },
     ],
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-white p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
@@ -155,7 +151,7 @@ const CoachFeedbackSummary = () => {
           </div>
         )}
 
-        {selectedPlayerId && validEntries.length > 0 && (
+        {selectedPlayerId && entries.length > 0 && (
           <div className="mt-10 bg-white rounded-xl shadow p-6">
             <h2 className="text-2xl font-semibold text-purple-600 mb-4">Skill Progress Chart</h2>
 
@@ -193,6 +189,7 @@ const CoachFeedbackSummary = () => {
     </div>
   );
 };
+
 const SkillRating = ({ label, value }) => {
   const getColor = (val) => {
     if (val >= 8) return 'bg-green-100 text-green-700';
