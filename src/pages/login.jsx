@@ -39,12 +39,15 @@ export default function Login() {
       console.log('✅ Logged in as:', role);
       console.log('🔐 Token:', data.token);
 
-      // ✅ Role-based redirect using React Router
-      navigate(
-        role === 'admin' ? '/admin/dashboard' :
-        role === 'coach' ? '/coach/dashboard' :
-        '/player/dashboard'
-      );
+      // ✅ SPA-safe redirect with delay to avoid race condition
+      setTimeout(() => {
+        navigate(
+          role === 'admin' ? '/admin/dashboard' :
+          role === 'coach' ? '/coach/dashboard' :
+          '/player/dashboard',
+          { replace: true }
+        );
+      }, 100);
     } catch (err) {
       setError(err.message);
     } finally {
