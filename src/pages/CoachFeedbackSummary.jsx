@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import {
@@ -24,6 +25,7 @@ const CoachFeedbackSummary = () => {
   const [endDate, setEndDate] = useState('');
   const [loadingPlayers, setLoadingPlayers] = useState(true);
   const [loadingFeedback, setLoadingFeedback] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -98,7 +100,7 @@ const CoachFeedbackSummary = () => {
         <h1 className="text-3xl font-bold text-purple-700">Player Progress Summary</h1>
 
         <button
-          onClick={() => window.location.href = '/coach/dashboard'}
+          onClick={() => navigate('/coach/dashboard')}
           className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition"
         >
           ← Back to Dashboard
@@ -149,7 +151,6 @@ const CoachFeedbackSummary = () => {
           </div>
         )}
 
-        {/* 📊 Skill Progress Chart */}
         {selectedPlayerId && entries.length > 0 && (
           <div className="mt-10 bg-white rounded-xl shadow p-6">
             <h2 className="text-2xl font-semibold text-purple-600 mb-4">Skill Progress Chart</h2>
