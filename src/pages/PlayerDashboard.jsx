@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // ✅ Added for SPA-safe logout
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import {
@@ -17,7 +17,7 @@ import NotificationBell from './NotificationBell';
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
 const PlayerDashboard = () => {
-  const navigate = useNavigate(); // ✅ Initialize navigate
+  const navigate = useNavigate();
   const [profile, setProfile] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [contactUpdates, setContactUpdates] = useState({});
@@ -80,7 +80,7 @@ const PlayerDashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    navigate('/login', { replace: true }); // ✅ SPA-safe redirect
+    navigate('/login', { replace: true });
   };
 
   const filteredEntries = entries.filter((e) => {
@@ -91,208 +91,23 @@ const PlayerDashboard = () => {
     );
   });
 
+  const validEntries = filteredEntries.filter((e) => {
+    const rating = e.rating?.[skill];
+    return rating !== undefined && rating !== null && rating > 0;
+  });
+
   const chartData = {
-    labels: filteredEntries.map((e) => new Date(e.date).toLocaleDateString()),
+    labels: validEntries.map((e) => new Date(e.date).toLocaleDateString()),
     datasets: [
       {
         label: `${skill.charAt(0).toUpperCase() + skill.slice(1)} Progress`,
-        data: filteredEntries.map((e) => e.rating?.[skill] ?? null),
+        data: validEntries.map((e) => e.rating[skill]),
         borderColor: '#2563eb',
         backgroundColor: 'rgba(37,99,235,0.1)',
         tension: 0.3,
       },
     ],
   };
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6 space-y-10">
-      <div className="max-w-6xl mx-auto space-y-10">
-
-        {/* 🔔 Notifications + Logout */}
-        <div className="flex justify-end items-center space-x-4">
-          <NotificationBell />
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-          >
-            Logout
-          </button>
-        </div>
-
-        {/* 👤 Profile Section */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-2xl font-semibold text-blue-600 mb-4">My Profile</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <p><strong>Name:</strong> {profile.firstName} {profile.lastName}</p>
-            <p><strong>Role:</strong> {profile.role}</p>
-            <p><strong>Specialty:</strong> {profile.specialty}</p>
-            <p><strong>Username:</strong> {profile.username}</p>
-            {editMode ? (
-              <>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  defaultValue={profile.email}
-                  onChange={handleContactChange}
-                  className="border px-3 py-2 rounded"
-                />
-                <input
-                  type="text"
-                  name="phone"
-                  placeholder="Phone"
-                  defaultValue={profile.phone}
-                  onChange={handleContactChange}
-                  className="border px-3 py-2 rounded"
-                />
-                <input
-                  type="text"
-                  name="address"
-                  placeholder="Address"
-                  defaultValue={profile.address}
-                  onChange={handleContactChange}
-                  className="border px-3 py-2 rounded"
-                />
-                <button
-                  onClick={handleContactSave}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Save
-                </button>
-              </>
-            ) : (
-              <>
-                <p><strong>Email:</strong> {profile.email}</p>
-                <p><strong>Phone:</strong> {profile.phone}</p>
-                <p><strong>Address:</strong> {profile.address}</p>
-                <button
-                  onClick={() => setEditMode(true)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Edit Contact Info
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* 📅 Upcoming Sessions */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-2xl font-semibold text-blue-600 mb-4">Upcoming Sessions</h2>
-          {sessions.length === 0 ? (
-            <p className="text-gray-500 italic">No upcoming sessions.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {sessions.map((s) => (
-                <div key={s._id} className="border p-4 rounded shadow-sm">
-                  <p className="text-gray-700 font-medium">
-                    {new Date(s.date).toLocaleDateString()} — {s.focusArea}
-                  </p>
-                  <p className="text-sm text-gray-600">Coach: {s.coach?.name || 'N/A'}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* 📝 Feedback Summary with Date Filter */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-2xl font-semibold text-blue-600 mb-4">Feedback Summary</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="border px-4 py-2 rounded"
-            />
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="border px-4 py-2 rounded"
-            />
-          </div>
-
-          {feedback.length === 0 ? (
-            <p className="text-gray-500 italic">No feedback available yet.</p>
-          ) : (
-            <div className="space-y-6">
-              {feedback
-                .filter((entry) => {
-                  const date = new Date(entry.sessionDate);
-                  const matchStart = !startDate || date >= new Date(startDate);
-                  const matchEnd = !endDate || date <= new Date(endDate);
-                  return matchStart && matchEnd;
-                })
-                .map((entry, index) => (
-                  <div key={index} className="border border-gray-200 bg-white p-5 rounded-lg shadow hover:shadow-md transition">
-                    <p className="text-gray-600 text-sm mb-2">
-                      <span className="font-semibold">Session:</span> {new Date(entry.sessionDate).toLocaleDateString()} | 
-                      <span className="ml-2 font-semibold">Focus:</span> {entry.focusArea}
-                    </p>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <SkillRating label="Batting" value={entry.rating?.batting} />
-                      <SkillRating label="Bowling" value={entry.rating?.bowling} />
-                      <SkillRating label="Wicketkeeping" value={entry.rating?.wicketkeeping} />
-                      <SkillRating label="Fielding" value={entry.rating?.fielding} />
-                    </div>
-                    {entry.notes && (
-                      <p className="mt-3 text-gray-700">
-                        <span className="font-semibold">Coach Notes:</span> {entry.notes}
-                      </p>
-                    )}
-
-                    <p className="mt-3 text-gray-700">
-                      <span className="font-semibold">Your Response:</span> {entry.playerResponse || 'No response yet.'}
-                    </p>
-
-                    <textarea
-                      placeholder="Write your response..."
-                      value={entry.responseText || ''}
-                      onChange={(e) => {
-                        const updated = [...feedback];
-                        updated[index].responseText = e.target.value;
-                        setFeedback(updated);
-                      }}
-                      className="border rounded w-full p-2 mt-2"
-                    />
-
-                    <button
-                      onClick={() => {
-                        const token = localStorage.getItem('token');
-                        axios
-                          .patch(
-                            `https://cricket-academy-backend.onrender.com/api/player/feedback-response/${entry.sessionId}`,
-                            {
-                              playerId: profile._id,
-                              responseText: entry.responseText || '',
-                            },
-                            { headers: { Authorization: `Bearer ${token}` } }
-                          )
-                          .then(() => {
-                            alert('Response submitted!');
-                            const updated = [...feedback];
-                            updated[index].playerResponse = entry.responseText;
-                            updated[index].responseText = '';
-                            setFeedback(updated);
-                          })
-                          .catch((err) => {
-                            console.error('Response error:', err.response?.data || err.message);
-                            alert('Failed to submit response.');
-                          });
-                      }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded mt-2"
-                    >
-                      Submit Response
-                    </button>
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
-
-        {/* 📊 Progress Chart */}
         {entries.length > 0 && (
           <div className="bg-white rounded-xl shadow p-6">
             <h2 className="text-2xl font-semibold text-blue-600 mb-4">Skill Progress Chart</h2>
@@ -338,6 +153,12 @@ const PlayerDashboard = () => {
                     title: {
                       display: true,
                       text: 'Rating (1–10)',
+                    },
+                  },
+                  x: {
+                    title: {
+                      display: true,
+                      text: 'Session Date',
                     },
                   },
                 },
