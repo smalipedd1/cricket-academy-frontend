@@ -56,6 +56,33 @@ const PlayerDashboard = () => {
       .then((res) => setEntries(res.data.entries));
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    navigate('/login', { replace: true });
+  };
+
+  const handleContactChange = (e) => {
+    setContactUpdates({ ...contactUpdates, [e.target.name]: e.target.value });
+  };
+
+  const handleContactSave = () => {
+    const token = localStorage.getItem('token');
+    axios
+      .patch('https://cricket-academy-backend.onrender.com/api/player/profile', contactUpdates, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        setProfile(res.data.player);
+        setEditMode(false);
+        setContactUpdates({});
+      })
+      .catch((err) => {
+        console.error('Update error:', err.response?.data || err.message);
+        alert('Failed to update profile.');
+      });
+  };
+
   const filteredEntries = entries.filter((e) => {
     const date = new Date(e.date);
     return (
@@ -178,103 +205,6 @@ const PlayerDashboard = () => {
               </>
             )}
           </div>
-        </div>
-        {/* 📝 Feedback Summary with Date Filter */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-2xl font-semibold text-blue-600 mb-4">Feedback Summary</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="border px-4 py-2 rounded"
-            />
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="border px-4 py-2 rounded"
-            />
-          </div>
-
-          {feedback.length === 0 ? (
-            <p className="text-gray-500 italic">No feedback available yet.</p>
-          ) : (
-            <div className="space-y-6">
-              {feedback
-                .filter((entry) => {
-                  const date = new Date(entry.sessionDate);
-                  const matchStart = !startDate || date >= new Date(startDate);
-                  const matchEnd = !endDate || date <= new Date(endDate);
-                  return matchStart && matchEnd;
-                })
-                .map((entry, index) => (
-                  <div key={index} className="border border-gray-200 bg-white p-5 rounded-lg shadow hover:shadow-md transition">
-                    <p className="text-gray-600 text-sm mb-2">
-                      <span className="font-semibold">Session:</span> {new Date(entry.sessionDate).toLocaleDateString()} | 
-                      <span className="ml-2 font-semibold">Focus:</span> {entry.focusArea}
-                    </p>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <SkillRating label="Batting" value={entry.rating?.batting} />
-                      <SkillRating label="Bowling" value={entry.rating?.bowling} />
-                      <SkillRating label="Wicketkeeping" value={entry.rating?.wicketkeeping} />
-                      <SkillRating label="Fielding" value={entry.rating?.fielding} />
-                    </div>
-                    {entry.notes && (
-                      <p className="mt-3 text-gray-700">
-                        <span className="font-semibold">Coach Notes:</span> {entry.notes}
-                      </p>
-                    )}
-
-                    <p className="mt-3 text-gray-700">
-                      <span className="font-semibold">Your Response:</span> {entry.playerResponse || 'No response yet.'}
-                    </p>
-
-                    <textarea
-                      placeholder="Write your response..."
-                      value={entry.responseText || ''}
-                      onChange={(e) => {
-                        const updated = [...feedback];
-                        updated[index].responseText = e.target.value;
-                        setFeedback(updated);
-                      }}
-                      className="border rounded w-full p-2 mt-2"
-                    />
-
-                    <button
-                      onClick={() => {
-                        const token = localStorage.getItem('token');
-                        axios
-                          .patch(
-                            `https://cricket-academy-backend.onrender.com/api/player/feedback-response/${entry.sessionId}`,
-                            {
-                              playerId: profile._id,
-                              responseText: entry.responseText || '',
-                            },
-                            { headers: { Authorization: `Bearer ${token}` } }
-                          )
-                          .then(() => {
-                            alert('Response submitted!');
-                            const updated = [...feedback];
-                            updated[index].playerResponse = entry.responseText;
-                            updated[index].responseText = '';
-                            setFeedback(updated);
-                          })
-                          .catch((err) => {
-                            console.error('Response error:', err.response?.data || err.message);
-                            alert('Failed to submit response.');
-                          });
-                      }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded mt-2"
-                    >
-                      Submit Response
-                    </button>
-                  </div>
-                ))}
-            </div>
-          )}
         </div>
         {/* 📊 Progress Chart */}
         {validEntries.length > 0 && (
