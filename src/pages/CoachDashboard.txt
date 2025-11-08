@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import NotificationBell from './NotificationBell';
+import NotificationBell from './NotificationBell'; // ✅ NEW
 
 const CoachDashboard = () => {
   const [sessions, setSessions] = useState([]);
@@ -51,16 +51,16 @@ const CoachDashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    navigate('/login', { replace: true });
+    navigate('/login');
   };
 
   return (
     <div className="p-6 max-w-6xl mx-auto bg-white rounded shadow space-y-6">
+      {/* ✅ Welcome + Logout + Notifications */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-blue-700">Welcome, {coachName}</h1>
         <div className="flex items-center space-x-4">
-          <NotificationBell />
+          <NotificationBell /> {/* ✅ NEW */}
           <button
             onClick={handleLogout}
             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
@@ -70,6 +70,7 @@ const CoachDashboard = () => {
         </div>
       </div>
 
+      {/* ✅ Dashboard Tiles */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div
           onClick={() => {
@@ -106,6 +107,7 @@ const CoachDashboard = () => {
         </div>
       </div>
 
+      {/* ✅ Embedded Player List */}
       {showPlayers && (
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-gray-800">All Players</h2>
@@ -131,6 +133,7 @@ const CoachDashboard = () => {
         </div>
       )}
 
+      {/* ✅ Embedded Session List */}
       {showSessions && (
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-gray-800">Your Sessions</h2>
