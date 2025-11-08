@@ -68,9 +68,10 @@ const AdminDashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then(() => {
-        alert('Coach updated!');
+        alert(isAddingCoach ? 'Coach added!' : 'Coach updated!');
         setSelectedCoach(null);
         setEditedCoach({});
+        setIsAddingCoach(false);
         return axios.get('https://cricket-academy-backend.onrender.com/api/admin/coaches', {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -89,9 +90,10 @@ const AdminDashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then(() => {
-        alert('Player updated!');
+        alert(isAddingPlayer ? 'Player added!' : 'Player updated!');
         setSelectedPlayer(null);
         setEditedPlayer({});
+        setIsAddingPlayer(false);
         return axios.get('https://cricket-academy-backend.onrender.com/api/admin/players', {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -226,9 +228,11 @@ const AdminDashboard = () => {
                     ))}
                   </ul>
 
-                  {selectedCoach && (
+                  {(selectedCoach || isAddingCoach) && (
                     <div className="mt-6 space-y-4">
-                      <h3 className="text-lg font-semibold text-blue-600">Edit Coach</h3>
+                      <h3 className="text-lg font-semibold text-blue-600">
+                        {isAddingCoach ? 'Add New Coach' : 'Edit Coach'}
+                      </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label>
                           First Name
@@ -298,7 +302,7 @@ const AdminDashboard = () => {
                         onClick={handleCoachUpdate}
                         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                       >
-                        Save Coach
+                        {isAddingCoach ? 'Save New Coach' : 'Update Coach'}
                       </button>
                     </div>
                   )}
@@ -345,9 +349,11 @@ const AdminDashboard = () => {
                     ))}
                   </ul>
 
-                  {selectedPlayer && (
+                  {(selectedPlayer || isAddingPlayer) && (
                     <div className="mt-6 space-y-4">
-                      <h3 className="text-lg font-semibold text-green-600">Edit Player</h3>
+                      <h3 className="text-lg font-semibold text-green-600">
+                        {isAddingPlayer ? 'Add New Player' : 'Edit Player'}
+                      </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label>
                           First Name
@@ -428,7 +434,7 @@ const AdminDashboard = () => {
                         onClick={handlePlayerUpdate}
                         className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                       >
-                        Save Player
+                        {isAddingPlayer ? 'Save New Player' : 'Update Player'}
                       </button>
                     </div>
                   )}
