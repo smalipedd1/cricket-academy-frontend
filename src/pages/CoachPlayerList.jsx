@@ -32,9 +32,10 @@ const CoachPlayerList = () => {
               <h2 className="text-xl font-semibold text-gray-800 mb-2">
                 {player.firstName} {player.lastName}
               </h2>
-              <p className="text-gray-600">Age: {player.age}</p>
-              <p className="text-gray-600">Specialization: {player.specialization}</p>
-              <p className="text-gray-600">Academy: {player.academy}</p>
+              <p className="text-gray-600">Age: {player.age ?? 'N/A'}</p>
+              <p className="text-gray-600">Specialization: {player.role ?? 'N/A'}</p>
+              <p className="text-gray-600">Academy Level: {player.academyLevel ?? 'N/A'}</p>
+              <p className="text-gray-600">Status: {player.status ?? 'N/A'}</p>
 
               <button
                 onClick={() => navigate(`/coach/player/${player._id}`)}
