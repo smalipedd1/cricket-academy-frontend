@@ -98,6 +98,29 @@ const CoachFeedbackSummary = () => {
       },
     ],
   };
+
+  const chartOptions = {
+    responsive: true,
+    scales: {
+      y: {
+        min: 1,
+        max: 10,
+        ticks: {
+          stepSize: 1,
+        },
+        title: {
+          display: true,
+          text: 'Rating',
+        },
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Session Date',
+        },
+      },
+    },
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-white p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6 space-y-6">
@@ -186,7 +209,7 @@ const CoachFeedbackSummary = () => {
               />
             </div>
 
-            <Line data={chartData} />
+            <Line data={chartData} options={chartOptions} />
           </div>
         )}
       </div>
