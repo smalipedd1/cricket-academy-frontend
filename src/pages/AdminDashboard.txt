@@ -61,47 +61,6 @@ const AdminDashboard = () => {
     navigate('/login', { replace: true });
   };
 
-  const handleCoachUpdate = () => {
-    const token = localStorage.getItem('token');
-    axios
-      .patch(`https://cricket-academy-backend.onrender.com/api/admin/coaches/${editedCoach._id}`, editedCoach, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(() => {
-        alert('Coach updated!');
-        setSelectedCoach(null);
-        setEditedCoach({});
-        return axios.get('https://cricket-academy-backend.onrender.com/api/admin/coaches', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      })
-      .then((res) => setCoaches(res.data))
-      .catch((err) => {
-        console.error('Coach update error:', err);
-        alert('Failed to update coach.');
-      });
-  };
-
-  const handlePlayerUpdate = () => {
-    const token = localStorage.getItem('token');
-    axios
-      .patch(`https://cricket-academy-backend.onrender.com/api/admin/players/${editedPlayer._id}`, editedPlayer, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(() => {
-        alert('Player updated!');
-        setSelectedPlayer(null);
-        setEditedPlayer({});
-        return axios.get('https://cricket-academy-backend.onrender.com/api/admin/players', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      })
-      .then((res) => setPlayers(res.data))
-      .catch((err) => {
-        console.error('Player update error:', err);
-        alert('Failed to update player.');
-      });
-  };
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-md p-6 space-y-8">
@@ -111,6 +70,7 @@ const AdminDashboard = () => {
           <>
             <p className="text-lg">Welcome Admin <strong>{data.name}</strong></p>
 
+            {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-yellow-50 p-4 rounded-lg shadow text-yellow-800 font-semibold">
                 Total Players: {data.totalPlayers}
@@ -123,6 +83,7 @@ const AdminDashboard = () => {
               </div>
             </div>
 
+            {/* ✅ Restored Action Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
               <div className="bg-white border border-blue-100 rounded-lg p-6 shadow-sm">
                 <h2 className="text-xl font-semibold mb-4 text-blue-700">Manage Coaches</h2>
@@ -131,7 +92,18 @@ const AdminDashboard = () => {
                     setShowCoachList(true);
                     setShowPlayerList(false);
                     setSelectedCoach(null);
-                    setEditedCoach({});
+                    setEditedCoach({
+                      username: '',
+                      password: '',
+                      firstName: '',
+                      lastName: '',
+                      specialization: '',
+                      experienceYears: '',
+                      emailAddress: '',
+                      phoneNumber: '',
+                      coachId: '',
+                      status: 'Active',
+                    });
                     setIsAddingCoach(false);
                     setSelectedPlayer(null);
                     setEditedPlayer({});
@@ -150,7 +122,18 @@ const AdminDashboard = () => {
                     setShowPlayerList(true);
                     setShowCoachList(false);
                     setSelectedPlayer(null);
-                    setEditedPlayer({});
+                    setEditedPlayer({
+                      username: '',
+                      password: '',
+                      firstName: '',
+                      lastName: '',
+                      age: '',
+                      emailAddress: '',
+                      role: 'Batsman',
+                      academyLevel: 'Beginner',
+                      cricclubsID: '',
+                      status: 'Active',
+                    });
                     setIsAddingPlayer(false);
                     setSelectedCoach(null);
                     setEditedCoach({});
@@ -182,6 +165,7 @@ const AdminDashboard = () => {
                 </button>
               </div>
             </div>
+
             {/* Coach List */}
             {showCoachList && (
               <div className="mt-10 bg-white p-6 rounded shadow space-y-4">
@@ -222,57 +206,9 @@ const AdminDashboard = () => {
                     </li>
                   ))}
                 </ul>
-
-                {selectedCoach && (
-                  <div className="mt-6 space-y-4">
-                    <h3 className="text-lg font-semibold text-blue-600">Edit Coach</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <input
-                        type="text"
-                        placeholder="First Name"
-                        value={editedCoach.firstName}
-                        onChange={(e) => setEditedCoach({ ...editedCoach, firstName: e.target.value })}
-                        className="border px-3 py-2 rounded"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Last Name"
-                        value={editedCoach.lastName}
-                        onChange={(e) => setEditedCoach({ ...editedCoach, lastName: e.target.value })}
-                        className="border px-3 py-2 rounded"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Specialization"
-                        value={editedCoach.specialization}
-                        onChange={(e) => setEditedCoach({ ...editedCoach, specialization: e.target.value })}
-                        className="border px-3 py-2 rounded"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Phone"
-                        value={editedCoach.phoneNumber}
-                        onChange={(e) => setEditedCoach({ ...editedCoach, phoneNumber: e.target.value })}
-                        className="border px-3 py-2 rounded"
-                      />
-                      <input
-                        type="email"
-                        placeholder="Email"
-                        value={editedCoach.emailAddress}
-                        onChange={(e) => setEditedCoach({ ...editedCoach, emailAddress: e.target.value })}
-                        className="border px-3 py-2 rounded"
-                      />
-                    </div>
-                    <button
-                      onClick={handleCoachUpdate}
-                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    >
-                      Save Coach
-                    </button>
-                  </div>
-                )}
               </div>
             )}
+
             {/* Player List */}
             {showPlayerList && (
               <div className="mt-10 bg-white p-6 rounded shadow space-y-4">
@@ -313,65 +249,10 @@ const AdminDashboard = () => {
                     </li>
                   ))}
                 </ul>
-
-                {selectedPlayer && (
-                  <div className="mt-6 space-y-4">
-                    <h3 className="text-lg font-semibold text-green-600">Edit Player</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <input
-                        type="text"
-                        placeholder="First Name"
-                        value={editedPlayer.firstName}
-                        onChange={(e) => setEditedPlayer({ ...editedPlayer, firstName: e.target.value })}
-                        className="border px-3 py-2 rounded"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Last Name"
-                        value={editedPlayer.lastName}
-                        onChange={(e) => setEditedPlayer({ ...editedPlayer, lastName: e.target.value })}
-                        className="border px-3 py-2 rounded"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Role"
-                        value={editedPlayer.role}
-                        onChange={(e) => setEditedPlayer({ ...editedPlayer, role: e.target.value })}
-                        className="border px-3 py-2 rounded"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Academy Level"
-                        value={editedPlayer.academyLevel}
-                        onChange={(e) => setEditedPlayer({ ...editedPlayer, academyLevel: e.target.value })}
-                        className="border px-3 py-2 rounded"
-                      />
-                      <input
-                        type="email"
-                        placeholder="Email"
-                        value={editedPlayer.emailAddress}
-                        onChange={(e) => setEditedPlayer({ ...editedPlayer, emailAddress: e.target.value })}
-                        className="border px-3 py-2 rounded"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Phone"
-                        value={editedPlayer.phoneNumber}
-                        onChange={(e) => setEditedPlayer({ ...editedPlayer, phoneNumber: e.target.value })}
-                        className="border px-3 py-2 rounded"
-                      />
-                    </div>
-                    <button
-                      onClick={handlePlayerUpdate}
-                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                    >
-                      Save Player
-                    </button>
-                  </div>
-                )}
               </div>
             )}
 
+            {/* ✅ Logout Button */}
             <button
               onClick={handleLogout}
               className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
