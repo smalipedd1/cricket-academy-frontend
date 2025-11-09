@@ -10,6 +10,10 @@ const PlayerDashboard = () => {
   const [endDate, setEndDate] = useState('');
   const [responseText, setResponseText] = useState('');
   const [selectedSessionId, setSelectedSessionId] = useState(null);
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [notifications, setNotifications] = useState([]);
 
   const token = localStorage.getItem('token');
   const playerId = localStorage.getItem('userId');
@@ -21,7 +25,12 @@ const PlayerDashboard = () => {
       .get('https://cricket-academy-backend.onrender.com/api/player/profile', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setPlayerData(res.data))
+      .then((res) => {
+        setPlayerData(res.data);
+        setEmail(res.data.email || '');
+        setPhone(res.data.phone || '');
+        setAddress(res.data.address || '');
+      })
       .catch((err) => console.error('Player profile fetch error:', err));
 
     axios
@@ -40,6 +49,13 @@ const PlayerDashboard = () => {
         setFilteredFeedbacks(res.data || []);
       })
       .catch((err) => console.error('Feedback fetch error:', err));
+
+    axios
+      .get('https://cricket-academy-backend.onrender.com/api/notifications', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setNotifications(res.data || []))
+      .catch((err) => console.error('Notification fetch error:', err));
   }, [token]);
 
   const handleFilter = () => {
@@ -77,6 +93,21 @@ const PlayerDashboard = () => {
         alert('Failed to submit response.');
       });
   };
+
+  const handleProfileUpdate = () => {
+    axios
+      .patch(
+        'https://cricket-academy-backend.onrender.com/api/player/profile',
+        { email, phone, address },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .then(() => alert('Profile updated!'))
+      .catch((err) => {
+        console.error('Profile update error:', err);
+        alert('Failed to update profile.');
+      });
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-md p-6 space-y-8">
@@ -86,11 +117,58 @@ const PlayerDashboard = () => {
           <>
             <p className="text-lg">Welcome <strong>{playerData.firstName}</strong></p>
 
-            {/* Notification Bell and Profile Update Section — preserved */}
-            {/* ... your existing notification and profile update components go here ... */}
+            {/* 🔔 Notifications */}
+            <div className="mt-4">
+              <h2 className="text-xl font-semibold text-red-700 mb-2">Notifications</h2>
+              {notifications.length > 0 ? (
+                <ul className="space-y-2">
+                  {notifications.map((note) => (
+                    <li key={note._id} className="border p-3 rounded bg-yellow-100">
+                      <p>{note.message}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No new notifications.</p>
+              )}
+            </div>
 
-            {/* Session Feedback Section — restored */}
+            {/* 📝 Profile Update */}
             <div className="mt-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">Update Profile</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="border p-2 rounded"
+                />
+                <input
+                  type="text"
+                  placeholder="Phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="border p-2 rounded"
+                />
+                <input
+                  type="text"
+                  placeholder="Address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="border p-2 rounded col-span-2"
+                />
+              </div>
+              <button
+                onClick={handleProfileUpdate}
+                className="mt-3 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Save Changes
+              </button>
+            </div>
+
+            {/* 🧠 Session Feedback */}
+            <div className="mt-10">
               <h2 className="text-xl font-semibold text-blue-700 mb-2">Session Feedback</h2>
               <div className="flex gap-4 mb-4">
                 <label>
@@ -119,7 +197,7 @@ const PlayerDashboard = () => {
                 </button>
               </div>
 
-              {Array.isArray(filteredFeedbacks) && filteredFeedbacks.map((fb) => (
+              {filteredFeedbacks.map((fb) => (
                 <div key={fb.sessionId} className="border p-4 rounded mb-4 bg-white shadow">
                   <h3 className="text-lg font-semibold text-blue-600">
                     Session on {new Date(fb.sessionDate).toLocaleDateString()}
@@ -157,10 +235,10 @@ const PlayerDashboard = () => {
               ))}
             </div>
 
-            {/* Performance Chart Section — preserved */}
+            {/* 📈 Performance Chart */}
             <div className="mt-10">
               <h2 className="text-xl font-semibold text-purple-700 mb-2">Performance Chart</h2>
-              {Array.isArray(performanceChart) && performanceChart.length > 0 ? (
+                            {performanceChart.length > 0 ? (
                 <ul className="space-y-2">
                   {performanceChart.map((entry, index) => (
                     <li key={index} className="border p-4 rounded bg-purple-50">
