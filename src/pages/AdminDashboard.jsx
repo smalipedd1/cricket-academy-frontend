@@ -423,6 +423,15 @@ const AdminDashboard = () => {
                             className="border px-3 py-2 rounded w-full"
                           />
                         </label>
+			<label>
+			  Age
+			  <input
+			    type="number"
+			    value={editedPlayer.age}
+			    onChange={(e) => setEditedPlayer({ ...editedPlayer, age: e.target.value })}
+			    className="border px-3 py-2 rounded w-full"
+			  />
+			</label>
                         <label>
                           Role
                           <select
