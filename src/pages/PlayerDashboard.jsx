@@ -182,33 +182,21 @@ const PlayerDashboard = () => {
         <div className="bg-white rounded-xl shadow p-6">
           <h2 className="text-2xl font-semibold text-blue-600 mb-4">My Profile</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <p><strong>Name:</strong> {profile.firstName} {profile.lastName}</p>
+            <p><strong>First Name:</strong> {profile.firstName}</p>
+            <p><strong>Last Name:</strong> {profile.lastName}</p>
+            <p><strong>Age:</strong> {profile.age}</p>
             <p><strong>Role:</strong> {profile.role}</p>
-            <p><strong>Specialty:</strong> {profile.specialty}</p>
-            <p><strong>Username:</strong> {profile.username}</p>
+            <p><strong>Academy Level:</strong> {profile.academyLevel}</p>
+            <p><strong>CricClubs ID:</strong> {profile.cricclubsID}</p>
+            <p><strong>Status:</strong> {profile.status}</p>
+
             {editMode ? (
               <>
                 <input
                   type="email"
-                  name="email"
+                  name="emailAddress"
                   placeholder="Email"
-                  defaultValue={profile.email}
-                  onChange={handleContactChange}
-                  className="border px-3 py-2 rounded"
-                />
-                <input
-                  type="text"
-                  name="phone"
-                  placeholder="Phone"
-                  defaultValue={profile.phone}
-                  onChange={handleContactChange}
-                  className="border px-3 py-2 rounded"
-                />
-                <input
-                  type="text"
-                  name="address"
-                  placeholder="Address"
-                  defaultValue={profile.address}
+                  defaultValue={profile.emailAddress}
                   onChange={handleContactChange}
                   className="border px-3 py-2 rounded"
                 />
@@ -221,14 +209,12 @@ const PlayerDashboard = () => {
               </>
             ) : (
               <>
-                <p><strong>Email:</strong> {profile.email}</p>
-                <p><strong>Phone:</strong> {profile.phone}</p>
-                <p><strong>Address:</strong> {profile.address}</p>
+                <p><strong>Email:</strong> {profile.emailAddress}</p>
                 <button
                   onClick={() => setEditMode(true)}
                   className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                 >
-                  Edit Contact Info
+                  Edit Email
                 </button>
               </>
             )}
