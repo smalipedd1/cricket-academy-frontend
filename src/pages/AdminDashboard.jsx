@@ -76,6 +76,64 @@ const AdminDashboard = () => {
       });
   };
 
+  const handleCoachUpdate = () => {
+    const token = localStorage.getItem('token');
+    const method = isAddingCoach ? 'post' : 'put';
+    const url = isAddingCoach
+      ? 'https://cricket-academy-backend.onrender.com/api/admin/coaches'
+      : `https://cricket-academy-backend.onrender.com/api/admin/coaches/${editedCoach._id}`;
+
+    axios({
+      method,
+      url,
+      data: editedCoach,
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(() => {
+        alert(isAddingCoach ? 'Coach added!' : 'Coach updated!');
+        setSelectedCoach(null);
+        setEditedCoach({});
+        setIsAddingCoach(false);
+        return axios.get('https://cricket-academy-backend.onrender.com/api/admin/coaches', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      })
+      .then((res) => setCoaches(res.data))
+      .catch((err) => {
+        console.error('Coach save error:', err);
+        alert('Failed to save coach.');
+      });
+  };
+
+  const handlePlayerUpdate = () => {
+    const token = localStorage.getItem('token');
+    const method = isAddingPlayer ? 'post' : 'put';
+    const url = isAddingPlayer
+      ? 'https://cricket-academy-backend.onrender.com/api/admin/players'
+      : `https://cricket-academy-backend.onrender.com/api/admin/players/${editedPlayer._id}`;
+
+    axios({
+      method,
+      url,
+      data: editedPlayer,
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(() => {
+        alert(isAddingPlayer ? 'Player added!' : 'Player updated!');
+        setSelectedPlayer(null);
+        setEditedPlayer({});
+        setIsAddingPlayer(false);
+        return axios.get('https://cricket-academy-backend.onrender.com/api/admin/players', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      })
+      .then((res) => setPlayers(res.data))
+      .catch((err) => {
+        console.error('Player save error:', err);
+        alert('Failed to save player.');
+      });
+  };
+
   return (
     <>
       <div className="min-h-screen bg-gray-100 p-6">
@@ -169,6 +227,7 @@ const AdminDashboard = () => {
                   Update All Player Ages
                 </button>
               </div>
+
               {/* Coach List */}
               {showCoachList && (
                 <div className="mt-10 bg-white p-6 rounded shadow space-y-4">

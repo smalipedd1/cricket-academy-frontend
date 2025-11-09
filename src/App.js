@@ -10,6 +10,8 @@ import CoachFeedbackSummary from './pages/CoachFeedbackSummary';
 import CoachPlayerList from './pages/CoachPlayerList';
 import CoachPlayerProfile from './pages/CoachPlayerProfile';
 import PlayerSessionView from './pages/PlayerSessionView';
+import EnterDOB from './pages/EnterDOB';
+
 
 function AppRoutes() {
   const [token, setToken] = useState(null);
