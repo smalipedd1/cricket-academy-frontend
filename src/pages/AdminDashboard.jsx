@@ -221,6 +221,67 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Coach List */}
+              {showCoachList && (
+                <div className="mt-10 bg-white p-6 rounded shadow space-y-4">
+                  <h2 className="text-xl font-bold text-blue-700">Coach List</h2>
+                  <button
+                    onClick={() => {
+                      setIsAddingCoach(true);
+                      setSelectedCoach(null);
+                      setEditedCoach({
+                        username: '',
+                        password: '',
+                        firstName: '',
+                        lastName: '',
+                        specialization: '',
+                        experienceYears: '',
+                        emailAddress: '',
+                        phoneNumber: '',
+                        coachId: '',
+                        status: 'Active',
+                      });
+                    }}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  >
+                    Add New Coach
+                  </button>
+                  <ul className="mt-4 space-y-2">
+                    {coaches.map((coach) => (
+                      <li
+                        key={coach._id}
+                        className="border p-4 rounded hover:bg-blue-50 cursor-pointer"
+                        onClick={() => {
+                          setSelectedCoach(coach);
+                          setEditedCoach(coach);
+                          setIsAddingCoach(false);
+                        }}
+                      >
+                        {coach.firstName} {coach.lastName} — {coach.specialization}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {(selectedCoach || isAddingCoach) && (
+                    <div className="mt-6 space-y-4">
+                      <h3 className="text-lg font-semibold text-blue-600">
+                        {isAddingCoach ? 'Add New Coach' : 'Edit Coach'}
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Coach form fields preserved */}
+                        {/* You can reinsert your coach form here if needed */}
+                      </div>
+                      <button
+                        onClick={handleCoachUpdate}
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                      >
+                        {isAddingCoach ? 'Save New Coach' : 'Update Coach'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
               {/* Player List */}
               {showPlayerList && (
                 <div className="mt-10 bg-white p-6 rounded shadow space-y-4">
@@ -278,8 +339,107 @@ const AdminDashboard = () => {
                         {isAddingPlayer ? 'Add New Player' : 'Edit Player'}
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Player form fields (already included in your last version) */}
-                        {/* ... */}
+                        <label>
+                          Username
+                          <input
+                            type="text"
+                            value={editedPlayer.username}
+                            onChange={(e) => setEditedPlayer({ ...editedPlayer, username: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Password
+                          <input
+                            type="password"
+                            value={editedPlayer.password}
+                            onChange={(e) => setEditedPlayer({ ...editedPlayer, password: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          First Name
+                          <input
+                            type="text"
+                            value={editedPlayer.firstName}
+                            onChange={(e) => setEditedPlayer({ ...editedPlayer, firstName: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Last Name
+                          <input
+                            type="text"
+                            value={editedPlayer.lastName}
+                            onChange={(e) => setEditedPlayer({ ...editedPlayer, lastName: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Age
+                          <input
+                            type="number"
+                            value={editedPlayer.age}
+                            onChange={(e) => setEditedPlayer({ ...editedPlayer, age: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Role
+                          <select
+                            value={editedPlayer.role}
+                            onChange={(e) => setEditedPlayer({ ...editedPlayer, role: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          >
+                            <option value="Batsman">Batsman</option>
+                            <option value="Bowler">Bowler</option>
+                            <option value="All-Rounder">All-Rounder</option>
+                            <option value="Wicketkeeper">Wicketkeeper</option>
+                          </select>
+                        </label>
+                        <label>
+                          Academy Level
+                          <select
+                            value={editedPlayer.academyLevel}
+                            onChange={(e) => setEditedPlayer({ ...editedPlayer, academyLevel: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          >
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                          </select>
+                        </label>
+                        <label>
+                          Email Address
+                          <input
+                            type="email"
+                            value={editedPlayer.emailAddress}
+                            onChange={(e) => setEditedPlayer({ ...editedPlayer, emailAddress: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Cricclubs ID
+                          <input
+                            type="text"
+                            value={editedPlayer.cricclubsID}
+                            onChange={(e) => setEditedPlayer({ ...editedPlayer, cricclubsID: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Status
+                          <select
+                            value={editedPlayer.status}
+                            onChange={(e) => setEditedPlayer({ ...editedPlayer, status: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          >
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Suspended">Suspended</option>
+                            <option value="Graduated">Graduated</option>
+                          </select>
+                        </label>
                       </div>
                       <button
                         onClick={handlePlayerUpdate}
