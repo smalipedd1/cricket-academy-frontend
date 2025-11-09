@@ -63,7 +63,7 @@ const AdminDashboard = () => {
 
   const handleCoachUpdate = () => {
     const token = localStorage.getItem('token');
-    const method = isAddingCoach ? 'post' : 'patch';
+    const method = isAddingCoach ? 'post' : 'put';
     const url = isAddingCoach
       ? 'https://cricket-academy-backend.onrender.com/api/admin/coaches'
       : `https://cricket-academy-backend.onrender.com/api/admin/coaches/${editedCoach._id}`;
@@ -92,7 +92,7 @@ const AdminDashboard = () => {
 
   const handlePlayerUpdate = () => {
     const token = localStorage.getItem('token');
-    const method = isAddingPlayer ? 'post' : 'patch';
+    const method = isAddingPlayer ? 'post' : 'put';
     const url = isAddingPlayer
       ? 'https://cricket-academy-backend.onrender.com/api/admin/players'
       : `https://cricket-academy-backend.onrender.com/api/admin/players/${editedPlayer._id}`;

@@ -63,43 +63,59 @@ const AdminDashboard = () => {
 
   const handleCoachUpdate = () => {
     const token = localStorage.getItem('token');
-    axios
-      .patch(`https://cricket-academy-backend.onrender.com/api/admin/coaches/${editedCoach._id}`, editedCoach, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    const method = isAddingCoach ? 'post' : 'patch';
+    const url = isAddingCoach
+      ? 'https://cricket-academy-backend.onrender.com/api/admin/coaches'
+      : `https://cricket-academy-backend.onrender.com/api/admin/coaches/${editedCoach._id}`;
+
+    axios({
+      method,
+      url,
+      data: editedCoach,
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then(() => {
-        alert('Coach updated!');
+        alert(isAddingCoach ? 'Coach added!' : 'Coach updated!');
         setSelectedCoach(null);
         setEditedCoach({});
+        setIsAddingCoach(false);
         return axios.get('https://cricket-academy-backend.onrender.com/api/admin/coaches', {
           headers: { Authorization: `Bearer ${token}` },
         });
       })
       .then((res) => setCoaches(res.data))
       .catch((err) => {
-        console.error('Coach update error:', err);
-        alert('Failed to update coach.');
+        console.error('Coach save error:', err);
+        alert('Failed to save coach.');
       });
   };
 
   const handlePlayerUpdate = () => {
     const token = localStorage.getItem('token');
-    axios
-      .patch(`https://cricket-academy-backend.onrender.com/api/admin/players/${editedPlayer._id}`, editedPlayer, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    const method = isAddingPlayer ? 'post' : 'patch';
+    const url = isAddingPlayer
+      ? 'https://cricket-academy-backend.onrender.com/api/admin/players'
+      : `https://cricket-academy-backend.onrender.com/api/admin/players/${editedPlayer._id}`;
+
+    axios({
+      method,
+      url,
+      data: editedPlayer,
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then(() => {
-        alert('Player updated!');
+        alert(isAddingPlayer ? 'Player added!' : 'Player updated!');
         setSelectedPlayer(null);
         setEditedPlayer({});
+        setIsAddingPlayer(false);
         return axios.get('https://cricket-academy-backend.onrender.com/api/admin/players', {
           headers: { Authorization: `Bearer ${token}` },
         });
       })
       .then((res) => setPlayers(res.data))
       .catch((err) => {
-        console.error('Player update error:', err);
-        alert('Failed to update player.');
+        console.error('Player save error:', err);
+        alert('Failed to save player.');
       });
   };
   return (
@@ -226,10 +242,30 @@ const AdminDashboard = () => {
                     ))}
                   </ul>
 
-                  {selectedCoach && (
+                  {(selectedCoach || isAddingCoach) && (
                     <div className="mt-6 space-y-4">
-                      <h3 className="text-lg font-semibold text-blue-600">Edit Coach</h3>
+                      <h3 className="text-lg font-semibold text-blue-600">
+                        {isAddingCoach ? 'Add New Coach' : 'Edit Coach'}
+                      </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label>
+                          Username
+                          <input
+                            type="text"
+                            value={editedCoach.username}
+                            onChange={(e) => setEditedCoach({ ...editedCoach, username: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Password
+                          <input
+                            type="password"
+                            value={editedCoach.password}
+                            onChange={(e) => setEditedCoach({ ...editedCoach, password: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
                         <label>
                           First Name
                           <input
@@ -298,7 +334,7 @@ const AdminDashboard = () => {
                         onClick={handleCoachUpdate}
                         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                       >
-                        Save Coach
+                        {isAddingCoach ? 'Save New Coach' : 'Update Coach'}
                       </button>
                     </div>
                   )}
@@ -345,10 +381,30 @@ const AdminDashboard = () => {
                     ))}
                   </ul>
 
-                  {selectedPlayer && (
+                  {(selectedPlayer || isAddingPlayer) && (
                     <div className="mt-6 space-y-4">
-                      <h3 className="text-lg font-semibold text-green-600">Edit Player</h3>
+                      <h3 className="text-lg font-semibold text-green-600">
+                        {isAddingPlayer ? 'Add New Player' : 'Edit Player'}
+                      </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label>
+                          Username
+                          <input
+                            type="text"
+                            value={editedPlayer.username}
+                            onChange={(e) => setEditedPlayer({ ...editedPlayer, username: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Password
+                          <input
+                            type="password"
+                            value={editedPlayer.password}
+                            onChange={(e) => setEditedPlayer({ ...editedPlayer, password: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
                         <label>
                           First Name
                           <input
@@ -428,7 +484,7 @@ const AdminDashboard = () => {
                         onClick={handlePlayerUpdate}
                         className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                       >
-                        Save Player
+                        {isAddingPlayer ? 'Save New Player' : 'Update Player'}
                       </button>
                     </div>
                   )}
