@@ -57,7 +57,7 @@ const SessionList = () => {
       .catch((err) => console.error('Coach fetch error:', err));
 
     axios
-      .get('https://cricket-academy-backend.onrender.com/api/admin/players', {
+      .get('https://cricket-academy-backend.onrender.com/api/players', {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setPlayers(res.data))
