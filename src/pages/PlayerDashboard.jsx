@@ -28,7 +28,7 @@ const PlayerDashboard = () => {
       .get('https://cricket-academy-backend.onrender.com/api/player/performance-chart', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setPerformanceChart(res.data.entries))
+      .then((res) => setPerformanceChart(res.data.entries || []))
       .catch((err) => console.error('Chart fetch error:', err));
 
     axios
@@ -36,8 +36,8 @@ const PlayerDashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        setFeedbacks(res.data);
-        setFilteredFeedbacks(res.data);
+        setFeedbacks(res.data || []);
+        setFilteredFeedbacks(res.data || []);
       })
       .catch((err) => console.error('Feedback fetch error:', err));
   }, [token]);
@@ -53,10 +53,11 @@ const PlayerDashboard = () => {
   };
 
   const handleResponseSubmit = (sessionId) => {
+    const resolvedPlayerId = playerId || playerData?._id;
     axios
       .patch(
         `https://cricket-academy-backend.onrender.com/api/player/feedback-response/${sessionId}`,
-        { playerId, responseText },
+        { playerId: resolvedPlayerId, responseText },
         { headers: { Authorization: `Bearer ${token}` } }
       )
       .then(() => {
@@ -68,8 +69,8 @@ const PlayerDashboard = () => {
         });
       })
       .then((res) => {
-        setFeedbacks(res.data);
-        setFilteredFeedbacks(res.data);
+        setFeedbacks(res.data || []);
+        setFilteredFeedbacks(res.data || []);
       })
       .catch((err) => {
         console.error('Response error:', err);
@@ -115,13 +116,18 @@ const PlayerDashboard = () => {
                 </button>
               </div>
 
-              {filteredFeedbacks.map((fb) => (
+              {Array.isArray(filteredFeedbacks) && filteredFeedbacks.map((fb) => (
                 <div key={fb.sessionId} className="border p-4 rounded mb-4 bg-white shadow">
                   <h3 className="text-lg font-semibold text-blue-600">
                     Session on {new Date(fb.sessionDate).toLocaleDateString()}
                   </h3>
                   <p><strong>Focus Area:</strong> {fb.focusArea}</p>
-                  <p><strong>Coach Rating:</strong> {fb.rating}</p>
+                  <p><strong>Coach Rating:</strong></p>
+                  <ul className="list-disc ml-6">
+                    {Object.entries(fb.rating || {}).map(([skill, value]) => (
+                      <li key={skill}>{skill}: {value}</li>
+                    ))}
+                  </ul>
                   <p><strong>Coach Notes:</strong> {fb.notes}</p>
                   <p><strong>Your Response:</strong> {fb.playerResponse || 'No response yet'}</p>
 
@@ -151,14 +157,19 @@ const PlayerDashboard = () => {
             {/* Performance Chart */}
             <div className="mt-10">
               <h2 className="text-xl font-semibold text-purple-700 mb-2">Performance Chart</h2>
-              {performanceChart.length > 0 ? (
+              {Array.isArray(performanceChart) && performanceChart.length > 0 ? (
                 <ul className="space-y-2">
                   {performanceChart.map((entry, index) => (
                     <li key={index} className="border p-4 rounded bg-purple-50">
                       <p><strong>Date:</strong> {new Date(entry.date).toLocaleDateString()}</p>
-                      <p><strong>Rating:</strong> {entry.rating}</p>
                       <p><strong>Focus Area:</strong> {entry.focusArea}</p>
                       <p><strong>Notes:</strong> {entry.notes}</p>
+                      <p><strong>Rating:</strong></p>
+                      <ul className="list-disc ml-6">
+                        {Object.entries(entry.rating || {}).map(([skill, value]) => (
+                          <li key={skill}>{skill}: {value}</li>
+                        ))}
+                      </ul>
                     </li>
                   ))}
                 </ul>
