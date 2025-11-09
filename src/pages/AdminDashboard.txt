@@ -336,9 +336,108 @@ const AdminDashboard = () => {
                         {isAddingPlayer ? 'Add New Player' : 'Edit Player'}
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Player form fields preserved */}
-                        {/* ... */}
-                      </div>
+  <label>
+    Username
+    <input
+      type="text"
+      value={editedPlayer.username}
+      onChange={(e) => setEditedPlayer({ ...editedPlayer, username: e.target.value })}
+      className="border px-3 py-2 rounded w-full"
+    />
+  </label>
+  <label>
+    Password
+    <input
+      type="password"
+      value={editedPlayer.password}
+      onChange={(e) => setEditedPlayer({ ...editedPlayer, password: e.target.value })}
+      className="border px-3 py-2 rounded w-full"
+    />
+  </label>
+  <label>
+    First Name
+    <input
+      type="text"
+      value={editedPlayer.firstName}
+      onChange={(e) => setEditedPlayer({ ...editedPlayer, firstName: e.target.value })}
+      className="border px-3 py-2 rounded w-full"
+    />
+  </label>
+  <label>
+    Last Name
+    <input
+      type="text"
+      value={editedPlayer.lastName}
+      onChange={(e) => setEditedPlayer({ ...editedPlayer, lastName: e.target.value })}
+      className="border px-3 py-2 rounded w-full"
+    />
+  </label>
+  <label>
+    Age
+    <input
+      type="number"
+      value={editedPlayer.age}
+      onChange={(e) => setEditedPlayer({ ...editedPlayer, age: e.target.value })}
+      className="border px-3 py-2 rounded w-full"
+    />
+  </label>
+  <label>
+    Role
+    <select
+      value={editedPlayer.role}
+      onChange={(e) => setEditedPlayer({ ...editedPlayer, role: e.target.value })}
+      className="border px-3 py-2 rounded w-full"
+    >
+      <option value="Batsman">Batsman</option>
+      <option value="Bowler">Bowler</option>
+      <option value="All-Rounder">All-Rounder</option>
+      <option value="Wicketkeeper">Wicketkeeper</option>
+    </select>
+  </label>
+  <label>
+    Academy Level
+    <select
+      value={editedPlayer.academyLevel}
+      onChange={(e) => setEditedPlayer({ ...editedPlayer, academyLevel: e.target.value })}
+      className="border px-3 py-2 rounded w-full"
+    >
+      <option value="Beginner">Beginner</option>
+      <option value="Intermediate">Intermediate</option>
+      <option value="Advanced">Advanced</option>
+    </select>
+  </label>
+  <label>
+    Email Address
+    <input
+      type="email"
+      value={editedPlayer.emailAddress}
+      onChange={(e) => setEditedPlayer({ ...editedPlayer, emailAddress: e.target.value })}
+      className="border px-3 py-2 rounded w-full"
+    />
+  </label>
+  <label>
+    Cricclubs ID
+    <input
+      type="text"
+      value={editedPlayer.cricclubsID}
+      onChange={(e) => setEditedPlayer({ ...editedPlayer, cricclubsID: e.target.value })}
+      className="border px-3 py-2 rounded w-full"
+    />
+  </label>
+  <label>
+    Status
+    <select
+      value={editedPlayer.status}
+      onChange={(e) => setEditedPlayer({ ...editedPlayer, status: e.target.value })}
+      className="border px-3 py-2 rounded w-full"
+    >
+      <option value="Active">Active</option>
+      <option value="Inactive">Inactive</option>
+      <option value="Suspended">Suspended</option>
+      <option value="Graduated">Graduated</option>
+    </select>
+  </label>
+</div>
                       <button
                         onClick={handlePlayerUpdate}
                         className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
