@@ -136,6 +136,14 @@ const AdminDashboard = () => {
   return (
     <>
       <div className="min-h-screen bg-gray-100 p-6">
+        {/* 🔴 Logout button moved to top left */}
+        <button
+          onClick={handleLogout}
+          className="mb-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+        >
+          Logout
+        </button>
+
         <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-md p-6 space-y-8">
           <h1 className="text-3xl font-bold text-blue-700">Admin Dashboard</h1>
 
@@ -235,8 +243,6 @@ const AdminDashboard = () => {
                         password: '',
                         firstName: '',
                         lastName: '',
-                        specialization: '',
-                        experienceYears: '',
                         emailAddress: '',
                         phoneNumber: '',
                         coachId: '',
@@ -258,7 +264,7 @@ const AdminDashboard = () => {
                           setIsAddingCoach(false);
                         }}
                       >
-                        {coach.firstName} {coach.lastName} — {coach.specialization}
+                        {coach.firstName} {coach.lastName}
                       </li>
                     ))}
                   </ul>
@@ -302,24 +308,6 @@ const AdminDashboard = () => {
                             type="text"
                             value={editedCoach.lastName}
                             onChange={(e) => setEditedCoach({ ...editedCoach, lastName: e.target.value })}
-                            className="border px-3 py-2 rounded w-full"
-                          />
-                        </label>
-                        <label>
-                          Specialization
-                          <input
-                            type="text"
-                            value={editedCoach.specialization}
-                            onChange={(e) => setEditedCoach({ ...editedCoach, specialization: e.target.value })}
-                            className="border px-3 py-2 rounded w-full"
-                          />
-                        </label>
-                        <label>
-                          Experience (Years)
-                          <input
-                            type="number"
-                            value={editedCoach.experienceYears}
-                            onChange={(e) => setEditedCoach({ ...editedCoach, experienceYears: e.target.value })}
                             className="border px-3 py-2 rounded w-full"
                           />
                         </label>
@@ -543,13 +531,6 @@ const AdminDashboard = () => {
                   )}
                 </div>
               )}
-
-              <button
-                onClick={handleLogout}
-                className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-              >
-                Logout
-              </button>
             </>
           ) : (
             <p>Loading dashboard...</p>

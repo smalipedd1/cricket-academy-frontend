@@ -269,8 +269,100 @@ const AdminDashboard = () => {
                         {isAddingCoach ? 'Add New Coach' : 'Edit Coach'}
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Coach form fields preserved */}
-                        {/* You can reinsert your coach form here if needed */}
+                        <label>
+                          Username
+                          <input
+                            type="text"
+                            value={editedCoach.username}
+                            onChange={(e) => setEditedCoach({ ...editedCoach, username: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Password
+                          <input
+                            type="password"
+                            value={editedCoach.password}
+                            onChange={(e) => setEditedCoach({ ...editedCoach, password: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          First Name
+                          <input
+                            type="text"
+                            value={editedCoach.firstName}
+                            onChange={(e) => setEditedCoach({ ...editedCoach, firstName: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Last Name
+                          <input
+                            type="text"
+                            value={editedCoach.lastName}
+                            onChange={(e) => setEditedCoach({ ...editedCoach, lastName: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Specialization
+                          <input
+                            type="text"
+                            value={editedCoach.specialization}
+                            onChange={(e) => setEditedCoach({ ...editedCoach, specialization: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Experience (Years)
+                          <input
+                            type="number"
+                            value={editedCoach.experienceYears}
+                            onChange={(e) => setEditedCoach({ ...editedCoach, experienceYears: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Email Address
+                          <input
+                            type="email"
+                            value={editedCoach.emailAddress}
+                            onChange={(e) => setEditedCoach({ ...editedCoach, emailAddress: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Phone Number
+                          <input
+                            type="text"
+                            value={editedCoach.phoneNumber}
+                            onChange={(e) => setEditedCoach({ ...editedCoach, phoneNumber: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Coach ID
+                          <input
+                            type="text"
+                            value={editedCoach.coachId}
+                            onChange={(e) => setEditedCoach({ ...editedCoach, coachId: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          />
+                        </label>
+                        <label>
+                          Status
+                          <select
+                            value={editedCoach.status}
+                            onChange={(e) => setEditedCoach({ ...editedCoach, status: e.target.value })}
+                            className="border px-3 py-2 rounded w-full"
+                          >
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Suspended">Suspended</option>
+                            <option value="Retired">Retired</option>
+                          </select>
+                        </label>
                       </div>
                       <button
                         onClick={handleCoachUpdate}
