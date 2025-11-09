@@ -27,6 +27,8 @@ const PlayerDashboard = () => {
   const [skill, setSkill] = useState('batting');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [responseText, setResponseText] = useState('');
+  const [selectedSessionId, setSelectedSessionId] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -80,6 +82,29 @@ const PlayerDashboard = () => {
       .catch((err) => {
         console.error('Update error:', err.response?.data || err.message);
         alert('Failed to update profile.');
+      });
+  };
+
+  const handleResponseSubmit = (sessionId) => {
+    const token = localStorage.getItem('token');
+    axios
+      .patch(
+        `https://cricket-academy-backend.onrender.com/api/player/feedback-response/${sessionId}`,
+        { playerId: profile._id, responseText },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .then(() => {
+        alert('Response submitted!');
+        setResponseText('');
+        setSelectedSessionId(null);
+        return axios.get('https://cricket-academy-backend.onrender.com/api/player/feedback', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      })
+      .then((res) => setFeedback(res.data))
+      .catch((err) => {
+        console.error('Response error:', err);
+        alert('Failed to submit response.');
       });
   };
 
@@ -206,6 +231,50 @@ const PlayerDashboard = () => {
             )}
           </div>
         </div>
+
+        {/* 🧠 Session Feedback Section */}
+        {feedback.length > 0 && (
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-2xl font-semibold text-blue-600 mb-4">Session Feedback</h2>
+            {feedback.map((fb) => (
+              <div key={fb.sessionId} className="border p-4 rounded mb-4 bg-gray-50">
+                <h3 className="text-lg font-semibold text-blue-700">
+                  Session on {new Date(fb.sessionDate).toLocaleDateString()}
+                </h3>
+                <p><strong>Focus Area:</strong> {fb.focusArea}</p>
+                <p><strong>Coach Notes:</strong> {fb.notes}</p>
+                <p><strong>Coach Rating:</strong></p>
+                <ul className="list-disc ml-6">
+                  {Object.entries(fb.rating || {}).map(([skill, value]) => (
+                    <li key={skill}>{skill}: {value}</li>
+                  ))}
+                </ul>
+                <p><strong>Your Response:</strong> {fb.playerResponse || 'No response yet'}</p>
+
+                {!fb.playerResponse && (
+                  <>
+                    <textarea
+                      placeholder="Write your response..."
+                      value={selectedSessionId === fb.sessionId ? responseText : ''}
+                      onChange={(e) => {
+                        setSelectedSessionId(fb.sessionId);
+                        setResponseText(e.target.value);
+                      }}
+                      className="border w-full p-2 mt-2 rounded"
+                    />
+                    <button
+                      onClick={() => handleResponseSubmit(fb.sessionId)}
+                      className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    >
+                      Submit Response
+                    </button>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* 📊 Progress Chart */}
         {validEntries.length > 0 && (
           <div className="bg-white rounded-xl shadow p-6">
@@ -242,24 +311,6 @@ const PlayerDashboard = () => {
           </div>
         )}
       </div>
-    </div>
-  );
-};
-
-const SkillRating = ({ label, value }) => {
-  const getColor = (val) => {
-    if (val >= 8) return 'bg-green-100 text-green-700';
-    if (val >= 4) return 'bg-yellow-100 text-yellow-700';
-    if (val >= 1) return 'bg-red-100 text-red-700';
-    return 'bg-gray-100 text-gray-500';
-  };
-
-  return (
-    <div className="text-center">
-      <span className="block font-medium text-gray-700">{label}</span>
-      <span className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-semibold ${getColor(value)}`}>
-        {value ?? 'N/A'}
-      </span>
     </div>
   );
 };
