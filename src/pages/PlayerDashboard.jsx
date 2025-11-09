@@ -19,6 +19,7 @@ ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, T
 const PlayerDashboard = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState({});
+  const [dob, setDob] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [contactUpdates, setContactUpdates] = useState({});
   const [sessions, setSessions] = useState([]);
@@ -33,6 +34,17 @@ const PlayerDashboard = () => {
   const [feedbackEndDate, setFeedbackEndDate] = useState('');
   const [showUnrespondedOnly, setShowUnrespondedOnly] = useState(false);
 
+  const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
 
@@ -41,6 +53,18 @@ const PlayerDashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setProfile(res.data));
+
+    axios
+      .get('https://cricket-academy-backend.onrender.com/api/player/dob', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        if (!res.data.dob) {
+          navigate('/enter-dob');
+        } else {
+          setDob(res.data.dob);
+        }
+      });
 
     axios
       .get('https://cricket-academy-backend.onrender.com/api/player/sessions/upcoming', {
@@ -184,7 +208,12 @@ const PlayerDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <p><strong>First Name:</strong> {profile.firstName}</p>
             <p><strong>Last Name:</strong> {profile.lastName}</p>
-            <p><strong>Age:</strong> {profile.age}</p>
+            {dob && (
+              <>
+                <p><strong>Date of Birth:</strong> {new Date(dob).toLocaleDateString()}</p>
+                <p><strong>Age:</strong> {calculateAge(dob)}</p>
+              </>
+            )}
             <p><strong>Role:</strong> {profile.role}</p>
             <p><strong>Academy Level:</strong> {profile.academyLevel}</p>
             <p><strong>CricClubs ID:</strong> {profile.cricclubsID}</p>
@@ -220,7 +249,6 @@ const PlayerDashboard = () => {
             )}
           </div>
         </div>
-
         {/* 🧠 Session Feedback Section */}
         {feedback.length > 0 && (
           <div className="bg-white rounded-xl shadow p-6">
@@ -300,6 +328,7 @@ const PlayerDashboard = () => {
               ))}
           </div>
         )}
+
         {/* 📊 Progress Chart */}
         {validEntries.length > 0 && (
           <div className="bg-white rounded-xl shadow p-6">

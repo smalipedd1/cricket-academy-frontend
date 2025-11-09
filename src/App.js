@@ -51,6 +51,7 @@ function AppRoutes() {
       <Route path="/coach/player-list" element={<CoachPlayerList />} />
       <Route path="/coach/player/:id" element={<CoachPlayerProfile />} />
       <Route path="/player/session/:id" element={<PlayerSessionView />} />
+	<Route path="/enter-dob" element={<EnterDOB />} />
     </Routes>
   );
 }
