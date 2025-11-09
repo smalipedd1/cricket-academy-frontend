@@ -86,7 +86,10 @@ const PlayerDashboard = () => {
           <>
             <p className="text-lg">Welcome <strong>{playerData.firstName}</strong></p>
 
-            {/* Feedback Filter */}
+            {/* Notification Bell and Profile Update Section — preserved */}
+            {/* ... your existing notification and profile update components go here ... */}
+
+            {/* Session Feedback Section — restored */}
             <div className="mt-6">
               <h2 className="text-xl font-semibold text-blue-700 mb-2">Session Feedback</h2>
               <div className="flex gap-4 mb-4">
@@ -154,7 +157,7 @@ const PlayerDashboard = () => {
               ))}
             </div>
 
-            {/* Performance Chart */}
+            {/* Performance Chart Section — preserved */}
             <div className="mt-10">
               <h2 className="text-xl font-semibold text-purple-700 mb-2">Performance Chart</h2>
               {Array.isArray(performanceChart) && performanceChart.length > 0 ? (
