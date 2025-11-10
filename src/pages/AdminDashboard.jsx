@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import NotificationBell from './NotificationBell';
 
 const AdminDashboard = () => {
   const [data, setData] = useState(null);
@@ -135,104 +136,100 @@ const AdminDashboard = () => {
   };
   return (
     <>
-      <div className="min-h-screen bg-gray-100 p-6">
-        {/* 🔴 Logout button moved to top left */}
-        <button
-          onClick={handleLogout}
-          className="mb-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-        >
-          Logout
-        </button>
-
-        <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-md p-6 space-y-8">
-          <h1 className="text-3xl font-bold text-blue-700">Admin Dashboard</h1>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6">
+        <div className="max-w-6xl mx-auto space-y-10">
+          {/* 🔷 Top Bar */}
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-blue-700">Welcome, {data?.name}</h1>
+            <div className="flex items-center space-x-4">
+              <NotificationBell />
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
 
           {data ? (
             <>
-              <p className="text-lg">Welcome Admin <strong>{data.name}</strong></p>
-
-              {/* Grouped Summary + Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                {/* Players */}
-                <div className="space-y-4">
-                  <div className="bg-yellow-50 p-4 rounded-lg shadow text-yellow-800 font-semibold">
-                    Total Players: {data.totalPlayers}
-                  </div>
-                  <div className="bg-white border border-green-100 rounded-lg p-6 shadow-sm">
-                    <h2 className="text-xl font-semibold mb-4 text-green-700">Manage Players</h2>
-                    <button
-                      onClick={() => {
-                        setShowPlayerList(true);
-                        setShowCoachList(false);
-                        setSelectedPlayer(null);
-                        setEditedPlayer({});
-                        setIsAddingPlayer(false);
-                        setSelectedCoach(null);
-                        setEditedCoach({});
-                        setIsAddingCoach(false);
-                      }}
-                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                    >
-                      View & Update Players
-                    </button>
-                  </div>
-                </div>
-
-                {/* Coaches */}
-                <div className="space-y-4">
-                  <div className="bg-purple-50 p-4 rounded-lg shadow text-purple-800 font-semibold">
-                    Total Coaches: {data.totalCoaches}
-                  </div>
-                  <div className="bg-white border border-blue-100 rounded-lg p-6 shadow-sm">
-                    <h2 className="text-xl font-semibold mb-4 text-blue-700">Manage Coaches</h2>
-                    <button
-                      onClick={() => {
-                        setShowCoachList(true);
-                        setShowPlayerList(false);
-                        setSelectedCoach(null);
-                        setEditedCoach({});
-                        setIsAddingCoach(false);
-                        setSelectedPlayer(null);
-                        setEditedPlayer({});
-                        setIsAddingPlayer(false);
-                      }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                    >
-                      View & Update Coaches
-                    </button>
+              {/* 🧩 Dashboard Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Manage Players */}
+                <div
+                  onClick={() => {
+                    setShowPlayerList(true);
+                    setShowCoachList(false);
+                    setSelectedPlayer(null);
+                    setEditedPlayer({});
+                    setIsAddingPlayer(false);
+                    setSelectedCoach(null);
+                    setEditedCoach({});
+                    setIsAddingCoach(false);
+                  }}
+                  className="cursor-pointer bg-white rounded-xl shadow p-6 hover:shadow-lg transition"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="bg-green-100 p-3 rounded-full">
+                      <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13 7a3 3 0 11-6 0 3 3 0 016 0zM4 14a4 4 0 018 0H4z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-green-700">Manage Players</h3>
+                      <p className="text-sm text-gray-600">View and update player profiles.</p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Sessions */}
-                <div className="space-y-4">
-                  <div className="bg-green-50 p-4 rounded-lg shadow text-green-800 font-semibold">
-                    Upcoming Sessions: {data.upcomingSessions}
+                {/* Session Feedback */}
+                <div
+                  onClick={() => {
+                    setShowCoachList(false);
+                    setShowPlayerList(false);
+                    navigate('/admin/sessions');
+                  }}
+                  className="cursor-pointer bg-white rounded-xl shadow p-6 hover:shadow-lg transition"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="bg-purple-100 p-3 rounded-full">
+                      <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm2 3h8v2H6V6zm0 4h5v2H6v-2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-purple-700">Session Feedback</h3>
+                      <p className="text-sm text-gray-600">Log or update feedback for sessions.</p>
+                    </div>
                   </div>
-                  <div className="bg-white border border-purple-100 rounded-lg p-6 shadow-sm">
-                    <h2 className="text-xl font-semibold mb-4 text-purple-700">Manage Sessions</h2>
-                    <button
-                      onClick={() => {
-                        setShowCoachList(false);
-                        setShowPlayerList(false);
-                        setSelectedCoach(null);
-                        setEditedCoach({});
-                        setIsAddingCoach(false);
-                        setSelectedPlayer(null);
-                        setEditedPlayer({});
-                        setIsAddingPlayer(false);
-                        navigate('/admin/sessions');
-                      }}
-                      className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-                    >
-                      View & Update Sessions
-                    </button>
+                </div>
+
+                {/* Player Progress */}
+                <div
+                  onClick={() => {
+                    setShowCoachList(false);
+                    setShowPlayerList(false);
+                    navigate('/admin/analytics');
+                  }}
+                  className="cursor-pointer bg-white rounded-xl shadow p-6 hover:shadow-lg transition"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="bg-blue-100 p-3 rounded-full">
+                      <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v6H2v-6zm6-4a1 1 0 011-1h2a1 1 0 011 1v10H8V7zm6-4a1 1 0 011-1h2a1 1 0 011 1v14h-4V3z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-blue-700">Player Progress</h3>
+                      <p className="text-sm text-gray-600">View performance graphs and analytics.</p>
+                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Coach List */}
+              {/* 👥 Coach List */}
               {showCoachList && (
-                <div className="mt-10 bg-white p-6 rounded shadow space-y-4">
+                <div className="mt-10 bg-white rounded-xl shadow p-6 space-y-4">
                   <h2 className="text-xl font-bold text-blue-700">Coach List</h2>
                   <button
                     onClick={() => {
@@ -362,9 +359,10 @@ const AdminDashboard = () => {
                   )}
                 </div>
               )}
-              {/* Player List */}
+
+              {/* 🏏 Player List */}
               {showPlayerList && (
-                <div className="mt-10 bg-white p-6 rounded shadow space-y-4">
+                <div className="mt-10 bg-white rounded-xl shadow p-6 space-y-4">
                   <h2 className="text-xl font-bold text-green-700">Player List</h2>
                   <div className="flex flex-wrap gap-4">
                     <button
@@ -487,57 +485,56 @@ const AdminDashboard = () => {
                             <option value="Beginner">Beginner</option>
                             <option value="Intermediate">Intermediate</option>
                             <option value="Advanced">Advanced</option>
-                          </select>
-                        </label>
-                        <label>
-                          Email Address
-                          <input
-                            type="email"
-                            value={editedPlayer.emailAddress}
-                            onChange={(e) => setEditedPlayer({ ...editedPlayer, emailAddress: e.target.value })}
-                            className="border px-3 py-2 rounded w-full"
-                          />
-                        </label>
-                        <label>
-                          Cricclubs ID
-                          <input
-                            type="text"
-                            value={editedPlayer.cricclubsID}
-                            onChange={(e) => setEditedPlayer({ ...editedPlayer, cricclubsID: e.target.value })}
-                            className="border px-3 py-2 rounded w-full"
-                          />
-                        </label>
-                        <label>
-                          Status
-                          <select
-                            value={editedPlayer.status}
-                            onChange={(e) => setEditedPlayer({ ...editedPlayer, status: e.target.value })}
-                            className="border px-3 py-2 rounded w-full"
-                          >
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                            <option value="Suspended">Suspended</option>
-                            <option value="Graduated">Graduated</option>
-                          </select>
-                        </label>
-                      </div>
-                      <button
-                        onClick={handlePlayerUpdate}
-                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                      >
-                        {isAddingPlayer ? 'Save New Player' : 'Update Player'}
-                      </button>
+                        </select>
+                      </label>
+                      <label>
+                        Email Address
+                        <input
+                          type="email"
+                          value={editedPlayer.emailAddress}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, emailAddress: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                      </label>
+                      <label>
+                        Cricclubs ID
+                        <input
+                          type="text"
+                          value={editedPlayer.cricclubsID}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, cricclubsID: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                      </label>
+                      <label>
+                        Status
+                        <select
+                          value={editedPlayer.status}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, status: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        >
+                          <option value="Active">Active</option>
+                          <option value="Inactive">Inactive</option>
+                          <option value="Suspended">Suspended</option>
+                          <option value="Graduated">Graduated</option>
+                        </select>
+                      </label>
                     </div>
-                  )}
-                </div>
-              )}
-            </>
-          ) : (
-            <p>Loading dashboard...</p>
-          )}
-        </div>
+                    <button
+                      onClick={handlePlayerUpdate}
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    >
+                      {isAddingPlayer ? 'Save New Player' : 'Update Player'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        ) : (
+          <p className="text-gray-600">Loading dashboard...</p>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 
