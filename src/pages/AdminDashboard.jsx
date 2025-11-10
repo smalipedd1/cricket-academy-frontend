@@ -204,31 +204,36 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* Player Progress */}
+              {/* Manage Coaches */}
               <div
                 onClick={() => {
-                  setShowCoachList(false);
+                  setShowCoachList(true);
                   setShowPlayerList(false);
-                  navigate('/admin/analytics');
+                  setSelectedCoach(null);
+                  setEditedCoach({});
+                  setIsAddingCoach(false);
+                  setSelectedPlayer(null);
+                  setEditedPlayer({});
+                  setIsAddingPlayer(false);
                 }}
                 className="cursor-pointer bg-white rounded-xl shadow p-6 hover:shadow-lg transition"
               >
                 <div className="flex items-center space-x-4">
                   <div className="bg-blue-100 p-3 rounded-full">
                     <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v6H2v-6zm6-4a1 1 0 011-1h2a1 1 0 011 1v10H8V7zm6-4a1 1 0 011-1h2a1 1 0 011 1v14h-4V3z" />
+                      <path d="M13 7a3 3 0 11-6 0 3 3 0 016 0zM4 14a4 4 0 018 0H4z" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-blue-700">Player Progress</h3>
-                    <p className="text-sm text-gray-600">View performance graphs and analytics.</p>
+                    <h3 className="text-lg font-semibold text-blue-700">Manage Coaches</h3>
+                    <p className="text-sm text-gray-600">View and update coach profiles.</p>
                   </div>
                 </div>
               </div>
             </div>
             {/* 👥 Coach List */}
             {showCoachList && (
-              <div className="bg-white rounded-xl shadow p-6 space-y-4">
+              <div className="mt-10 bg-white rounded-xl shadow p-6 space-y-4">
                 <h2 className="text-xl font-bold text-blue-700">Coach List</h2>
                 <button
                   onClick={() => {
@@ -360,7 +365,7 @@ const AdminDashboard = () => {
             )}
             {/* 🏏 Player List */}
             {showPlayerList && (
-              <div className="bg-white rounded-xl shadow p-6 space-y-4">
+              <div className="mt-10 bg-white rounded-xl shadow p-6 space-y-4">
                 <h2 className="text-xl font-bold text-green-700">Player List</h2>
                 <div className="flex flex-wrap gap-4">
                   <button
