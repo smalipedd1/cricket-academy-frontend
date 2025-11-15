@@ -156,9 +156,8 @@ const PlayerDashboard = () => {
 
   const handleEvaluationResponseSubmit = (evaluationId) => {
     const token = localStorage.getItem('token');
-    axios
-      .patch(
-        `https://cricket-academy-backend.onrender.com/api/evaluations/respond/${evaluationId}`,
+    axios.post(
+  		`https://cricket-academy-backend.onrender.com/api/evaluations/${evaluationId}/respond`,
         { playerResponse: evalResponseText },
         { headers: { Authorization: `Bearer ${token}` } }
       )
