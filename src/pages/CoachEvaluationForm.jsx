@@ -140,10 +140,10 @@ const CoachEvaluationForm = () => {
       );
       alert('Evaluation submitted!');
       navigate('/coach/dashboard');
-    } catch (err) {
-      console.error('Evaluation submission error:', err);
-      alert('Failed to submit evaluation.');
-    }
+} catch (err) {
+  console.error('Evaluation submission error:', err.response?.data || err.message || err);
+  alert('Failed to submit evaluation.');
+}
   };
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow space-y-6">
@@ -357,8 +357,6 @@ const CoachEvaluationForm = () => {
             placeholder="Add any final observations or recommendations..."
           />
         </div>
-
-console.log('Submitting evaluation with coach ID:', coachProfile._id);
 
         {/* 🔹 Submit Button */}
         <div className="text-right">
