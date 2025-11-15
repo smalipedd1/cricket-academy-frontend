@@ -156,7 +156,12 @@ const CoachEvaluationForm = () => {
           <div><strong>Category:</strong> {selectedPlayer.category}</div>
           <div><strong>Cricclubs ID:</strong> {selectedPlayer.cricclubsID}</div>
           <div><strong>Player Profile:</strong> {selectedPlayer.role}</div>
-          <div><strong>Years in Academy:</strong> {selectedPlayer.yearsInAcademy}</div>
+          <div>
+  		<strong>Competitive Years:</strong>{' '}
+  		{selectedPlayer.competitiveStartYear
+    		? new Date().getFullYear() - selectedPlayer.competitiveStartYear
+    		: 'N/A'}
+	</div>
           <div><strong>Age:</strong> {selectedPlayer.age}</div>
 
           {playerStats ? (
