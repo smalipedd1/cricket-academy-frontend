@@ -17,11 +17,11 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-  "start": "react-scripts start",
-  "build": "react-scripts build && copy public\\_redirects build\\_redirects",
-  "test": "react-scripts test",
-  "eject": "react-scripts eject"
-},
+    "start": "react-scripts start",
+    "build": "react-scripts build && cpx \"public/_redirects\" build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
+    "cpx": "^1.5.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.14"
   },
