@@ -129,7 +129,6 @@ const CoachEvaluationForm = () => {
     }
 
     try {
-      console.log('Submitting with coach ID:', coachProfile._id);
       await axios.post(
         'https://cricket-academy-backend.onrender.com/api/evaluations',
         {
@@ -154,9 +153,17 @@ const CoachEvaluationForm = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow space-y-6">
-      <h2 className="text-3xl font-bold text-blue-700">Coach Evaluation Form</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold text-blue-700">Coach Evaluation Form</h2>
+        <button
+          type="button"
+          onClick={() => navigate('/coach/dashboard')}
+          className="bg-gray-100 text-gray-800 px-4 py-2 rounded hover:bg-gray-200 border border-gray-300"
+        >
+          ← Back to Dashboard
+        </button>
+      </div>
 
-      {/* ✅ Fixed Coach Name Display */}
       <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded shadow text-sm text-gray-800">
         <strong>Coach:</strong>{' '}
         {coachProfile.firstName && coachProfile.lastName
@@ -164,16 +171,210 @@ const CoachEvaluationForm = () => {
           : 'Loading...'}
       </div>
 
-      <button
-        type="button"
-        onClick={() => navigate('/coach/dashboard')}
-        className="text-blue-600 underline hover:text-blue-800"
-      >
-        ← Back to Dashboard
-      </button>
+      <label className="block font-medium text-gray-700 mt-4">
+        Select Player
+        <select
+          value={selectedPlayerId}
+          onChange={(e) => setSelectedPlayerId(e.target.value)}
+          className="border px-3 py-2 rounded w-full mt-1"
+          required
+        >
+          <option value="">Choose a player</option>
+          {players.map((p) => (
+            <option key={p._id} value={p._id}>
+              {p.firstName} {p.lastName}
+            </option>
+          ))}
+        </select>
+      </label>
 
-      {/* 🔹 Rest of the form remains unchanged */}
-      {/* Includes player selection, stat entry, feedback sections, and submit button */}
+      {selectedPlayer && (
+        <div className="bg-gray-100 border-l-4 border-green-400 p-4 rounded shadow text-sm text-gray-700 space-y-1">
+          <div><strong>Player Name:</strong> {selectedPlayer.firstName} {selectedPlayer.lastName}</div>
+          <div><strong>Category:</strong> {derivedCategory}</div>
+          <div><strong>CricClubs ID:</strong> {selectedPlayer.cricclubsID}</div>
+          <div><strong>Player Profile:</strong> {selectedPlayer.role}</div>
+          <div>
+            <strong>Competitive Years:</strong>{' '}
+            {selectedPlayer.competitiveStartYear
+              ? new Date().getFullYear() - selectedPlayer.competitiveStartYear
+              : 'N/A'}
+          </div>
+          <div><strong>Age:</strong> {selectedPlayer.age}</div>
+          <div>
+            <a
+              href={`https://cricclubs.com/PremierCricAcad/viewPlayer.do?playerId=${selectedPlayer.cricclubsID}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              View CricClubs Profile ↗
+            </a>
+            <p className="text-sm text-gray-500 mt-1">
+              Please open the link, review the stats, and enter them manually below.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Games Played</label>
+              <input
+                type="number"
+                value={manualStats.gamesPlayed}
+                onChange={(e) =>
+                  setManualStats({ ...manualStats, gamesPlayed: e.target.value })
+                }
+                className="border px-3 py-2 rounded w-full"
+                placeholder="Enter manually"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Total Runs</label>
+              <input
+                type="number"
+                value={manualStats.totalRuns}
+                onChange={(e) =>
+                  setManualStats({ ...manualStats, totalRuns: e.target.value })
+                }
+                className="border px-3 py-2 rounded w-full"
+                placeholder="Enter manually"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Total Wickets</label>
+              <input
+                type="number"
+                value={manualStats.totalWickets}
+                onChange={(e) =>
+                  setManualStats({ ...manualStats, totalWickets: e.target.value })
+                }
+                className="border px-3 py-2 rounded w-full"
+                placeholder="Enter manually"
+              />
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSaveStats}
+            className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Save Stats
+          </button>
+
+          {derivedStats.target !== null && (
+            <div className="mt-4 space-y-1 text-sm text-gray-700">
+              <div><strong>Target:</strong> {derivedStats.target}</div>
+              <div><strong>Gap:</strong> {derivedStats.gapPercent}%</div>
+              <div><strong>Game Time:</strong> {derivedStats.gameTime}</div>
+            </div>
+          )}
+        </div>
+      )}
+      <form onSubmit={handleSubmit} className="space-y-8 mt-6">
+        {['batting', 'bowling', 'mindset', 'fitness'].map((group) => (
+          <div key={group} className="bg-white p-6 rounded-lg shadow space-y-4">
+            <h3 className="text-xl font-semibold text-blue-700 capitalize">{group} Evaluation</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block font-medium text-gray-700">
+                  {group.charAt(0).toUpperCase() + group.slice(1)} Score (1–10)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={feedback[group].score}
+                  onChange={(e) =>
+                    setFeedback({
+                      ...feedback,
+                      [group]: {
+                        ...feedback[group],
+                        score: parseInt(e.target.value) || '',
+                      },
+                    })
+                  }
+                  className="border px-3 py-2 rounded w-full"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block font-medium text-gray-700">Comments</label>
+                <textarea
+                  value={feedback[group].comments}
+                  onChange={(e) =>
+                    setFeedback({
+                      ...feedback,
+                      [group]: {
+                        ...feedback[group],
+                        comments: e.target.value,
+                      },
+                    })
+                  }
+                  className="border px-3 py-2 rounded w-full"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Object.entries(categories[group]).map(([field, value]) => (
+                <label key={field} className="block">
+                  <span className="block font-medium text-gray-700 mb-1">
+                    {field.replace(/([A-Z])/g, ' $1')}
+                  </span>
+                  <select
+                    value={value}
+                    onChange={(e) =>
+                      setCategories({
+                        ...categories,
+                        [group]: {
+                          ...categories[group],
+                          [field]: e.target.value,
+                        },
+                      })
+                    }
+                    className="border px-3 py-2 rounded w-full"
+                    required
+                  >
+                    <option value="">Select</option>
+                    {ratingOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <div className="bg-white p-6 rounded-lg shadow space-y-2">
+          <h3 className="text-xl font-semibold text-gray-700">Coach Comments</h3>
+          <textarea
+            value={coachComments}
+            onChange={(e) => setCoachComments(e.target.value)}
+            className="border px-3 py-2 rounded w-full"
+            rows={4}
+            placeholder="Add any final observations or recommendations..."
+          />
+        </div>
+
+        <div className="text-right">
+          <button
+            type="submit"
+            disabled={!coachProfile._id || !selectedPlayerId}
+            className={`px-6 py-2 rounded transition ${
+              !coachProfile._id || !selectedPlayerId
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            Submit Evaluation
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
