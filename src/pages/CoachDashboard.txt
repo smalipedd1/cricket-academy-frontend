@@ -54,7 +54,6 @@ const CoachDashboard = () => {
     localStorage.removeItem('role');
     navigate('/login', { replace: true });
   };
-
   return (
     <div className="p-6 max-w-6xl mx-auto bg-white rounded shadow space-y-6">
       <div className="flex justify-between items-center mb-6">
@@ -70,7 +69,7 @@ const CoachDashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div
           onClick={() => {
             setShowPlayers(true);
@@ -103,15 +102,6 @@ const CoachDashboard = () => {
           <div className="text-4xl mb-2">📊</div>
           <h2 className="text-xl font-semibold text-purple-700">Player Progress</h2>
           <p className="text-gray-600 mt-1 text-sm">View performance graphs and analytics</p>
-        </div>
-
-        <div
-          onClick={() => navigate('/coach/evaluation')}
-          className="bg-green-100 hover:bg-green-200 cursor-pointer p-6 rounded shadow text-center"
-        >
-          <div className="text-4xl mb-2">🧾</div>
-          <h2 className="text-xl font-semibold text-green-700">Player Evaluation</h2>
-          <p className="text-gray-600 mt-1 text-sm">Submit detailed player evaluations</p>
         </div>
       </div>
 
