@@ -120,6 +120,7 @@ const CoachEvaluationForm = () => {
 
     setDerivedStats({ target, gapPercent, gameTime });
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -150,7 +151,6 @@ const CoachEvaluationForm = () => {
       alert('Failed to submit evaluation.');
     }
   };
-
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow space-y-6">
       <div className="flex justify-between items-center">
