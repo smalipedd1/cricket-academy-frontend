@@ -67,15 +67,20 @@ const CoachEvaluationForm = () => {
       .get('https://cricket-academy-backend.onrender.com/api/coach/profile', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setCoachName(res.data.name))
-      .catch((err) => console.error('Coach profile fetch error:', err));
+      .then((res) => {
+        console.log('✅ Coach profile response:', res.data);
+        setCoachName(res.data.name);
+      })
+      .catch((err) => {
+        console.error('❌ Coach profile fetch error:', err.response?.data || err.message);
+      });
   }, []);
 
   useEffect(() => {
     if (!selectedPlayerId) return;
 
     axios
-      .get(`https://cricket-academy-backend.onrender.com/api/players/${selectedPlayerId}`, {
+      .get(`https://cricket-academy-backend.onrender.com/api/player/${selectedPlayerId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -115,6 +120,11 @@ const CoachEvaluationForm = () => {
     <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow space-y-6">
       <h2 className="text-3xl font-bold text-blue-700">Coach Evaluation Form</h2>
 
+      {/* ✅ Always-visible Coach Header */}
+      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded shadow text-sm text-gray-800">
+        <strong>Coach:</strong> {coachName || 'Loading...'}
+      </div>
+
       <button
         type="button"
         onClick={() => navigate('/coach/dashboard')}
@@ -141,8 +151,7 @@ const CoachEvaluationForm = () => {
       </label>
 
       {selectedPlayer && (
-        <div className="bg-gray-50 p-4 rounded shadow text-sm text-gray-700 space-y-1">
-          <div><strong>Coach:</strong> {coachName}</div>
+        <div className="bg-gray-100 border-l-4 border-green-400 p-4 rounded shadow text-sm text-gray-700 space-y-1">
           <div><strong>Player Name:</strong> {selectedPlayer.firstName} {selectedPlayer.lastName}</div>
           <div><strong>Category:</strong> {selectedPlayer.category}</div>
           <div><strong>Cricclubs ID:</strong> {selectedPlayer.cricclubsID}</div>
