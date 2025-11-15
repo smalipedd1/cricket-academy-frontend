@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const CoachPlayerEvaluations = () => {
@@ -9,6 +10,7 @@ const CoachPlayerEvaluations = () => {
   const [selectedEvalId, setSelectedEvalId] = useState(null);
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const token = localStorage.getItem('token');
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
@@ -52,6 +54,16 @@ const CoachPlayerEvaluations = () => {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <h2 className="text-3xl font-bold text-blue-700">Player Evaluations</h2>
+
+      {/* 🔙 Back to Dashboard */}
+      <div className="text-right">
+        <button
+          onClick={() => navigate('/coach/dashboard')}
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
+        >
+          ← Back to Dashboard
+        </button>
+      </div>
 
       {/* Player Selection */}
       <label className="block font-medium text-gray-700">
