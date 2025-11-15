@@ -123,6 +123,12 @@ const CoachEvaluationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!coachProfile._id) {
+      alert('Coach profile not loaded yet. Please wait a moment and try again.');
+      return;
+    }
+
     try {
       console.log('Submitting with coach ID:', coachProfile._id);
       await axios.post(
@@ -314,7 +320,6 @@ const CoachEvaluationForm = () => {
               </div>
             </div>
 
-
             {/* Category Ratings */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {Object.entries(categories[group]).map(([field, value]) => (
@@ -365,7 +370,12 @@ const CoachEvaluationForm = () => {
         <div className="text-right">
           <button
             type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+            disabled={!coachProfile._id || !selectedPlayerId}
+            className={`px-6 py-2 rounded transition ${
+              !coachProfile._id || !selectedPlayerId
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
           >
             Submit Evaluation
           </button>
