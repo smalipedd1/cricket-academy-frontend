@@ -77,12 +77,8 @@ const CoachEvaluationForm = () => {
       .get('https://cricket-academy-backend.onrender.com/api/coach/profile', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => {
-        setCoachName(res.data.name);
-      })
-      .catch((err) => {
-        console.error('Coach profile fetch error:', err.response?.data || err.message);
-      });
+      .then((res) => setCoachName(res.data.name))
+      .catch((err) => console.error('Coach profile fetch error:', err.response?.data || err.message));
   }, []);
 
   useEffect(() => {
@@ -96,16 +92,17 @@ const CoachEvaluationForm = () => {
       .catch((err) => console.error('Player detail fetch error:', err));
   }, [selectedPlayerId]);
 
-  const handleSaveStats = () => {
+  const derivedCategory = (() => {
     const age = selectedPlayer?.age;
-    if (!age) return;
+    if (age === undefined || age === null) return 'N/A';
+    if (age < 11) return 'U11';
+    if (age < 13) return 'U13';
+    if (age < 15) return 'U15';
+    if (age < 17) return 'U17';
+    return 'Adult';
+  })();
 
-    const category =
-      age < 11 ? 'U11' :
-      age < 13 ? 'U13' :
-      age < 15 ? 'U15' :
-      age < 17 ? 'U17' : 'Adult';
-
+  const handleSaveStats = () => {
     const categoryTargets = {
       U11: 15,
       U13: 30,
@@ -113,8 +110,7 @@ const CoachEvaluationForm = () => {
       U17: 60,
       Adult: 60,
     };
-
-    const target = categoryTargets[category];
+    const target = categoryTargets[derivedCategory] || 30;
     const played = parseInt(manualStats.gamesPlayed) || 0;
     const gapPercent = Math.round(((target - played) / target) * 100);
     const gameTime =
@@ -123,6 +119,31 @@ const CoachEvaluationForm = () => {
       'On Track';
 
     setDerivedStats({ target, gapPercent, gameTime });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(
+        'https://cricket-academy-backend.onrender.com/api/evaluations',
+        {
+          player: selectedPlayerId,
+          coach: coachName,
+          feedback,
+          categories,
+          coachComments,
+          gamesPlayed: parseInt(manualStats.gamesPlayed) || 0,
+          totalRuns: parseInt(manualStats.totalRuns) || 0,
+          totalWickets: parseInt(manualStats.totalWickets) || 0,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert('Evaluation submitted!');
+      navigate('/coach/dashboard');
+    } catch (err) {
+      console.error('Evaluation submission error:', err);
+      alert('Failed to submit evaluation.');
+    }
   };
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow space-y-6">
