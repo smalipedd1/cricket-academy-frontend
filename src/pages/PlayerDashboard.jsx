@@ -67,95 +67,6 @@ const PlayerDashboard = () => {
     window.location.href = '/';
   };
 
-  const handleContactChange = (e) => {
-    setProfile({ ...profile, emailAddress: e.target.value });
-  };
-
-  const handleContactSave = () => {
-    axios
-      .put(
-        'https://cricket-academy-backend.onrender.com/api/player/update-contact',
-        { emailAddress: profile.emailAddress },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then(() => setEditMode(false))
-      .catch((err) => console.error('Contact update error:', err));
-  };
-
-  const handleResponseSubmit = (sessionId) => {
-    axios
-      .patch(
-        `https://cricket-academy-backend.onrender.com/api/player/respond/${sessionId}`,
-        { playerResponse: responseText },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then(() => {
-        setResponseText('');
-        setSelectedSessionId(null);
-        window.location.reload();
-      })
-      .catch((err) => console.error('Response submit error:', err));
-  };
-
-  const handleEvaluationResponseSubmit = (evaluationId) => {
-    axios
-      .post(
-        `https://cricket-academy-backend.onrender.com/api/evaluations/${evaluationId}/respond`,
-        { playerResponse: evalResponseText },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then(() => {
-        setEvalResponseText('');
-        setSelectedEvalId(null);
-        window.location.reload();
-      })
-      .catch((err) => console.error('Evaluation response error:', err));
-  };
-
-  const filteredEntries = feedback.filter((e) => {
-    const date = new Date(e.sessionDate);
-    return (
-      (!startDate || date >= new Date(startDate)) &&
-      (!endDate || date <= new Date(endDate))
-    );
-  });
-
-  const validEntries = filteredEntries.filter((e) => {
-    const rating = e.rating?.[skill];
-    return rating !== undefined && rating !== null && rating > 0;
-  });
-
-  const chartData = {
-    labels: validEntries.map((e) => new Date(e.sessionDate).toLocaleDateString()),
-    datasets: [
-      {
-        label: `${skill.charAt(0).toUpperCase() + skill.slice(1)} Progress`,
-        data: validEntries.map((e) => e.rating[skill]),
-        borderColor: '#2563eb',
-        backgroundColor: 'rgba(37,99,235,0.1)',
-        tension: 0.3,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    scales: {
-      y: {
-        min: 1,
-        max: 10,
-        ticks: { stepSize: 1 },
-        title: { display: true, text: 'Rating (1–10)' },
-      },
-      x: {
-        title: { display: true, text: 'Session Date' },
-      },
-    },
-    plugins: {
-      legend: { display: true, position: 'top' },
-    },
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6 space-y-10">
       <div className="max-w-6xl mx-auto space-y-10">
@@ -177,7 +88,7 @@ const PlayerDashboard = () => {
               activeSection === 'profile' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'
             }`}
           >
-            My Profile
+            🧍 My Profile
           </button>
           <button
             onClick={() => setActiveSection('feedback')}
@@ -185,7 +96,7 @@ const PlayerDashboard = () => {
               activeSection === 'feedback' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'
             }`}
           >
-            Session Feedback
+            🧠 Session Feedback
           </button>
           <button
             onClick={() => setActiveSection('evaluations')}
@@ -193,7 +104,7 @@ const PlayerDashboard = () => {
               activeSection === 'evaluations' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'
             }`}
           >
-            Coach Evaluations
+            📋 Coach Evaluations
           </button>
         </div>
         {/* 👤 Profile Section */}
@@ -257,11 +168,89 @@ const PlayerDashboard = () => {
           </div>
         )}
         {/* 🧠 Session Feedback Section */}
-        {activeSection === 'feedback' && feedback.length > 0 && (
-          <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-2xl font-semibold text-blue-600 mb-4">Session Feedback</h2>
+        {activeSection === 'feedback' && (
+          <div className="bg-white rounded-xl shadow p-6 space-y-6">
+            <h2 className="text-2xl font-semibold text-blue-600">Session Feedback</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {/* 📊 Skill Progress Chart */}
+            {feedback.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Skill Progress Chart</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <select
+                    value={skill}
+                    onChange={(e) => setSkill(e.target.value)}
+                    className="border px-4 py-2 rounded"
+                  >
+                    <option value="batting">Batting</option>
+                    <option value="bowling">Bowling</option>
+                    <option value="wicketkeeping">Wicketkeeping</option>
+                    <option value="fielding">Fielding</option>
+                  </select>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="border px-4 py-2 rounded"
+                  />
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="border px-4 py-2 rounded"
+                  />
+                </div>
+                <Line data={{
+                  labels: feedback
+                    .filter((e) => {
+                      const date = new Date(e.sessionDate);
+                      return (
+                        (!startDate || date >= new Date(startDate)) &&
+                        (!endDate || date <= new Date(endDate)) &&
+                        e.rating?.[skill] > 0
+                      );
+                    })
+                    .map((e) => new Date(e.sessionDate).toLocaleDateString()),
+                  datasets: [
+                    {
+                      label: `${skill.charAt(0).toUpperCase() + skill.slice(1)} Progress`,
+                      data: feedback
+                        .filter((e) => {
+                          const date = new Date(e.sessionDate);
+                          return (
+                            (!startDate || date >= new Date(startDate)) &&
+                            (!endDate || date <= new Date(endDate)) &&
+                            e.rating?.[skill] > 0
+                          );
+                        })
+                        .map((e) => e.rating[skill]),
+                      borderColor: '#2563eb',
+                      backgroundColor: 'rgba(37,99,235,0.1)',
+                      tension: 0.3,
+                    },
+                  ],
+                }} options={{
+                  responsive: true,
+                  scales: {
+                    y: {
+                      min: 1,
+                      max: 10,
+                      ticks: { stepSize: 1 },
+                      title: { display: true, text: 'Rating (1–10)' },
+                    },
+                    x: {
+                      title: { display: true, text: 'Session Date' },
+                    },
+                  },
+                  plugins: {
+                    legend: { display: true, position: 'top' },
+                  },
+                }} />
+              </div>
+            )}
+
+            {/* 📅 Date Filter and Response Toggle */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
               <input
                 type="date"
                 value={feedbackStartDate}
@@ -285,6 +274,7 @@ const PlayerDashboard = () => {
               </label>
             </div>
 
+            {/* 📝 Feedback Entries */}
             {feedback
               .filter((fb) => {
                 const sessionDate = new Date(fb.sessionDate);
@@ -335,13 +325,12 @@ const PlayerDashboard = () => {
               ))}
           </div>
         )}
-
         {/* 📋 Coach Evaluations Section */}
-        {activeSection === 'evaluations' && evaluations.length > 0 && (
-          <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-2xl font-semibold text-blue-600 mb-4">Coach Evaluations</h2>
+        {activeSection === 'evaluations' && (
+          <div className="bg-white rounded-xl shadow p-6 space-y-6">
+            <h2 className="text-2xl font-semibold text-blue-600">Coach Evaluations</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <input
                 type="date"
                 value={evalStartDate}
@@ -364,7 +353,7 @@ const PlayerDashboard = () => {
                 return (!start || date >= start) && (!end || date <= end);
               })
               .map((ev) => (
-                <div key={ev._id} className="border p-4 rounded mb-4 bg-gray-50">
+                <div key={ev._id} className="border p-4 rounded bg-gray-50">
                   <h3 className="text-lg font-semibold text-blue-700">
                     Evaluation on {new Date(ev.dateOfEvaluation).toLocaleDateString()}
                   </h3>
@@ -413,41 +402,6 @@ const PlayerDashboard = () => {
                   )}
                 </div>
               ))}
-          </div>
-        )}
-        {/* 📊 Progress Chart */}
-        {validEntries.length > 0 && (
-          <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-2xl font-semibold text-blue-600 mb-4">Skill Progress Chart</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <select
-                value={skill}
-                onChange={(e) => setSkill(e.target.value)}
-                className="border px-4 py-2 rounded"
-              >
-                <option value="batting">Batting</option>
-                <option value="bowling">Bowling</option>
-                <option value="wicketkeeping">Wicketkeeping</option>
-                <option value="fielding">Fielding</option>
-              </select>
-
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="border px-4 py-2 rounded"
-              />
-
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="border px-4 py-2 rounded"
-              />
-            </div>
-
-            <Line data={chartData} options={chartOptions} />
           </div>
         )}
       </div>
