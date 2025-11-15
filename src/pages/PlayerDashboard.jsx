@@ -53,18 +53,14 @@ const PlayerDashboard = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    if (!token) return navigate('/login');
 
     axios
       .get('https://cricket-academy-backend.onrender.com/api/player/profile', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => {
-        setProfile(res.data);
-        return axios.get(`https://cricket-academy-backend.onrender.com/api/evaluations/player/${res.data._id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      })
-      .then((res) => setEvaluations(res.data));
+      .then((res) => setProfile(res.data))
+      .catch((err) => console.error('Profile fetch error:', err));
 
     axios
       .get('https://cricket-academy-backend.onrender.com/api/player/dob', {
@@ -96,6 +92,17 @@ const PlayerDashboard = () => {
       })
       .then((res) => setEntries(res.data.entries));
   }, []);
+
+  useEffect(() => {
+    if (!profile._id) return;
+    const token = localStorage.getItem('token');
+    axios
+      .get(`https://cricket-academy-backend.onrender.com/api/evaluations/player/${profile._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setEvaluations(res.data))
+      .catch((err) => console.error('Evaluation fetch error:', err));
+  }, [profile._id]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
