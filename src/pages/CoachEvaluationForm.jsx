@@ -264,52 +264,58 @@ const CoachEvaluationForm = () => {
           )}
         </div>
       )}
+
+      {/* 🔹 Grouped Feedback + Evaluation Sections */}
       <form onSubmit={handleSubmit} className="space-y-8 mt-6">
-        {/* 🔹 Feedback Scores */}
-        <div className="bg-white p-4 rounded-lg shadow space-y-4">
-          <h3 className="text-xl font-semibold text-blue-700">Feedback Scores</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {Object.entries(feedback).map(([key, value]) => (
-              <div key={key} className="bg-gray-50 p-4 rounded shadow-sm space-y-2">
+        {['batting', 'bowling', 'mindset', 'fitness'].map((group) => (
+          <div key={group} className="bg-white p-6 rounded-lg shadow space-y-4">
+            <h3 className="text-xl font-semibold text-blue-700 capitalize">{group} Evaluation</h3>
+
+            {/* Feedback Score + Comments */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
                 <label className="block font-medium text-gray-700">
-                  {key.charAt(0).toUpperCase() + key.slice(1)} Score (1–10)
+                  {group.charAt(0).toUpperCase() + group.slice(1)} Score (1–10)
                 </label>
                 <input
                   type="number"
                   min="1"
                   max="10"
-                  value={value.score}
+                  value={feedback[group].score}
                   onChange={(e) =>
                     setFeedback({
                       ...feedback,
-                      [key]: { ...value, score: parseInt(e.target.value) || '' },
+                      [group]: {
+                        ...feedback[group],
+                        score: parseInt(e.target.value) || '',
+                      },
                     })
                   }
                   className="border px-3 py-2 rounded w-full"
                   required
                 />
+              </div>
+              <div>
                 <label className="block font-medium text-gray-700">Comments</label>
                 <textarea
-                  value={value.comments}
+                  value={feedback[group].comments}
                   onChange={(e) =>
                     setFeedback({
                       ...feedback,
-                      [key]: { ...value, comments: e.target.value },
+                      [group]: {
+                        ...feedback[group],
+                        comments: e.target.value,
+                      },
                     })
                   }
                   className="border px-3 py-2 rounded w-full"
                 />
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* 🔹 Category Ratings */}
-        {Object.entries(categories).map(([group, fields]) => (
-          <div key={group} className="bg-white p-6 rounded-lg shadow space-y-4">
-            <h3 className="text-xl font-semibold text-green-700 capitalize">{group} Evaluation</h3>
+            {/* Category Ratings */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {Object.entries(fields).map(([field, value]) => (
+              {Object.entries(categories[group]).map(([field, value]) => (
                 <label key={field} className="block">
                   <span className="block font-medium text-gray-700 mb-1">
                     {field.replace(/([A-Z])/g, ' $1')}
@@ -340,7 +346,6 @@ const CoachEvaluationForm = () => {
             </div>
           </div>
         ))}
-
         {/* 🔹 Coach Comments */}
         <div className="bg-white p-6 rounded-lg shadow space-y-2">
           <h3 className="text-xl font-semibold text-gray-700">Coach Comments</h3>
