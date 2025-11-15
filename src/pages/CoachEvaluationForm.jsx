@@ -46,7 +46,7 @@ const CoachEvaluationForm = () => {
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [playerStats, setPlayerStats] = useState(null);
-  const [coachId, setCoachId] = useState('');
+  const [coachName, setCoachName] = useState('');
   const [feedback, setFeedback] = useState(initialFeedback);
   const [categories, setCategories] = useState(initialCategories);
   const [coachComments, setCoachComments] = useState('');
@@ -54,11 +54,21 @@ const CoachEvaluationForm = () => {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    axios.get('https://cricket-academy-backend.onrender.com/api/coach/players?status=Active', {
-  headers: { Authorization: `Bearer ${token}` },
-})
+    axios
+      .get('https://cricket-academy-backend.onrender.com/api/coach/players?status=Active', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => setPlayers(res.data))
       .catch((err) => console.error('Player fetch error:', err));
+  }, []);
+
+  useEffect(() => {
+    axios
+      .get('https://cricket-academy-backend.onrender.com/api/coach/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setCoachName(res.data.name))
+      .catch((err) => console.error('Coach profile fetch error:', err));
   }, []);
 
   useEffect(() => {
@@ -78,7 +88,6 @@ const CoachEvaluationForm = () => {
       .then((res) => setPlayerStats(res.data))
       .catch((err) => console.error('CricClubs fetch error:', err));
   }, [selectedPlayerId]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -86,7 +95,7 @@ const CoachEvaluationForm = () => {
         'https://cricket-academy-backend.onrender.com/api/evaluations',
         {
           player: selectedPlayerId,
-          coach: coachId,
+          coach: coachName,
           feedback,
           categories,
           coachComments,
@@ -102,8 +111,16 @@ const CoachEvaluationForm = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded shadow space-y-6">
+    <div className="max-w-5xl mx-auto p-6 bg-white rounded shadow space-y-6">
       <h2 className="text-2xl font-bold text-blue-700">Coach Evaluation Form</h2>
+
+      <button
+        type="button"
+        onClick={() => navigate('/coach/dashboard')}
+        className="text-blue-600 underline hover:text-blue-800"
+      >
+        ← Back to Dashboard
+      </button>
 
       <label>
         Select Player
@@ -124,6 +141,7 @@ const CoachEvaluationForm = () => {
 
       {selectedPlayer && playerStats && (
         <div className="bg-gray-50 p-4 rounded shadow text-sm text-gray-700 space-y-1">
+          <div><strong>Coach:</strong> {coachName}</div>
           <div><strong>Player Name:</strong> {selectedPlayer.firstName} {selectedPlayer.lastName}</div>
           <div><strong>Category:</strong> {selectedPlayer.category}</div>
           <div><strong>Cricclubs ID:</strong> {selectedPlayer.cricclubsID}</div>
@@ -170,75 +188,58 @@ const CoachEvaluationForm = () => {
         </div>
       )}
 
-<button
-  type="button"
-  onClick={() => navigate('/coach/dashboard')}
-  className="text-blue-600 underline hover:text-blue-800"
->
-  ← Back to Dashboard
-</button>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <label>
-          Coach ID
-          <input
-            type="text"
-            value={coachId}
-            onChange={(e) => setCoachId(e.target.value)}
-            className="border px-3 py-2 rounded w-full"
-            required
-          />
-        </label>
-
-        <div>
-          <h3 className="text-lg font-semibold text-gray-700">Feedback Scores</h3>
-          <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-8 mt-6">
+        {/* 🔹 Feedback Scores */}
+        <div className="bg-white p-4 rounded-lg shadow space-y-4">
+          <h3 className="text-xl font-semibold text-blue-700">Feedback Scores</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {Object.keys(feedback).map((key) => (
-              <div key={key} className="space-y-2">
-                <label>
+              <div key={key} className="bg-gray-50 p-4 rounded shadow-sm space-y-2">
+                <label className="block font-medium text-gray-700">
                   {key.charAt(0).toUpperCase() + key.slice(1)} Score (1–10)
-                  <input
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={feedback[key].score}
-                    onChange={(e) =>
-                      setFeedback({
-                        ...feedback,
-                        [key]: { ...feedback[key], score: parseInt(e.target.value) || '' },
-                      })
-                    }
-                    className="border px-3 py-2 rounded w-full"
-                    required
-                  />
                 </label>
-                <label>
-                  Comments
-                  <textarea
-                    value={feedback[key].comments}
-                    onChange={(e) =>
-                      setFeedback({
-                        ...feedback,
-                        [key]: { ...feedback[key], comments: e.target.value },
-                      })
-                    }
-                    className="border px-3 py-2 rounded w-full"
-                  />
-                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={feedback[key].score}
+                  onChange={(e) =>
+                    setFeedback({
+                      ...feedback,
+                      [key]: { ...feedback[key], score: parseInt(e.target.value) || '' },
+                    })
+                  }
+                  className="border px-3 py-2 rounded w-full"
+                  required
+                />
+                <label className="block font-medium text-gray-700">Comments</label>
+                <textarea
+                  value={feedback[key].comments}
+                  onChange={(e) =>
+                    setFeedback({
+                      ...feedback,
+                      [key]: { ...feedback[key], comments: e.target.value },
+                    })
+                  }
+                  className="border px-3 py-2 rounded w-full"
+                />
               </div>
             ))}
           </div>
         </div>
+
         {/* 🔹 Category Ratings */}
-        <div>
-          <h3 className="text-lg font-semibold text-gray-700">Category Ratings</h3>
+        <div className="bg-white p-4 rounded-lg shadow space-y-4">
+          <h3 className="text-xl font-semibold text-green-700">Category Ratings</h3>
           {Object.entries(categories).map(([group, fields]) => (
-            <div key={group} className="mb-4">
-              <h4 className="text-md font-semibold text-green-700 capitalize">{group}</h4>
-              <div className="grid grid-cols-2 gap-4">
+            <div key={group} className="mb-6">
+              <h4 className="text-md font-semibold text-gray-800 capitalize mb-2">{group}</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.keys(fields).map((field) => (
-                  <label key={field}>
-                    {field.replace(/([A-Z])/g, ' $1')}
+                  <label key={field} className="block">
+                    <span className="block font-medium text-gray-700 mb-1">
+                      {field.replace(/([A-Z])/g, ' $1')}
+                    </span>
                     <select
                       value={categories[group][field]}
                       onChange={(e) =>
@@ -268,21 +269,26 @@ const CoachEvaluationForm = () => {
         </div>
 
         {/* 🔹 Coach Comments */}
-        <label>
-          Coach Comments
+        <div className="bg-white p-4 rounded-lg shadow space-y-2">
+          <h3 className="text-xl font-semibold text-gray-700">Coach Comments</h3>
           <textarea
             value={coachComments}
             onChange={(e) => setCoachComments(e.target.value)}
             className="border px-3 py-2 rounded w-full"
+            rows={4}
+            placeholder="Add any final observations or recommendations..."
           />
-        </label>
+        </div>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Submit Evaluation
-        </button>
+        {/* 🔹 Submit Button */}
+        <div className="text-right">
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+          >
+            Submit Evaluation
+          </button>
+        </div>
       </form>
     </div>
   );
