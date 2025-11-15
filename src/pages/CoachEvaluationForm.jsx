@@ -358,6 +358,8 @@ const CoachEvaluationForm = () => {
           />
         </div>
 
+console.log('Submitting evaluation with coach ID:', coachProfile._id);
+
         {/* 🔹 Submit Button */}
         <div className="text-right">
           <button
