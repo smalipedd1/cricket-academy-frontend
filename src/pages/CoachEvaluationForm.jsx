@@ -314,6 +314,7 @@ const CoachEvaluationForm = () => {
               </div>
             </div>
 
+
             {/* Category Ratings */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {Object.entries(categories[group]).map(([field, value]) => (
