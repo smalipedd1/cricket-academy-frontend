@@ -12,7 +12,7 @@ import CoachPlayerProfile from './pages/CoachPlayerProfile';
 import PlayerSessionView from './pages/PlayerSessionView';
 import EnterDOB from './pages/EnterDOB';
 import CoachEvaluationForm from './pages/CoachEvaluationForm';
-import CoachPlayerEvaluations from './components/CoachPlayerEvaluations';
+import CoachPlayerEvaluations from './pages/CoachPlayerEvaluations';
 
 
 
