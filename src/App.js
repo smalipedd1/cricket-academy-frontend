@@ -12,6 +12,8 @@ import CoachPlayerProfile from './pages/CoachPlayerProfile';
 import PlayerSessionView from './pages/PlayerSessionView';
 import EnterDOB from './pages/EnterDOB';
 import CoachEvaluationForm from './pages/CoachEvaluationForm';
+import CoachPlayerEvaluations from './components/CoachPlayerEvaluations';
+
 
 
 
@@ -58,6 +60,8 @@ function AppRoutes() {
 	<Route path="/enter-dob" element={<EnterDOB />} />
 	<Route path="/player-dashboard" element={<PlayerDashboard />} />
 	<Route path="/coach/evaluation" element={<CoachEvaluationForm />} />
+	<Route path="/coach/evaluations/player" element={<CoachPlayerEvaluations />} />
+
     </Routes>
   );
 }
