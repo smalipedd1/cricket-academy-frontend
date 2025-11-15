@@ -54,9 +54,10 @@ const CoachEvaluationForm = () => {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    axios.get('https://cricket-academy-backend.onrender.com/api/coach/players?status=Active', {
-  headers: { Authorization: `Bearer ${token}` },
-})
+    axios
+      .get('https://cricket-academy-backend.onrender.com/api/players', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => setPlayers(res.data))
       .catch((err) => console.error('Player fetch error:', err));
   }, []);
