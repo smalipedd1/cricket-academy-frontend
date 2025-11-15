@@ -34,12 +34,6 @@ const PlayerDashboard = () => {
   const [feedbackEndDate, setFeedbackEndDate] = useState('');
   const [showUnrespondedOnly, setShowUnrespondedOnly] = useState(false);
 
-  const [evaluations, setEvaluations] = useState([]);
-  const [evalStartDate, setEvalStartDate] = useState('');
-  const [evalEndDate, setEvalEndDate] = useState('');
-  const [evalResponseText, setEvalResponseText] = useState('');
-  const [selectedEvalId, setSelectedEvalId] = useState(null);
-
   const calculateAge = (dob) => {
     const birthDate = new Date(dob);
     const today = new Date();
@@ -53,14 +47,12 @@ const PlayerDashboard = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) return navigate('/login');
 
     axios
       .get('https://cricket-academy-backend.onrender.com/api/player/profile', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setProfile(res.data))
-      .catch((err) => console.error('Profile fetch error:', err));
+      .then((res) => setProfile(res.data));
 
     axios
       .get('https://cricket-academy-backend.onrender.com/api/player/dob', {
@@ -92,17 +84,6 @@ const PlayerDashboard = () => {
       })
       .then((res) => setEntries(res.data.entries));
   }, []);
-
-  useEffect(() => {
-    if (!profile._id) return;
-    const token = localStorage.getItem('token');
-    axios
-      .get(`https://cricket-academy-backend.onrender.com/api/evaluations/player/${profile._id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setEvaluations(res.data))
-      .catch((err) => console.error('Evaluation fetch error:', err));
-  }, [profile._id]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -154,28 +135,6 @@ const PlayerDashboard = () => {
       });
   };
 
-  const handleEvaluationResponseSubmit = (evaluationId) => {
-    const token = localStorage.getItem('token');
-    axios
-      .patch(
-        `https://cricket-academy-backend.onrender.com/api/evaluations/respond/${evaluationId}`,
-        { playerResponse: evalResponseText },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then(() => {
-        alert('Response submitted!');
-        setEvalResponseText('');
-        setSelectedEvalId(null);
-        return axios.get(`https://cricket-academy-backend.onrender.com/api/evaluations/player/${profile._id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      })
-      .then((res) => setEvaluations(res.data))
-      .catch((err) => {
-        console.error('Evaluation response error:', err);
-        alert('Failed to submit response.');
-      });
-  };
   const filteredEntries = entries.filter((e) => {
     const date = new Date(e.date);
     return (
@@ -208,18 +167,28 @@ const PlayerDashboard = () => {
       y: {
         min: 1,
         max: 10,
-        ticks: { stepSize: 1 },
-        title: { display: true, text: 'Rating (1–10)' },
+        ticks: {
+          stepSize: 1,
+        },
+        title: {
+          display: true,
+          text: 'Rating (1–10)',
+        },
       },
       x: {
-        title: { display: true, text: 'Session Date' },
+        title: {
+          display: true,
+          text: 'Session Date',
+        },
       },
     },
     plugins: {
-      legend: { display: true, position: 'top' },
+      legend: {
+        display: true,
+        position: 'top',
+      },
     },
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6 space-y-10">
       <div className="max-w-6xl mx-auto space-y-10">
@@ -349,86 +318,6 @@ const PlayerDashboard = () => {
                       />
                       <button
                         onClick={() => handleResponseSubmit(fb.sessionId)}
-                        className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                      >
-                        Submit Response
-                      </button>
-                    </>
-                  )}
-                </div>
-              ))}
-          </div>
-        )}
-
-        {/* 📋 Coach Evaluations Section */}
-        {evaluations.length > 0 && (
-          <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-2xl font-semibold text-blue-600 mb-4">Coach Evaluations</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <input
-                type="date"
-                value={evalStartDate}
-                onChange={(e) => setEvalStartDate(e.target.value)}
-                className="border px-4 py-2 rounded"
-              />
-              <input
-                type="date"
-                value={evalEndDate}
-                onChange={(e) => setEvalEndDate(e.target.value)}
-                className="border px-4 py-2 rounded"
-              />
-            </div>
-
-            {evaluations
-              .filter((ev) => {
-                const date = new Date(ev.dateOfEvaluation);
-                const start = evalStartDate ? new Date(evalStartDate) : null;
-                const end = evalEndDate ? new Date(evalEndDate) : null;
-                return (!start || date >= start) && (!end || date <= end);
-              })
-              .map((ev) => (
-                <div key={ev._id} className="border p-4 rounded mb-4 bg-gray-50">
-                  <h3 className="text-lg font-semibold text-blue-700">
-                    Evaluation on {new Date(ev.dateOfEvaluation).toLocaleDateString()}
-                  </h3>
-                  <p><strong>Coach:</strong> {ev.coachName || '—'}</p>
-                  <p><strong>Coach Comments:</strong> {ev.coachComments || '—'}</p>
-                  <p><strong>Games Played:</strong> {ev.gamesPlayed}</p>
-                  <p><strong>Total Runs:</strong> {ev.totalRuns}</p>
-                  <p><strong>Total Wickets:</strong> {ev.totalWickets}</p>
-
-                  {['batting', 'bowling', 'mindset', 'fitness'].map((group) => (
-                    <div key={group} className="mt-4">
-                      <h4 className="text-md font-semibold text-gray-700 capitalize">{group}</h4>
-                      <p><strong>Score:</strong> {ev.feedback?.[group]?.score}</p>
-                      <p><strong>Comments:</strong> {ev.feedback?.[group]?.comments}</p>
-                      <div className="grid grid-cols-2 gap-2 text-sm text-gray-700 mt-2">
-                        {ev.categories?.[group] &&
-                          Object.entries(ev.categories[group]).map(([field, value]) => (
-                            <div key={field}>
-                              <strong>{field.replace(/([A-Z])/g, ' $1')}:</strong> {value}
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  ))}
-
-                  <p className="mt-4"><strong>Your Response:</strong> {ev.playerResponse || 'No response yet'}</p>
-
-                  {!ev.playerResponse && (
-                    <>
-                      <textarea
-                        placeholder="Write your response to the coach..."
-                        value={selectedEvalId === ev._id ? evalResponseText : ''}
-                        onChange={(e) => {
-                          setSelectedEvalId(ev._id);
-                          setEvalResponseText(e.target.value);
-                        }}
-                        className="border w-full p-2 mt-2 rounded"
-                      />
-                      <button
-                        onClick={() => handleEvaluationResponseSubmit(ev._id)}
                         className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                       >
                         Submit Response
