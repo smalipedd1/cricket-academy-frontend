@@ -53,13 +53,11 @@ const CoachPlayerEvaluations = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <h2 className="text-3xl font-bold text-blue-700">Player Evaluations</h2>
-
-      {/* 🔙 Back to Dashboard */}
-      <div className="text-right">
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold text-blue-700">Player Evaluations</h2>
         <button
           onClick={() => navigate('/coach/dashboard')}
-          className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
+          className="bg-gray-100 text-gray-800 px-4 py-2 rounded hover:bg-gray-200 border border-gray-300"
         >
           ← Back to Dashboard
         </button>
