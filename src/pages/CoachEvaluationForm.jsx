@@ -116,6 +116,16 @@ const CoachEvaluationForm = () => {
     }
   };
 
+const derivedCategory = (() => {
+  const age = selectedPlayer?.age;
+  if (age === undefined || age === null) return 'N/A';
+  if (age < 11) return 'U11';
+  if (age < 13) return 'U13';
+  if (age < 15) return 'U15';
+  if (age < 17) return 'U17';
+  return 'Adult';
+})();
+
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow space-y-6">
       <h2 className="text-3xl font-bold text-blue-700">Coach Evaluation Form</h2>
@@ -153,7 +163,7 @@ const CoachEvaluationForm = () => {
       {selectedPlayer && (
         <div className="bg-gray-100 border-l-4 border-green-400 p-4 rounded shadow text-sm text-gray-700 space-y-1">
           <div><strong>Player Name:</strong> {selectedPlayer.firstName} {selectedPlayer.lastName}</div>
-          <div><strong>Category:</strong> {selectedPlayer.category}</div>
+          <div><strong>Category:</strong> {derivedCategory}</div>
           <div><strong>Cricclubs ID:</strong> {selectedPlayer.cricclubsID}</div>
           <div><strong>Player Profile:</strong> {selectedPlayer.role}</div>
           <div>
