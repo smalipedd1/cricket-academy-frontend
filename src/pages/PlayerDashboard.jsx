@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import NotificationBell from './NotificationBell';
-import { calculateAge } from '../utils/ageUtils';
 
 const PlayerDashboard = () => {
   const [profile, setProfile] = useState({});
@@ -207,7 +206,18 @@ const PlayerDashboard = () => {
               {dob && (
                 <>
                   <p><strong>Date of Birth:</strong> {new Date(dob).toLocaleDateString()}</p>
-                  <p><strong>Age:</strong> {calculateAge(dob)}</p>
+                  <p><strong>Age:</strong> {
+                    (() => {
+                      const birthDate = new Date(dob);
+                      const today = new Date();
+                      let age = today.getFullYear() - birthDate.getFullYear();
+                      const m = today.getMonth() - birthDate.getMonth();
+                      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                      }
+                      return age;
+                    })()
+                  }</p>
                 </>
               )}
               <p><strong>Role:</strong> {profile.role}</p>
@@ -246,7 +256,6 @@ const PlayerDashboard = () => {
             </div>
           </div>
         )}
-
         {/* 🧠 Session Feedback Section */}
         {activeSection === 'feedback' && feedback.length > 0 && (
           <div className="bg-white rounded-xl shadow p-6">
@@ -326,6 +335,7 @@ const PlayerDashboard = () => {
               ))}
           </div>
         )}
+
         {/* 📋 Coach Evaluations Section */}
         {activeSection === 'evaluations' && evaluations.length > 0 && (
           <div className="bg-white rounded-xl shadow p-6">
@@ -405,7 +415,6 @@ const PlayerDashboard = () => {
               ))}
           </div>
         )}
-
         {/* 📊 Progress Chart */}
         {validEntries.length > 0 && (
           <div className="bg-white rounded-xl shadow p-6">
