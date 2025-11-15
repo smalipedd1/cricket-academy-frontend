@@ -88,6 +88,7 @@ const CoachEvaluationForm = () => {
       .then((res) => setPlayerStats(res.data))
       .catch((err) => console.error('CricClubs fetch error:', err));
   }, [selectedPlayerId]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -111,8 +112,8 @@ const CoachEvaluationForm = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white rounded shadow space-y-6">
-      <h2 className="text-2xl font-bold text-blue-700">Coach Evaluation Form</h2>
+    <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow space-y-6">
+      <h2 className="text-3xl font-bold text-blue-700">Coach Evaluation Form</h2>
 
       <button
         type="button"
@@ -122,12 +123,12 @@ const CoachEvaluationForm = () => {
         ← Back to Dashboard
       </button>
 
-      <label>
+      <label className="block font-medium text-gray-700 mt-4">
         Select Player
         <select
           value={selectedPlayerId}
           onChange={(e) => setSelectedPlayerId(e.target.value)}
-          className="border px-3 py-2 rounded w-full"
+          className="border px-3 py-2 rounded w-full mt-1"
           required
         >
           <option value="">Choose a player</option>
@@ -139,61 +140,67 @@ const CoachEvaluationForm = () => {
         </select>
       </label>
 
-      {selectedPlayer && playerStats && (
+      {selectedPlayer && (
         <div className="bg-gray-50 p-4 rounded shadow text-sm text-gray-700 space-y-1">
           <div><strong>Coach:</strong> {coachName}</div>
           <div><strong>Player Name:</strong> {selectedPlayer.firstName} {selectedPlayer.lastName}</div>
           <div><strong>Category:</strong> {selectedPlayer.category}</div>
           <div><strong>Cricclubs ID:</strong> {selectedPlayer.cricclubsID}</div>
           <div><strong>Player Profile:</strong> {selectedPlayer.role}</div>
-          <div><strong>Total Games Played:</strong> {playerStats.gamesPlayed}</div>
-          {(() => {
-            const categoryTargets = {
-              U11: 15,
-              U13: 30,
-              U15: 45,
-              U17: 60,
-              Adult: 60,
-            };
-            const targetGames = categoryTargets[selectedPlayer.category] || 30;
-            const gamesPlayed = playerStats.gamesPlayed || 0;
-            const gapPercent = Math.round(((targetGames - gamesPlayed) / targetGames) * 100);
-            const gameTime =
-              gapPercent >= 80 ? 'Major Gap' :
-              gapPercent >= 50 ? 'Need Some More' :
-              'On Track';
-
-            return (
-              <>
-                <div><strong>Target:</strong> {targetGames}</div>
-                <div><strong>Gap:</strong> {gapPercent}%</div>
-                <div><strong>Game Time:</strong> {gameTime}</div>
-              </>
-            );
-          })()}
           <div><strong>Years in Academy:</strong> {selectedPlayer.yearsInAcademy}</div>
           <div><strong>Age:</strong> {selectedPlayer.age}</div>
-          <div><strong>Total Runs:</strong> {playerStats.totalRuns}</div>
-          <div><strong>Total Wickets:</strong> {playerStats.totalWickets}</div>
-          <div>
-            <a
-              href={`https://cricclubs.com/PremierCricAcad/viewPlayer.do?playerId=${selectedPlayer.cricclubsID}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 underline"
-            >
-              View CricClubs Profile
-            </a>
-          </div>
+
+          {playerStats ? (
+            <>
+              <div><strong>Total Games Played:</strong> {playerStats.gamesPlayed}</div>
+              <div><strong>Total Runs:</strong> {playerStats.totalRuns}</div>
+              <div><strong>Total Wickets:</strong> {playerStats.totalWickets}</div>
+              {(() => {
+                const categoryTargets = {
+                  U11: 15,
+                  U13: 30,
+                  U15: 45,
+                  U17: 60,
+                  Adult: 60,
+                };
+                const targetGames = categoryTargets[selectedPlayer.category] || 30;
+                const gamesPlayed = playerStats.gamesPlayed || 0;
+                const gapPercent = Math.round(((targetGames - gamesPlayed) / targetGames) * 100);
+                const gameTime =
+                  gapPercent >= 80 ? 'Major Gap' :
+                  gapPercent >= 50 ? 'Need Some More' :
+                  'On Track';
+
+                return (
+                  <>
+                    <div><strong>Target:</strong> {targetGames}</div>
+                    <div><strong>Gap:</strong> {gapPercent}%</div>
+                    <div><strong>Game Time:</strong> {gameTime}</div>
+                  </>
+                );
+              })()}
+              <div>
+                <a
+                  href={`https://cricclubs.com/PremierCricAcad/viewPlayer.do?playerId=${selectedPlayer.cricclubsID}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  View CricClubs Profile
+                </a>
+              </div>
+            </>
+          ) : (
+            <p className="text-gray-500 italic">Loading CricClubs stats...</p>
+          )}
         </div>
       )}
-
       <form onSubmit={handleSubmit} className="space-y-8 mt-6">
         {/* 🔹 Feedback Scores */}
         <div className="bg-white p-4 rounded-lg shadow space-y-4">
           <h3 className="text-xl font-semibold text-blue-700">Feedback Scores</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {Object.keys(feedback).map((key) => (
+            {Object.entries(feedback).map(([key, value]) => (
               <div key={key} className="bg-gray-50 p-4 rounded shadow-sm space-y-2">
                 <label className="block font-medium text-gray-700">
                   {key.charAt(0).toUpperCase() + key.slice(1)} Score (1–10)
@@ -202,11 +209,11 @@ const CoachEvaluationForm = () => {
                   type="number"
                   min="1"
                   max="10"
-                  value={feedback[key].score}
+                  value={value.score}
                   onChange={(e) =>
                     setFeedback({
                       ...feedback,
-                      [key]: { ...feedback[key], score: parseInt(e.target.value) || '' },
+                      [key]: { ...value, score: parseInt(e.target.value) || '' },
                     })
                   }
                   className="border px-3 py-2 rounded w-full"
@@ -214,11 +221,11 @@ const CoachEvaluationForm = () => {
                 />
                 <label className="block font-medium text-gray-700">Comments</label>
                 <textarea
-                  value={feedback[key].comments}
+                  value={value.comments}
                   onChange={(e) =>
                     setFeedback({
                       ...feedback,
-                      [key]: { ...feedback[key], comments: e.target.value },
+                      [key]: { ...value, comments: e.target.value },
                     })
                   }
                   className="border px-3 py-2 rounded w-full"
@@ -229,47 +236,44 @@ const CoachEvaluationForm = () => {
         </div>
 
         {/* 🔹 Category Ratings */}
-        <div className="bg-white p-4 rounded-lg shadow space-y-4">
-          <h3 className="text-xl font-semibold text-green-700">Category Ratings</h3>
-          {Object.entries(categories).map(([group, fields]) => (
-            <div key={group} className="mb-6">
-              <h4 className="text-md font-semibold text-gray-800 capitalize mb-2">{group}</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.keys(fields).map((field) => (
-                  <label key={field} className="block">
-                    <span className="block font-medium text-gray-700 mb-1">
-                      {field.replace(/([A-Z])/g, ' $1')}
-                    </span>
-                    <select
-                      value={categories[group][field]}
-                      onChange={(e) =>
-                        setCategories({
-                          ...categories,
-                          [group]: {
-                            ...categories[group],
-                            [field]: e.target.value,
-                          },
-                        })
-                      }
-                      className="border px-3 py-2 rounded w-full"
-                      required
-                    >
-                      <option value="">Select</option>
-                      {ratingOptions.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                ))}
-              </div>
+        {Object.entries(categories).map(([group, fields]) => (
+          <div key={group} className="bg-white p-6 rounded-lg shadow space-y-4">
+            <h3 className="text-xl font-semibold text-green-700 capitalize">{group} Evaluation</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Object.entries(fields).map(([field, value]) => (
+                <label key={field} className="block">
+                  <span className="block font-medium text-gray-700 mb-1">
+                    {field.replace(/([A-Z])/g, ' $1')}
+                  </span>
+                  <select
+                    value={value}
+                    onChange={(e) =>
+                      setCategories({
+                        ...categories,
+                        [group]: {
+                          ...categories[group],
+                          [field]: e.target.value,
+                        },
+                      })
+                    }
+                    className="border px-3 py-2 rounded w-full"
+                    required
+                  >
+                    <option value="">Select</option>
+                    {ratingOptions.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
 
         {/* 🔹 Coach Comments */}
-        <div className="bg-white p-4 rounded-lg shadow space-y-2">
+        <div className="bg-white p-6 rounded-lg shadow space-y-2">
           <h3 className="text-xl font-semibold text-gray-700">Coach Comments</h3>
           <textarea
             value={coachComments}
