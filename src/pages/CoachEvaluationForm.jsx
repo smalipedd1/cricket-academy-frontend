@@ -162,7 +162,109 @@ const CoachEvaluationForm = () => {
         ← Back to Dashboard
       </button>
 
-      {/* Player selection, manual stats, derived metrics — already included in Part 1 */}
+      <label className="block font-medium text-gray-700 mt-4">
+        Select Player
+        <select
+          value={selectedPlayerId}
+          onChange={(e) => setSelectedPlayerId(e.target.value)}
+          className="border px-3 py-2 rounded w-full mt-1"
+          required
+        >
+          <option value="">Choose a player</option>
+          {players.map((p) => (
+            <option key={p._id} value={p._id}>
+              {p.firstName} {p.lastName}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      {selectedPlayer && (
+        <div className="bg-gray-100 border-l-4 border-green-400 p-4 rounded shadow text-sm text-gray-700 space-y-1">
+          <div><strong>Player Name:</strong> {selectedPlayer.firstName} {selectedPlayer.lastName}</div>
+          <div><strong>Category:</strong> {derivedCategory}</div>
+          <div><strong>CricClubs ID:</strong> {selectedPlayer.cricclubsID}</div>
+          <div><strong>Player Profile:</strong> {selectedPlayer.role}</div>
+          <div>
+            <strong>Competitive Years:</strong>{' '}
+            {selectedPlayer.competitiveStartYear
+              ? new Date().getFullYear() - selectedPlayer.competitiveStartYear
+              : 'N/A'}
+          </div>
+          <div><strong>Age:</strong> {selectedPlayer.age}</div>
+          <div>
+            <a
+              href={`https://cricclubs.com/PremierCricAcad/viewPlayer.do?playerId=${selectedPlayer.cricclubsID}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              View CricClubs Profile ↗
+            </a>
+            <p className="text-sm text-gray-500 mt-1">
+              Please open the link, review the stats, and enter them manually below.
+            </p>
+          </div>
+
+          {/* 🔹 Manual Stat Entry */}
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Games Played</label>
+              <input
+                type="number"
+                value={manualStats.gamesPlayed}
+                onChange={(e) =>
+                  setManualStats({ ...manualStats, gamesPlayed: e.target.value })
+                }
+                className="border px-3 py-2 rounded w-full"
+                placeholder="Enter manually"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Total Runs</label>
+              <input
+                type="number"
+                value={manualStats.totalRuns}
+                onChange={(e) =>
+                  setManualStats({ ...manualStats, totalRuns: e.target.value })
+                }
+                className="border px-3 py-2 rounded w-full"
+                placeholder="Enter manually"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Total Wickets</label>
+              <input
+                type="number"
+                value={manualStats.totalWickets}
+                onChange={(e) =>
+                  setManualStats({ ...manualStats, totalWickets: e.target.value })
+                }
+                className="border px-3 py-2 rounded w-full"
+                placeholder="Enter manually"
+              />
+            </div>
+          </div>
+
+          {/* 🔹 Save Stats Button */}
+          <button
+            type="button"
+            onClick={handleSaveStats}
+            className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Save Stats
+          </button>
+
+          {/* 🔹 Derived Output */}
+          {derivedStats.target !== null && (
+            <div className="mt-4 space-y-1 text-sm text-gray-700">
+              <div><strong>Target:</strong> {derivedStats.target}</div>
+              <div><strong>Gap:</strong> {derivedStats.gapPercent}%</div>
+              <div><strong>Game Time:</strong> {derivedStats.gameTime}</div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 🔹 Grouped Feedback + Evaluation Sections */}
       <form onSubmit={handleSubmit} className="space-y-8 mt-6">
