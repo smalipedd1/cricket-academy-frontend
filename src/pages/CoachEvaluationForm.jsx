@@ -45,7 +45,7 @@ const CoachEvaluationForm = () => {
   const [players, setPlayers] = useState([]);
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [coachName, setCoachName] = useState('');
+  const [coachProfile, setCoachProfile] = useState({ name: '', _id: '' });
   const [feedback, setFeedback] = useState(initialFeedback);
   const [categories, setCategories] = useState(initialCategories);
   const [coachComments, setCoachComments] = useState('');
@@ -77,7 +77,7 @@ const CoachEvaluationForm = () => {
       .get('https://cricket-academy-backend.onrender.com/api/coach/profile', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setCoachName(res.data.name))
+      .then((res) => setCoachProfile(res.data))
       .catch((err) => console.error('Coach profile fetch error:', err.response?.data || err.message));
   }, []);
 
@@ -128,7 +128,7 @@ const CoachEvaluationForm = () => {
         'https://cricket-academy-backend.onrender.com/api/evaluations',
         {
           player: selectedPlayerId,
-          coach: coachName,
+          coach: coachProfile._id,
           feedback,
           categories,
           coachComments,
@@ -150,7 +150,7 @@ const CoachEvaluationForm = () => {
       <h2 className="text-3xl font-bold text-blue-700">Coach Evaluation Form</h2>
 
       <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded shadow text-sm text-gray-800">
-        <strong>Coach:</strong> {coachName || 'Loading...'}
+        <strong>Coach:</strong> {coachProfile.name || 'Loading...'}
       </div>
 
       <button

@@ -40,15 +40,26 @@ const initialCategories = {
     endurance: '',
   },
 };
+
 const CoachEvaluationForm = () => {
   const [players, setPlayers] = useState([]);
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [playerStats, setPlayerStats] = useState(null);
-  const [coachName, setCoachName] = useState('');
+  const [coachProfile, setCoachProfile] = useState({ name: '', _id: '' });
   const [feedback, setFeedback] = useState(initialFeedback);
   const [categories, setCategories] = useState(initialCategories);
   const [coachComments, setCoachComments] = useState('');
+  const [manualStats, setManualStats] = useState({
+    gamesPlayed: '',
+    totalRuns: '',
+    totalWickets: '',
+  });
+  const [derivedStats, setDerivedStats] = useState({
+    target: null,
+    gapPercent: null,
+    gameTime: '',
+  });
+
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
@@ -66,14 +77,10 @@ const CoachEvaluationForm = () => {
       .get('https://cricket-academy-backend.onrender.com/api/coach/profile', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => {
-        console.log('✅ Coach profile response:', res.data);
-        setCoachName(res.data.name);
-      })
-      .catch((err) => {
-        console.error('❌ Coach profile fetch error:', err.response?.data || err.message);
-      });
+      .then((res) => setCoachName(res.data.name))
+      .catch((err) => console.error('Coach profile fetch error:', err.response?.data || err.message));
   }, []);
+
   useEffect(() => {
     if (!selectedPlayerId) return;
 
@@ -81,16 +88,38 @@ const CoachEvaluationForm = () => {
       .get(`https://cricket-academy-backend.onrender.com/api/player/${selectedPlayerId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => {
-        setSelectedPlayer(res.data);
-        return axios.get(
-          `https://cricket-academy-backend.onrender.com/api/cricclubs/${res.data.cricclubsID}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      })
-      .then((res) => setPlayerStats(res.data))
-      .catch((err) => console.error('CricClubs fetch error:', err));
+      .then((res) => setSelectedPlayer(res.data))
+      .catch((err) => console.error('Player detail fetch error:', err));
   }, [selectedPlayerId]);
+
+  const derivedCategory = (() => {
+    const age = selectedPlayer?.age;
+    if (age === undefined || age === null) return 'N/A';
+    if (age < 11) return 'U11';
+    if (age < 13) return 'U13';
+    if (age < 15) return 'U15';
+    if (age < 17) return 'U17';
+    return 'Adult';
+  })();
+
+  const handleSaveStats = () => {
+    const categoryTargets = {
+      U11: 15,
+      U13: 30,
+      U15: 45,
+      U17: 60,
+      Adult: 60,
+    };
+    const target = categoryTargets[derivedCategory] || 30;
+    const played = parseInt(manualStats.gamesPlayed) || 0;
+    const gapPercent = Math.round(((target - played) / target) * 100);
+    const gameTime =
+      gapPercent >= 80 ? 'Major Gap' :
+      gapPercent >= 50 ? 'Need Some More' :
+      'On Track';
+
+    setDerivedStats({ target, gapPercent, gameTime });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,6 +132,9 @@ const CoachEvaluationForm = () => {
           feedback,
           categories,
           coachComments,
+          gamesPlayed: parseInt(manualStats.gamesPlayed) || 0,
+          totalRuns: parseInt(manualStats.totalRuns) || 0,
+          totalWickets: parseInt(manualStats.totalWickets) || 0,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -113,16 +145,6 @@ const CoachEvaluationForm = () => {
       alert('Failed to submit evaluation.');
     }
   };
-
-  const derivedCategory = (() => {
-    const age = selectedPlayer?.age;
-    if (age === undefined || age === null) return 'N/A';
-    if (age < 11) return 'U11';
-    if (age < 13) return 'U13';
-    if (age < 15) return 'U15';
-    if (age < 17) return 'U17';
-    return 'Adult';
-  })();
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow space-y-6">
       <h2 className="text-3xl font-bold text-blue-700">Coach Evaluation Form</h2>
@@ -160,7 +182,7 @@ const CoachEvaluationForm = () => {
         <div className="bg-gray-100 border-l-4 border-green-400 p-4 rounded shadow text-sm text-gray-700 space-y-1">
           <div><strong>Player Name:</strong> {selectedPlayer.firstName} {selectedPlayer.lastName}</div>
           <div><strong>Category:</strong> {derivedCategory}</div>
-          <div><strong>Cricclubs ID:</strong> {selectedPlayer.cricclubsID}</div>
+          <div><strong>CricClubs ID:</strong> {selectedPlayer.cricclubsID}</div>
           <div><strong>Player Profile:</strong> {selectedPlayer.role}</div>
           <div>
             <strong>Competitive Years:</strong>{' '}
@@ -169,98 +191,131 @@ const CoachEvaluationForm = () => {
               : 'N/A'}
           </div>
           <div><strong>Age:</strong> {selectedPlayer.age}</div>
+          <div>
+            <a
+              href={`https://cricclubs.com/PremierCricAcad/viewPlayer.do?playerId=${selectedPlayer.cricclubsID}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              View CricClubs Profile ↗
+            </a>
+            <p className="text-sm text-gray-500 mt-1">
+              Please open the link, review the stats, and enter them manually below.
+            </p>
+          </div>
 
-          {playerStats && typeof playerStats.gamesPlayed === 'number' ? (
-            <>
-              <div><strong>Total Games Played:</strong> {playerStats.gamesPlayed}</div>
-              <div><strong>Total Runs:</strong> {playerStats.totalRuns}</div>
-              <div><strong>Total Wickets:</strong> {playerStats.totalWickets}</div>
-              {(() => {
-                const categoryTargets = {
-                  U11: 15,
-                  U13: 30,
-                  U15: 45,
-                  U17: 60,
-                  Adult: 60,
-                };
-                const targetGames = categoryTargets[derivedCategory] || 30;
-                const gamesPlayed = playerStats.gamesPlayed || 0;
-                const gapPercent = Math.round(((targetGames - gamesPlayed) / targetGames) * 100);
-                const gameTime =
-                  gapPercent >= 80 ? 'Major Gap' :
-                  gapPercent >= 50 ? 'Need Some More' :
-                  'On Track';
+          {/* 🔹 Manual Stat Entry */}
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Games Played</label>
+              <input
+                type="number"
+                value={manualStats.gamesPlayed}
+                onChange={(e) =>
+                  setManualStats({ ...manualStats, gamesPlayed: e.target.value })
+                }
+                className="border px-3 py-2 rounded w-full"
+                placeholder="Enter manually"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Total Runs</label>
+              <input
+                type="number"
+                value={manualStats.totalRuns}
+                onChange={(e) =>
+                  setManualStats({ ...manualStats, totalRuns: e.target.value })
+                }
+                className="border px-3 py-2 rounded w-full"
+                placeholder="Enter manually"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Total Wickets</label>
+              <input
+                type="number"
+                value={manualStats.totalWickets}
+                onChange={(e) =>
+                  setManualStats({ ...manualStats, totalWickets: e.target.value })
+                }
+                className="border px-3 py-2 rounded w-full"
+                placeholder="Enter manually"
+              />
+            </div>
+          </div>
 
-                return (
-                  <>
-                    <div><strong>Target:</strong> {targetGames}</div>
-                    <div><strong>Gap:</strong> {gapPercent}%</div>
-                    <div><strong>Game Time:</strong> {gameTime}</div>
-                  </>
-                );
-              })()}
-              <div>
-                <a
-                  href={`https://cricclubs.com/PremierCricAcad/viewPlayer.do?playerId=${selectedPlayer.cricclubsID}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline"
-                >
-                  View CricClubs Profile
-                </a>
-              </div>
-            </>
-          ) : (
-            <p className="text-gray-500 italic">Loading CricClubs stats...</p>
+          {/* 🔹 Save Stats Button */}
+          <button
+            type="button"
+            onClick={handleSaveStats}
+            className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Save Stats
+          </button>
+
+          {/* 🔹 Derived Output */}
+          {derivedStats.target !== null && (
+            <div className="mt-4 space-y-1 text-sm text-gray-700">
+              <div><strong>Target:</strong> {derivedStats.target}</div>
+              <div><strong>Gap:</strong> {derivedStats.gapPercent}%</div>
+              <div><strong>Game Time:</strong> {derivedStats.gameTime}</div>
+            </div>
           )}
         </div>
       )}
+
+      {/* 🔹 Grouped Feedback + Evaluation Sections */}
       <form onSubmit={handleSubmit} className="space-y-8 mt-6">
-        {/* 🔹 Feedback Scores */}
-        <div className="bg-white p-4 rounded-lg shadow space-y-4">
-          <h3 className="text-xl font-semibold text-blue-700">Feedback Scores</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {Object.entries(feedback).map(([key, value]) => (
-              <div key={key} className="bg-gray-50 p-4 rounded shadow-sm space-y-2">
+        {['batting', 'bowling', 'mindset', 'fitness'].map((group) => (
+          <div key={group} className="bg-white p-6 rounded-lg shadow space-y-4">
+            <h3 className="text-xl font-semibold text-blue-700 capitalize">{group} Evaluation</h3>
+
+            {/* Feedback Score + Comments */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
                 <label className="block font-medium text-gray-700">
-                  {key.charAt(0).toUpperCase() + key.slice(1)} Score (1–10)
+                  {group.charAt(0).toUpperCase() + group.slice(1)} Score (1–10)
                 </label>
                 <input
                   type="number"
                   min="1"
                   max="10"
-                  value={value.score}
+                  value={feedback[group].score}
                   onChange={(e) =>
                     setFeedback({
                       ...feedback,
-                      [key]: { ...value, score: parseInt(e.target.value) || '' },
+                      [group]: {
+                        ...feedback[group],
+                        score: parseInt(e.target.value) || '',
+                      },
                     })
                   }
                   className="border px-3 py-2 rounded w-full"
                   required
                 />
+              </div>
+              <div>
                 <label className="block font-medium text-gray-700">Comments</label>
                 <textarea
-                  value={value.comments}
+                  value={feedback[group].comments}
                   onChange={(e) =>
                     setFeedback({
                       ...feedback,
-                      [key]: { ...value, comments: e.target.value },
+                      [group]: {
+                        ...feedback[group],
+                        comments: e.target.value,
+                      },
                     })
                   }
                   className="border px-3 py-2 rounded w-full"
                 />
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* 🔹 Category Ratings */}
-        {Object.entries(categories).map(([group, fields]) => (
-          <div key={group} className="bg-white p-6 rounded-lg shadow space-y-4">
-            <h3 className="text-xl font-semibold text-green-700 capitalize">{group} Evaluation</h3>
+            {/* Category Ratings */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {Object.entries(fields).map(([field, value]) => (
+              {Object.entries(categories[group]).map(([field, value]) => (
                 <label key={field} className="block">
                   <span className="block font-medium text-gray-700 mb-1">
                     {field.replace(/([A-Z])/g, ' $1')}
@@ -291,7 +346,6 @@ const CoachEvaluationForm = () => {
             </div>
           </div>
         ))}
-
         {/* 🔹 Coach Comments */}
         <div className="bg-white p-6 rounded-lg shadow space-y-2">
           <h3 className="text-xl font-semibold text-gray-700">Coach Comments</h3>
