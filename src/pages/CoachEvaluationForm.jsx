@@ -54,6 +54,11 @@ const CoachEvaluationForm = () => {
     totalRuns: '',
     totalWickets: '',
   });
+  const [derivedStats, setDerivedStats] = useState({
+    target: null,
+    gapPercent: null,
+    gameTime: '',
+  });
 
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -73,11 +78,10 @@ const CoachEvaluationForm = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        console.log('✅ Coach profile response:', res.data);
         setCoachName(res.data.name);
       })
       .catch((err) => {
-        console.error('❌ Coach profile fetch error:', err.response?.data || err.message);
+        console.error('Coach profile fetch error:', err.response?.data || err.message);
       });
   }, []);
 
@@ -91,41 +95,35 @@ const CoachEvaluationForm = () => {
       .then((res) => setSelectedPlayer(res.data))
       .catch((err) => console.error('Player detail fetch error:', err));
   }, [selectedPlayerId]);
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post(
-        'https://cricket-academy-backend.onrender.com/api/evaluations',
-        {
-          player: selectedPlayerId,
-          coach: coachName,
-          feedback,
-          categories,
-          coachComments,
-          gamesPlayed: parseInt(manualStats.gamesPlayed) || 0,
-          totalRuns: parseInt(manualStats.totalRuns) || 0,
-          totalWickets: parseInt(manualStats.totalWickets) || 0,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      alert('Evaluation submitted!');
-      navigate('/coach/dashboard');
-    } catch (err) {
-      console.error('Evaluation submission error:', err);
-      alert('Failed to submit evaluation.');
-    }
-  };
 
-  const derivedCategory = (() => {
+  const handleSaveStats = () => {
     const age = selectedPlayer?.age;
-    if (age === undefined || age === null) return 'N/A';
-    if (age < 11) return 'U11';
-    if (age < 13) return 'U13';
-    if (age < 15) return 'U15';
-    if (age < 17) return 'U17';
-    return 'Adult';
-  })();
+    if (!age) return;
 
+    const category =
+      age < 11 ? 'U11' :
+      age < 13 ? 'U13' :
+      age < 15 ? 'U15' :
+      age < 17 ? 'U17' : 'Adult';
+
+    const categoryTargets = {
+      U11: 15,
+      U13: 30,
+      U15: 45,
+      U17: 60,
+      Adult: 60,
+    };
+
+    const target = categoryTargets[category];
+    const played = parseInt(manualStats.gamesPlayed) || 0;
+    const gapPercent = Math.round(((target - played) / target) * 100);
+    const gameTime =
+      gapPercent >= 80 ? 'Major Gap' :
+      gapPercent >= 50 ? 'Need Some More' :
+      'On Track';
+
+    setDerivedStats({ target, gapPercent, gameTime });
+  };
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow space-y-6">
       <h2 className="text-3xl font-bold text-blue-700">Coach Evaluation Form</h2>
@@ -158,6 +156,7 @@ const CoachEvaluationForm = () => {
           ))}
         </select>
       </label>
+
       {selectedPlayer && (
         <div className="bg-gray-100 border-l-4 border-green-400 p-4 rounded shadow text-sm text-gray-700 space-y-1">
           <div><strong>Player Name:</strong> {selectedPlayer.firstName} {selectedPlayer.lastName}</div>
@@ -184,6 +183,8 @@ const CoachEvaluationForm = () => {
               Please open the link, review the stats, and enter them manually below.
             </p>
           </div>
+
+          {/* 🔹 Manual Stat Entry */}
           <div className="grid grid-cols-3 gap-4 mt-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Games Played</label>
@@ -222,6 +223,24 @@ const CoachEvaluationForm = () => {
               />
             </div>
           </div>
+
+          {/* 🔹 Save Stats Button */}
+          <button
+            type="button"
+            onClick={handleSaveStats}
+            className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Save Stats
+          </button>
+
+          {/* 🔹 Derived Output */}
+          {derivedStats.target !== null && (
+            <div className="mt-4 space-y-1 text-sm text-gray-700">
+              <div><strong>Target:</strong> {derivedStats.target}</div>
+              <div><strong>Gap:</strong> {derivedStats.gapPercent}%</div>
+              <div><strong>Game Time:</strong> {derivedStats.gameTime}</div>
+            </div>
+          )}
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-8 mt-6">
