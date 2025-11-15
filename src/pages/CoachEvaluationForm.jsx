@@ -40,15 +40,21 @@ const initialCategories = {
     endurance: '',
   },
 };
+
 const CoachEvaluationForm = () => {
   const [players, setPlayers] = useState([]);
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState(null);
-  const [playerStats, setPlayerStats] = useState(null);
   const [coachName, setCoachName] = useState('');
   const [feedback, setFeedback] = useState(initialFeedback);
   const [categories, setCategories] = useState(initialCategories);
   const [coachComments, setCoachComments] = useState('');
+  const [manualStats, setManualStats] = useState({
+    gamesPlayed: '',
+    totalRuns: '',
+    totalWickets: '',
+  });
+
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
@@ -74,6 +80,7 @@ const CoachEvaluationForm = () => {
         console.error('❌ Coach profile fetch error:', err.response?.data || err.message);
       });
   }, []);
+
   useEffect(() => {
     if (!selectedPlayerId) return;
 
@@ -81,17 +88,9 @@ const CoachEvaluationForm = () => {
       .get(`https://cricket-academy-backend.onrender.com/api/player/${selectedPlayerId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => {
-        setSelectedPlayer(res.data);
-        return axios.get(
-          `https://cricket-academy-backend.onrender.com/api/cricclubs/${res.data.cricclubsID}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      })
-      .then((res) => setPlayerStats(res.data))
-      .catch((err) => console.error('CricClubs fetch error:', err));
+      .then((res) => setSelectedPlayer(res.data))
+      .catch((err) => console.error('Player detail fetch error:', err));
   }, [selectedPlayerId]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -103,6 +102,9 @@ const CoachEvaluationForm = () => {
           feedback,
           categories,
           coachComments,
+          gamesPlayed: parseInt(manualStats.gamesPlayed) || 0,
+          totalRuns: parseInt(manualStats.totalRuns) || 0,
+          totalWickets: parseInt(manualStats.totalWickets) || 0,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -123,6 +125,7 @@ const CoachEvaluationForm = () => {
     if (age < 17) return 'U17';
     return 'Adult';
   })();
+
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow space-y-6">
       <h2 className="text-3xl font-bold text-blue-700">Coach Evaluation Form</h2>
@@ -155,12 +158,11 @@ const CoachEvaluationForm = () => {
           ))}
         </select>
       </label>
-
       {selectedPlayer && (
         <div className="bg-gray-100 border-l-4 border-green-400 p-4 rounded shadow text-sm text-gray-700 space-y-1">
           <div><strong>Player Name:</strong> {selectedPlayer.firstName} {selectedPlayer.lastName}</div>
           <div><strong>Category:</strong> {derivedCategory}</div>
-          <div><strong>Cricclubs ID:</strong> {selectedPlayer.cricclubsID}</div>
+          <div><strong>CricClubs ID:</strong> {selectedPlayer.cricclubsID}</div>
           <div><strong>Player Profile:</strong> {selectedPlayer.role}</div>
           <div>
             <strong>Competitive Years:</strong>{' '}
@@ -169,50 +171,57 @@ const CoachEvaluationForm = () => {
               : 'N/A'}
           </div>
           <div><strong>Age:</strong> {selectedPlayer.age}</div>
-
-          {playerStats && typeof playerStats.gamesPlayed === 'number' ? (
-            <>
-              <div><strong>Total Games Played:</strong> {playerStats.gamesPlayed}</div>
-              <div><strong>Total Runs:</strong> {playerStats.totalRuns}</div>
-              <div><strong>Total Wickets:</strong> {playerStats.totalWickets}</div>
-              {(() => {
-                const categoryTargets = {
-                  U11: 15,
-                  U13: 30,
-                  U15: 45,
-                  U17: 60,
-                  Adult: 60,
-                };
-                const targetGames = categoryTargets[derivedCategory] || 30;
-                const gamesPlayed = playerStats.gamesPlayed || 0;
-                const gapPercent = Math.round(((targetGames - gamesPlayed) / targetGames) * 100);
-                const gameTime =
-                  gapPercent >= 80 ? 'Major Gap' :
-                  gapPercent >= 50 ? 'Need Some More' :
-                  'On Track';
-
-                return (
-                  <>
-                    <div><strong>Target:</strong> {targetGames}</div>
-                    <div><strong>Gap:</strong> {gapPercent}%</div>
-                    <div><strong>Game Time:</strong> {gameTime}</div>
-                  </>
-                );
-              })()}
-              <div>
-                <a
-                  href={`https://cricclubs.com/PremierCricAcad/viewPlayer.do?playerId=${selectedPlayer.cricclubsID}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline"
-                >
-                  View CricClubs Profile
-                </a>
-              </div>
-            </>
-          ) : (
-            <p className="text-gray-500 italic">Loading CricClubs stats...</p>
-          )}
+          <div>
+            <a
+              href={`https://cricclubs.com/PremierCricAcad/viewPlayer.do?playerId=${selectedPlayer.cricclubsID}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline"
+            >
+              View CricClubs Profile ↗
+            </a>
+            <p className="text-sm text-gray-500 mt-1">
+              Please open the link, review the stats, and enter them manually below.
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Games Played</label>
+              <input
+                type="number"
+                value={manualStats.gamesPlayed}
+                onChange={(e) =>
+                  setManualStats({ ...manualStats, gamesPlayed: e.target.value })
+                }
+                className="border px-3 py-2 rounded w-full"
+                placeholder="Enter manually"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Total Runs</label>
+              <input
+                type="number"
+                value={manualStats.totalRuns}
+                onChange={(e) =>
+                  setManualStats({ ...manualStats, totalRuns: e.target.value })
+                }
+                className="border px-3 py-2 rounded w-full"
+                placeholder="Enter manually"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Total Wickets</label>
+              <input
+                type="number"
+                value={manualStats.totalWickets}
+                onChange={(e) =>
+                  setManualStats({ ...manualStats, totalWickets: e.target.value })
+                }
+                className="border px-3 py-2 rounded w-full"
+                placeholder="Enter manually"
+              />
+            </div>
+          </div>
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-8 mt-6">

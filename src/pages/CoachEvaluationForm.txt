@@ -40,7 +40,6 @@ const initialCategories = {
     endurance: '',
   },
 };
-
 const CoachEvaluationForm = () => {
   const [players, setPlayers] = useState([]);
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
@@ -75,7 +74,6 @@ const CoachEvaluationForm = () => {
         console.error('❌ Coach profile fetch error:', err.response?.data || err.message);
       });
   }, []);
-
   useEffect(() => {
     if (!selectedPlayerId) return;
 
@@ -116,21 +114,19 @@ const CoachEvaluationForm = () => {
     }
   };
 
-const derivedCategory = (() => {
-  const age = selectedPlayer?.age;
-  if (age === undefined || age === null) return 'N/A';
-  if (age < 11) return 'U11';
-  if (age < 13) return 'U13';
-  if (age < 15) return 'U15';
-  if (age < 17) return 'U17';
-  return 'Adult';
-})();
-
+  const derivedCategory = (() => {
+    const age = selectedPlayer?.age;
+    if (age === undefined || age === null) return 'N/A';
+    if (age < 11) return 'U11';
+    if (age < 13) return 'U13';
+    if (age < 15) return 'U15';
+    if (age < 17) return 'U17';
+    return 'Adult';
+  })();
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow space-y-6">
       <h2 className="text-3xl font-bold text-blue-700">Coach Evaluation Form</h2>
 
-      {/* ✅ Always-visible Coach Header */}
       <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded shadow text-sm text-gray-800">
         <strong>Coach:</strong> {coachName || 'Loading...'}
       </div>
@@ -167,14 +163,14 @@ const derivedCategory = (() => {
           <div><strong>Cricclubs ID:</strong> {selectedPlayer.cricclubsID}</div>
           <div><strong>Player Profile:</strong> {selectedPlayer.role}</div>
           <div>
-  		<strong>Competitive Years:</strong>{' '}
-  		{selectedPlayer.competitiveStartYear
-    		? new Date().getFullYear() - selectedPlayer.competitiveStartYear
-    		: 'N/A'}
-	</div>
+            <strong>Competitive Years:</strong>{' '}
+            {selectedPlayer.competitiveStartYear
+              ? new Date().getFullYear() - selectedPlayer.competitiveStartYear
+              : 'N/A'}
+          </div>
           <div><strong>Age:</strong> {selectedPlayer.age}</div>
 
-          {playerStats ? (
+          {playerStats && typeof playerStats.gamesPlayed === 'number' ? (
             <>
               <div><strong>Total Games Played:</strong> {playerStats.gamesPlayed}</div>
               <div><strong>Total Runs:</strong> {playerStats.totalRuns}</div>
@@ -187,7 +183,7 @@ const derivedCategory = (() => {
                   U17: 60,
                   Adult: 60,
                 };
-                const targetGames = categoryTargets[selectedPlayer.category] || 30;
+                const targetGames = categoryTargets[derivedCategory] || 30;
                 const gamesPlayed = playerStats.gamesPlayed || 0;
                 const gapPercent = Math.round(((targetGames - gamesPlayed) / targetGames) * 100);
                 const gameTime =
