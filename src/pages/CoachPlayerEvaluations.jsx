@@ -8,6 +8,7 @@ const CoachPlayerEvaluations = () => {
   const [evaluations, setEvaluations] = useState([]);
   const [filteredEvaluations, setFilteredEvaluations] = useState([]);
   const [selectedEvalId, setSelectedEvalId] = useState(null);
+  const [selectedEval, setSelectedEval] = useState(null);
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const [tempResponse, setTempResponse] = useState('');
   const token = localStorage.getItem('token');
@@ -37,20 +38,10 @@ const CoachPlayerEvaluations = () => {
       .catch((err) => console.error('Evaluation fetch error:', err));
   }, [selectedPlayerId]);
 
-  const applyDateFilter = () => {
-    const from = dateRange.from ? new Date(dateRange.from) : null;
-    const to = dateRange.to ? new Date(dateRange.to) : null;
-
-    const filtered = evaluations.filter((ev) => {
-      const date = new Date(ev.dateOfEvaluation);
-      return (!from || date >= from) && (!to || date <= to);
-    });
-
-    setFilteredEvaluations(filtered);
-    setSelectedEvalId(null);
-  };
-
-  const selectedEval = filteredEvaluations.find((ev) => ev._id === selectedEvalId);
+  useEffect(() => {
+    const evalObj = filteredEvaluations.find((ev) => ev._id === selectedEvalId);
+    setSelectedEval(evalObj || null);
+  }, [filteredEvaluations, selectedEvalId]);
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -109,79 +100,6 @@ const CoachPlayerEvaluations = () => {
           </div>
         </div>
       )}
-      {filteredEvaluations.length > 0 ? (
-        <div className="space-y-4 mt-6">
-          {filteredEvaluations.map((ev) => (
-            <div
-              key={ev._id}
-              className={`border rounded p-4 shadow cursor-pointer ${
-                selectedEvalId === ev._id ? 'bg-blue-50 border-blue-400' : 'bg-white'
-              }`}
-              onClick={() => {
-                setSelectedEvalId(ev._id);
-                setTempResponse('');
-              }}
-            >
-              <div className="text-sm text-gray-600">
-                <strong>Date:</strong> {new Date(ev.dateOfEvaluation).toLocaleDateString()}
-              </div>
-              <div className="text-sm text-gray-700">
-                <strong>Coach Comments:</strong> {ev.coachComments || '—'}
-              </div>
-              {ev.playerResponded && (
-                <div className="text-xs text-green-700 mt-1">✅ Player responded</div>
-              )}
-            </div>
-          ))}
-        </div>
-      ) : selectedPlayerId ? (
-        <p className="text-gray-600 mt-4">No evaluations found for this player.</p>
-      ) : null}
-
-      {selectedEval && (
-        <div className="mt-6 border rounded p-6 bg-white shadow space-y-2">
-          <h3 className="text-xl font-semibold text-blue-700">Evaluation Details</h3>
-          <div><strong>Date:</strong> {new Date(selectedEval.dateOfEvaluation).toLocaleDateString()}</div>
-          <div><strong>Coach Comments:</strong> {selectedEval.coachComments || '—'}</div>
-          <div><strong>Games Played:</strong> {selectedEval.gamesPlayed}</div>
-          <div><strong>Total Runs:</strong> {selectedEval.totalRuns}</div>
-          <div><strong>Total Wickets:</strong> {selectedEval.totalWickets}</div>
-          {['batting', 'bowling', 'mindset', 'fitness'].map((group) => (
-            <div key={group} className="mt-4">
-              <h4 className="text-md font-semibold text-gray-700 capitalize">{group}</h4>
-              <div className="text-sm text-gray-700">
-                <strong>Score:</strong> {selectedEval.feedback[group]?.score}
-              </div>
-              <div className="text-sm text-gray-700">
-                <strong>Comments:</strong> {selectedEval.feedback[group]?.comments}
-              </div>
-              <div className="grid grid-cols-2 gap-2 mt-2 text-sm text-gray-600">
-                {Object.entries(selectedEval.categories[group]).map(([field, value]) => (
-                  <div key={field}>
-                    <strong>{field.replace(/([A-Z])/g, ' $1')}:</strong> {value}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-
-          {selectedEval.playerResponded ? (
-            <div className="mt-6 border-t pt-4">
-              <h4 className="text-md font-semibold text-green-700">Player Response</h4>
-              <p className="text-sm text-gray-800 whitespace-pre-line">
-                {selectedEval.playerResponse}
-              </p>
-            </div>
-          ) : (
-            <div className="mt-6 border-t pt-4 space-y-2">
-              <h4 className="text-md font-semibold text-blue-700">Submit Your Response</h4>
-              <textarea
-                value={tempResponse}
-                onChange={(e) => setTempResponse(e.target.value)}
-                className="border px-3 py-2 rounded w-full"
-                rows={4}
-                placeholder="Write your response here..."
-              />
               <button
                 onClick={async () => {
                   try {
