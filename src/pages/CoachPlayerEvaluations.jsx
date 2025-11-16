@@ -128,24 +128,24 @@ const CoachPlayerEvaluations = () => {
                 onClick={async () => {
                   try {
                     await axios.post(
-                      `https://cricket-academy-backend.onrender.com/api/evaluations/${selectedEval._id}/respond`,
-                      { playerResponse: tempResponse },
-                      { headers: { Authorization: `Bearer ${token}` } }
-                    );
-                    alert('✅ Response submitted successfully!');
-                    setFilteredEvaluations((prev) =>
-                      prev.map((ev) =>
-                        ev._id === selectedEval._id
-                          ? {
-                              ...ev,
-                              playerResponded: true,
-                              playerResponse: tempResponse,
-                            }
-                          : ev
-                      )
-                    );
-                    setSelectedEvalId(selectedEval._id);
-                    setTempResponse('');
+  `https://cricket-academy-backend.onrender.com/api/evaluations/${selectedEval._id}/respond`,
+  { playerResponse: tempResponse },
+  { headers: { Authorization: `Bearer ${token}` } }
+);
+alert('✅ Response submitted successfully!');
+setFilteredEvaluations((prev) =>
+  prev.map((ev) =>
+    ev._id === selectedEval._id
+      ? {
+          ...ev,
+          playerResponded: true,
+          playerResponse: tempResponse,
+        }
+      : ev
+  )
+);
+setSelectedEvalId(selectedEval._id);
+setTempResponse('');
                   } catch (err) {
                     console.error('Response submission error:', err.response?.data || err.message);
                     alert('Failed to submit response.');
