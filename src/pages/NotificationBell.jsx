@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { socket } from '../socket'; // adjust path if needed
+import { socket } from '../socket'; // ✅ Socket.IO connection
 
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [filterType, setFilterType] = useState('all');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -105,12 +104,6 @@ const NotificationBell = () => {
     }
   };
 
-  const filteredNotifications = notifications.filter((n) => {
-    if (filterType === 'all') return true;
-    if (filterType === 'unread') return !n.isRead;
-    return n.type === filterType;
-  });
-
   return (
     <div className="relative">
       <button
@@ -129,23 +122,11 @@ const NotificationBell = () => {
         <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded p-4 z-50">
           <h3 className="text-lg font-semibold mb-2">Notifications</h3>
 
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="mb-3 w-full border px-2 py-1 rounded text-sm"
-          >
-            <option value="all">All</option>
-            <option value="unread">Unread</option>
-            <option value="evaluation">Evaluations</option>
-            <option value="player-response">Player Responses</option>
-            <option value="feedback-submitted">Session Feedback</option>
-          </select>
-
-          {filteredNotifications.length === 0 ? (
+          {notifications.length === 0 ? (
             <p className="text-gray-500">No notifications</p>
           ) : (
             <ul className="space-y-2">
-              {filteredNotifications.map((n) => (
+              {notifications.map((n) => (
                 <li
                   key={n._id}
                   onClick={() => handleClick(n)}
