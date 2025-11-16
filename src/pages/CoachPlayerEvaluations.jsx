@@ -202,6 +202,7 @@ const CoachPlayerEvaluations = () => {
                         : ev
                     );
                     setFilteredEvaluations(updated);
+			setSelectedEvalId(selectedEval._id);
                   } catch (err) {
                     console.error('Response submission error:', err.response?.data || err.message);
                     alert('Failed to submit response.');
