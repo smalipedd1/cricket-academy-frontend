@@ -212,90 +212,14 @@ const PlayerDashboard = () => {
             </div>
           </div>
         )}
+
         {/* 🧠 Session Feedback Section */}
         {activeSection === 'feedback' && (
           <div className="bg-white rounded-xl shadow p-6 space-y-6">
             <h2 className="text-2xl font-semibold text-blue-600">Session Feedback</h2>
 
-            {/* 📊 Skill Progress Chart */}
-            {feedback.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">Skill Progress Chart</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <select
-                    value={skill}
-                    onChange={(e) => setSkill(e.target.value)}
-                    className="border px-4 py-2 rounded"
-                  >
-                    <option value="batting">Batting</option>
-                    <option value="bowling">Bowling</option>
-                    <option value="wicketkeeping">Wicketkeeping</option>
-                    <option value="fielding">Fielding</option>
-                  </select>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="border px-4 py-2 rounded"
-                  />
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="border px-4 py-2 rounded"
-                  />
-                </div>
-                <Line data={{
-                  labels: feedback
-                    .filter((e) => {
-                      const date = new Date(e.sessionDate);
-                      return (
-                        (!startDate || date >= new Date(startDate)) &&
-                        (!endDate || date <= new Date(endDate)) &&
-                        e.rating?.[skill] > 0
-                      );
-                    })
-                    .map((e) => new Date(e.sessionDate).toLocaleDateString()),
-                  datasets: [
-                    {
-                      label: `${skill.charAt(0).toUpperCase() + skill.slice(1)} Progress`,
-                      data: feedback
-                        .filter((e) => {
-                          const date = new Date(e.sessionDate);
-                          return (
-                            (!startDate || date >= new Date(startDate)) &&
-                            (!endDate || date <= new Date(endDate)) &&
-                            e.rating?.[skill] > 0
-                          );
-                        })
-                        .map((e) => e.rating[skill]),
-                      borderColor: '#2563eb',
-                      backgroundColor: 'rgba(37,99,235,0.1)',
-                      tension: 0.3,
-                    },
-                  ],
-                }} options={{
-                  responsive: true,
-                  scales: {
-                    y: {
-                      min: 1,
-                      max: 10,
-                      ticks: { stepSize: 1 },
-                      title: { display: true, text: 'Rating (1–10)' },
-                    },
-                    x: {
-                      title: { display: true, text: 'Session Date' },
-                    },
-                  },
-                  plugins: {
-                    legend: { display: true, position: 'top' },
-                  },
-                }} />
-              </div>
-            )}
-
             {/* 📅 Date Filter and Response Toggle */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <input
                 type="date"
                 value={feedbackStartDate}
@@ -318,7 +242,6 @@ const PlayerDashboard = () => {
                 <span className="text-sm text-gray-700">Show only unresponded</span>
               </label>
             </div>
-
             {/* 📝 Feedback Entries */}
             {feedback
               .filter((fb) => {
@@ -368,6 +291,86 @@ const PlayerDashboard = () => {
                   )}
                 </div>
               ))}
+
+            {/* 📊 Skill Progress Chart — now at the bottom */}
+            {feedback.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Skill Progress Chart</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <select
+                    value={skill}
+                    onChange={(e) => setSkill(e.target.value)}
+                    className="border px-4 py-2 rounded"
+                  >
+                    <option value="batting">Batting</option>
+                    <option value="bowling">Bowling</option>
+                    <option value="wicketkeeping">Wicketkeeping</option>
+                    <option value="fielding">Fielding</option>
+                  </select>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="border px-4 py-2 rounded"
+                  />
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="border px-4 py-2 rounded"
+                  />
+                </div>
+                <Line
+                  data={{
+                    labels: feedback
+                      .filter((e) => {
+                        const date = new Date(e.sessionDate);
+                        return (
+                          (!startDate || date >= new Date(startDate)) &&
+                          (!endDate || date <= new Date(endDate)) &&
+                          e.rating?.[skill] > 0
+                        );
+                      })
+                      .map((e) => new Date(e.sessionDate).toLocaleDateString()),
+                    datasets: [
+                      {
+                        label: `${skill.charAt(0).toUpperCase() + skill.slice(1)} Progress`,
+                        data: feedback
+                          .filter((e) => {
+                            const date = new Date(e.sessionDate);
+                            return (
+                              (!startDate || date >= new Date(startDate)) &&
+                              (!endDate || date <= new Date(endDate)) &&
+                              e.rating?.[skill] > 0
+                            );
+                          })
+                          .map((e) => e.rating[skill]),
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37,99,235,0.1)',
+                        tension: 0.3,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    scales: {
+                      y: {
+                        min: 1,
+                        max: 10,
+                        ticks: { stepSize: 1 },
+                        title: { display: true, text: 'Rating (1–10)' },
+                      },
+                      x: {
+                        title: { display: true, text: 'Session Date' },
+                      },
+                    },
+                    plugins: {
+                      legend: { display: true, position: 'top' },
+                    },
+                  }}
+                />
+              </div>
+            )}
           </div>
         )}
         {/* 📋 Coach Evaluations Section */}
