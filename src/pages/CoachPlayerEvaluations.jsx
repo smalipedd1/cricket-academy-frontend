@@ -195,18 +195,17 @@ const CoachPlayerEvaluations = () => {
                       { headers: { Authorization: `Bearer ${token}` } }
                     );
                     alert('✅ Response submitted successfully!');
+                    const updatedEval = {
+                      ...selectedEval,
+                      playerResponded: true,
+                      playerResponse: tempResponse,
+                    };
                     setFilteredEvaluations((prev) =>
                       prev.map((ev) =>
-                        ev._id === selectedEval._id
-                          ? {
-                              ...ev,
-                              playerResponded: true,
-                              playerResponse: tempResponse,
-                            }
-                          : ev
+                        ev._id === selectedEval._id ? updatedEval : ev
                       )
                     );
-                    setSelectedEvalId(selectedEval._id);
+                    setSelectedEval(updatedEval);
                     setTempResponse('');
                   } catch (err) {
                     console.error('Response submission error:', err.response?.data || err.message);
