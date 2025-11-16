@@ -67,6 +67,51 @@ const PlayerDashboard = () => {
     window.location.href = '/';
   };
 
+  const handleContactChange = (e) => {
+    setProfile({ ...profile, emailAddress: e.target.value });
+  };
+
+  const handleContactSave = () => {
+    axios
+      .put(
+        'https://cricket-academy-backend.onrender.com/api/player/update-contact',
+        { emailAddress: profile.emailAddress },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .then(() => setEditMode(false))
+      .catch((err) => console.error('Contact update error:', err));
+  };
+
+  const handleResponseSubmit = (sessionId) => {
+    axios
+      .patch(
+        `https://cricket-academy-backend.onrender.com/api/player/respond/${sessionId}`,
+        { playerResponse: responseText },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .then(() => {
+        setResponseText('');
+        setSelectedSessionId(null);
+        window.location.reload();
+      })
+      .catch((err) => console.error('Response submit error:', err));
+  };
+
+  const handleEvaluationResponseSubmit = (evaluationId) => {
+    axios
+      .post(
+        `https://cricket-academy-backend.onrender.com/api/evaluations/${evaluationId}/respond`,
+        { playerResponse: evalResponseText },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .then(() => {
+        setEvalResponseText('');
+        setSelectedEvalId(null);
+        window.location.reload();
+      })
+      .catch((err) => console.error('Evaluation response error:', err));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6 space-y-10">
       <div className="max-w-6xl mx-auto space-y-10">
