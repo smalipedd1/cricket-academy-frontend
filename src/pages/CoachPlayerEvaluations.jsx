@@ -9,6 +9,7 @@ const CoachPlayerEvaluations = () => {
   const [filteredEvaluations, setFilteredEvaluations] = useState([]);
   const [selectedEvalId, setSelectedEvalId] = useState(null);
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
+  const [tempResponse, setTempResponse] = useState('');
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
 
@@ -116,7 +117,10 @@ const CoachPlayerEvaluations = () => {
               className={`border rounded p-4 shadow cursor-pointer ${
                 selectedEvalId === ev._id ? 'bg-blue-50 border-blue-400' : 'bg-white'
               }`}
-              onClick={() => setSelectedEvalId(ev._id)}
+              onClick={() => {
+                setSelectedEvalId(ev._id);
+                setTempResponse('');
+              }}
             >
               <div className="text-sm text-gray-600">
                 <strong>Date:</strong> {new Date(ev.dateOfEvaluation).toLocaleDateString()}
@@ -172,13 +176,8 @@ const CoachPlayerEvaluations = () => {
             <div className="mt-6 border-t pt-4 space-y-2">
               <h4 className="text-md font-semibold text-blue-700">Submit Your Response</h4>
               <textarea
-                value={selectedEval.tempResponse || ''}
-                onChange={(e) => {
-                  const updated = filteredEvaluations.map((ev) =>
-                    ev._id === selectedEval._id ? { ...ev, tempResponse: e.target.value } : ev
-                  );
-                  setFilteredEvaluations(updated);
-                }}
+                value={tempResponse}
+                onChange={(e) => setTempResponse(e.target.value)}
                 className="border px-3 py-2 rounded w-full"
                 rows={4}
                 placeholder="Write your response here..."
@@ -188,21 +187,23 @@ const CoachPlayerEvaluations = () => {
                   try {
                     await axios.post(
                       `https://cricket-academy-backend.onrender.com/api/evaluations/${selectedEval._id}/respond`,
-                      { playerResponse: selectedEval.tempResponse },
+                      { playerResponse: tempResponse },
                       { headers: { Authorization: `Bearer ${token}` } }
                     );
+                    alert('✅ Response submitted successfully!');
+                    const updated = filteredEvaluations
                     const updated = filteredEvaluations.map((ev) =>
                       ev._id === selectedEval._id
                         ? {
                             ...ev,
                             playerResponded: true,
-                            playerResponse: selectedEval.tempResponse,
-                            tempResponse: '',
+                            playerResponse: tempResponse,
                           }
                         : ev
                     );
                     setFilteredEvaluations(updated);
-			setSelectedEvalId(selectedEval._id);
+                    setSelectedEvalId(selectedEval._id);
+                    setTempResponse('');
                   } catch (err) {
                     console.error('Response submission error:', err.response?.data || err.message);
                     alert('Failed to submit response.');
