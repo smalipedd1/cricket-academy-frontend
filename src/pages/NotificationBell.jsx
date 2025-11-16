@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { socket } from '../socket'; // adjust path if needed
 
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [filterType, setFilterType] = useState('all');
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     const rawRole = localStorage.getItem('role');
-    const role = rawRole?.toLowerCase(); // ✅ normalize to match backend
+    const role = rawRole?.toLowerCase();
 
     const fetchNotifications = () => {
       axios
@@ -22,12 +24,6 @@ const NotificationBell = () => {
           const filtered = role
             ? all.filter((n) => n.recipientRole === role)
             : all;
-
-          // ✅ Optional debug logs
-          // console.log('🔔 All notifications:', all);
-          // console.log('🔍 Role from localStorage:', role);
-          // console.log('✅ Filtered notifications:', filtered);
-
           setNotifications(filtered);
         })
         .catch((err) => console.error('Notification fetch error:', err));
@@ -38,6 +34,21 @@ const NotificationBell = () => {
       const interval = setInterval(fetchNotifications, 30000);
       return () => clearInterval(interval);
     }
+  }, []);
+
+  useEffect(() => {
+    socket.on('new-evaluation', (notification) => {
+      setNotifications((prev) => [notification, ...prev]);
+    });
+
+    socket.on('new-player-response', (notification) => {
+      setNotifications((prev) => [notification, ...prev]);
+    });
+
+    return () => {
+      socket.off('new-evaluation');
+      socket.off('new-player-response');
+    };
   }, []);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -54,7 +65,9 @@ const NotificationBell = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (notification.session?._id) {
+      if (notification.link) {
+        navigate(notification.link);
+      } else if (notification.session?._id) {
         if (role === 'coach') {
           navigate(`/coach/feedback/${notification.session._id}`);
         } else {
@@ -79,6 +92,25 @@ const NotificationBell = () => {
     }
   };
 
+  const getIcon = (type) => {
+    switch (type) {
+      case 'feedback-submitted':
+        return '📝';
+      case 'evaluation':
+        return '📊';
+      case 'player-response':
+        return '✅';
+      default:
+        return '📣';
+    }
+  };
+
+  const filteredNotifications = notifications.filter((n) => {
+    if (filterType === 'all') return true;
+    if (filterType === 'unread') return !n.isRead;
+    return n.type === filterType;
+  });
+
   return (
     <div className="relative">
       <button
@@ -97,11 +129,23 @@ const NotificationBell = () => {
         <div className="absolute right-0 mt-2 w-80 bg-white shadow-lg rounded p-4 z-50">
           <h3 className="text-lg font-semibold mb-2">Notifications</h3>
 
-          {notifications.length === 0 ? (
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="mb-3 w-full border px-2 py-1 rounded text-sm"
+          >
+            <option value="all">All</option>
+            <option value="unread">Unread</option>
+            <option value="evaluation">Evaluations</option>
+            <option value="player-response">Player Responses</option>
+            <option value="feedback-submitted">Session Feedback</option>
+          </select>
+
+          {filteredNotifications.length === 0 ? (
             <p className="text-gray-500">No notifications</p>
           ) : (
             <ul className="space-y-2">
-              {notifications.map((n) => (
+              {filteredNotifications.map((n) => (
                 <li
                   key={n._id}
                   onClick={() => handleClick(n)}
@@ -111,7 +155,7 @@ const NotificationBell = () => {
                 >
                   <div>
                     <p className="text-sm">
-                      {n.type === 'feedback-submitted' ? '📝' : '📣'} {n.message}
+                      {getIcon(n.type)} {n.message}
                     </p>
                     <p className="text-xs text-gray-500">
                       {new Date(n.createdAt).toLocaleString()}
