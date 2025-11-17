@@ -61,7 +61,10 @@ function AppRoutes() {
 	<Route path="/player-dashboard" element={<PlayerDashboard />} />
 	<Route path="/coach/evaluation" element={<CoachEvaluationForm />} />
 	<Route path="/coach/evaluations/player" element={token && role === 'coach' ? <CoachPlayerEvaluations />}/>
-	<Route path="/coach/evaluations/player" element={token && role === 'player' ? <CoachPlayerEvaluations /> : <Navigate to="/login" />}/>
+	<Route
+  path="/player/evaluation/:id"
+  element={token && role === 'player' ? <CoachPlayerEvaluations viewer="player" /> : <Navigate to="/login" />}
+/>
     </Routes>
   );
 }
