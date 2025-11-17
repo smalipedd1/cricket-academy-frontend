@@ -76,7 +76,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
           {['batting', 'bowling', 'mindset', 'fitness'].map((category) => {
             const catSkills = evalItem.categories?.[category];
             const catFeedback = evalItem.feedback?.[category];
-            if (!catSkills) return null;
+            if (!catSkills || typeof catSkills !== 'object') return null;
 
             return (
               <div key={category}>
@@ -124,6 +124,5 @@ const CoachPlayerEvaluations = ({ viewer }) => {
     </div>
   );
 };
-
 
 export default CoachPlayerEvaluations;
