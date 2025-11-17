@@ -205,7 +205,7 @@ const CoachPlayerEvaluations = () => {
                         ev._id === selectedEval._id ? updatedEval : ev
                       )
                     );
-                    setSelectedEval(updatedEval);
+                    setSelectedEvalId(selectedEval._id); // ✅ triggers useEffect to refresh selectedEval
                     setTempResponse('');
                   } catch (err) {
                     console.error('Response submission error:', err.response?.data || err.message);
