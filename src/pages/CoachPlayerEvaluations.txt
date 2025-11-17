@@ -11,8 +11,13 @@ const CoachPlayerEvaluations = () => {
   const [selectedEval, setSelectedEval] = useState(null);
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const [tempResponse, setTempResponse] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
+
+useEffect(() => {
+  localStorage.setItem('playerLoginRedirect', '/player-dashboard?section=evaluations');
+}, []);
 
   useEffect(() => {
     axios
@@ -113,6 +118,7 @@ const CoachPlayerEvaluations = () => {
           </div>
         </div>
       )}
+
       {filteredEvaluations.length > 0 ? (
         <div className="space-y-4 mt-6">
           {filteredEvaluations.map((ev) => (
@@ -124,6 +130,7 @@ const CoachPlayerEvaluations = () => {
               onClick={() => {
                 setSelectedEvalId(ev._id);
                 setTempResponse('');
+                setShowConfirmation(false);
               }}
             >
               <div className="text-sm text-gray-600">
@@ -141,7 +148,6 @@ const CoachPlayerEvaluations = () => {
       ) : selectedPlayerId ? (
         <p className="text-gray-600 mt-4">No evaluations found for this player.</p>
       ) : null}
-
       {selectedEval && (
         <div className="mt-6 border rounded p-6 bg-white shadow space-y-2">
           <h3 className="text-xl font-semibold text-blue-700">Evaluation Details</h3>
@@ -150,6 +156,7 @@ const CoachPlayerEvaluations = () => {
           <div><strong>Games Played:</strong> {selectedEval.gamesPlayed}</div>
           <div><strong>Total Runs:</strong> {selectedEval.totalRuns}</div>
           <div><strong>Total Wickets:</strong> {selectedEval.totalWickets}</div>
+
           {['batting', 'bowling', 'mindset', 'fitness'].map((group) => (
             <div key={group} className="mt-4">
               <h4 className="text-md font-semibold text-gray-700 capitalize">{group}</h4>
@@ -186,36 +193,42 @@ const CoachPlayerEvaluations = () => {
                 rows={4}
                 placeholder="Write your response here..."
               />
-              <button
-                onClick={async () => {
-                  try {
-                    await axios.post(
-                      `https://cricket-academy-backend.onrender.com/api/evaluations/${selectedEval._id}/respond`,
-                      { playerResponse: tempResponse },
-                      { headers: { Authorization: `Bearer ${token}` } }
-                    );
-                    alert('✅ Response submitted successfully!');
-                    const updatedEval = {
-                      ...selectedEval,
-                      playerResponded: true,
-                      playerResponse: tempResponse,
-                    };
-                    setFilteredEvaluations((prev) =>
-                      prev.map((ev) =>
-                        ev._id === selectedEval._id ? updatedEval : ev
-                      )
-                    );
-                    setSelectedEval(updatedEval);
-                    setTempResponse('');
-                  } catch (err) {
-                    console.error('Response submission error:', err.response?.data || err.message);
-                    alert('Failed to submit response.');
-                  }
-                }}
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-              >
-                Submit Response
-              </button>
+              {showConfirmation ? (
+                <div className="text-green-700 font-medium">
+                  ✅ Your response has been submitted successfully!
+                </div>
+              ) : (
+                <button
+                  onClick={async () => {
+                    try {
+                      await axios.post(
+                        `https://cricket-academy-backend.onrender.com/api/evaluations/${selectedEval._id}/respond`,
+                        { playerResponse: tempResponse },
+                        { headers: { Authorization: `Bearer ${token}` } }
+                      );
+                      const updatedEval = {
+                        ...selectedEval,
+                        playerResponded: true,
+                        playerResponse: tempResponse,
+                      };
+                      setFilteredEvaluations((prev) =>
+                        prev.map((ev) =>
+                          ev._id === selectedEval._id ? updatedEval : ev
+                        )
+                      );
+                      setSelectedEvalId(selectedEval._id); // triggers useEffect to refresh selectedEval
+                      setTempResponse('');
+                      setShowConfirmation(true);
+                    } catch (err) {
+                      console.error('Response submission error:', err.response?.data || err.message);
+                      alert('Failed to submit response.');
+                    }
+                  }}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                  Submit Response
+                </button>
+              )}
             </div>
           )}
         </div>
