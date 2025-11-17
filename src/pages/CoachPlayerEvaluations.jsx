@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+const BASE_URL = 'https://cricket-academy-backend.onrender.com';
+
 const CoachPlayerEvaluations = ({ viewer }) => {
   const role = viewer || localStorage.getItem('role');
   const token = localStorage.getItem('token');
@@ -17,8 +19,8 @@ const CoachPlayerEvaluations = ({ viewer }) => {
       try {
         const endpoint =
           role === 'coach'
-            ? '/api/evaluations/coach-view'
-            : `/api/evaluations/player/${id}`;
+            ? `${BASE_URL}/api/evaluations/coach-view`
+            : `${BASE_URL}/api/evaluations/player/${id}`;
 
         const res = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${token}` },
@@ -38,16 +40,16 @@ const CoachPlayerEvaluations = ({ viewer }) => {
   const handleSubmitResponse = async (evaluationId) => {
     try {
       await axios.post(
-        `/api/evaluations/${evaluationId}/respond`,
+        `${BASE_URL}/api/evaluations/${evaluationId}/respond`,
         { playerResponse },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       alert('Response submitted!');
-  setEvaluations((prev) =>
-  prev.map((e) =>
-    e._id === evaluationId ? { ...e, playerResponded: true } : e
-  )
-);
+      setEvaluations((prev) =>
+        prev.map((e) =>
+          e._id === evaluationId ? { ...e, playerResponded: true } : e
+        )
+      );
     } catch (err) {
       console.error('Submit response error:', err.response?.data || err.message);
       alert('Failed to submit response.');
@@ -65,9 +67,18 @@ const CoachPlayerEvaluations = ({ viewer }) => {
       {evaluations.map((evalItem) => (
         <div key={evalItem._id} className="border rounded p-4 shadow space-y-2">
           <p><strong>Player:</strong> {evalItem.playerName}</p>
-          <p><strong>Category:</strong> {evalItem.category}</p>
-          <p><strong>Coach Comments:</strong> {evalItem.comments}</p>
+          <p><strong>Coach Comments:</strong> {evalItem.coachComments}</p>
           <p><strong>Submitted On:</strong> {new Date(evalItem.createdAt).toLocaleDateString()}</p>
+
+          {role === 'coach' && (
+            <div>
+              <p><strong>Categories:</strong></p>
+              <pre className="bg-gray-100 p-2 rounded text-sm">
+                {JSON.stringify(evalItem.categories, null, 2)}
+              </pre>
+            </div>
+          )}
+
           {role === 'player' && !evalItem.playerResponded && (
             <div className="space-y-2 mt-4">
               <textarea
