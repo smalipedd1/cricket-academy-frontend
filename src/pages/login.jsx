@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
@@ -39,14 +40,21 @@ export default function Login() {
       console.log('✅ Logged in as:', role);
       console.log('🔐 Token:', data.token);
 
-      // ✅ SPA-safe redirect with delay to avoid race condition
+      // ✅ SPA-safe redirect with override support
       setTimeout(() => {
-        navigate(
-          role === 'admin' ? '/admin/dashboard' :
-          role === 'coach' ? '/coach/dashboard' :
-          '/player/dashboard',
-          { replace: true }
-        );
+        const redirectOverride = localStorage.getItem('playerLoginRedirect');
+
+        if (role === 'player' && redirectOverride) {
+          localStorage.removeItem('playerLoginRedirect'); // cleanup
+          navigate(redirectOverride, { replace: true });
+        } else {
+          navigate(
+            role === 'admin' ? '/admin/dashboard' :
+            role === 'coach' ? '/coach/dashboard' :
+            '/player/dashboard',
+            { replace: true }
+          );
+        }
       }, 100);
     } catch (err) {
       setError(err.message);

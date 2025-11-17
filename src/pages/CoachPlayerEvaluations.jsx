@@ -14,6 +14,11 @@ const CoachPlayerEvaluations = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
+
+useEffect(() => {
+  localStorage.setItem('playerLoginRedirect', '/player-dashboard?section=evaluations');
+}, []);
+
   useEffect(() => {
     axios
       .get('https://cricket-academy-backend.onrender.com/api/coach/players?status=Active', {
