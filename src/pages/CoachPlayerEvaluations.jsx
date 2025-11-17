@@ -7,7 +7,7 @@ const BASE_URL = 'https://cricket-academy-backend.onrender.com';
 const CoachPlayerEvaluations = ({ viewer }) => {
   const role = viewer || localStorage.getItem('role');
   const token = localStorage.getItem('token');
-  const { id } = useParams(); // only used for player route
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [evaluations, setEvaluations] = useState([]);
@@ -66,64 +66,62 @@ const CoachPlayerEvaluations = ({ viewer }) => {
       </h1>
 
       {evaluations.map((evalItem) => (
-        <div key={evalItem._id} className="border rounded p-4 shadow space-y-2">
-          <p><strong>Player:</strong> {evalItem.playerName}</p>
-          <p><strong>Coach Comments:</strong> {evalItem.coachComments}</p>
-          <p><strong>Submitted On:</strong> {new Date(evalItem.createdAt).toLocaleDateString()}</p>
+        <div key={evalItem._id} className="border rounded p-4 shadow space-y-4">
+          <p><strong>Evaluation Date:</strong> {new Date(evalItem.createdAt).toLocaleDateString()}</p>
+          <p><strong>Coach:</strong> {evalItem.coachName}</p>
+          <p><strong>Coach Comments:</strong> {evalItem.coachComments || '—'}</p>
+          <p><strong>Games Played:</strong> {evalItem.gamesPlayed}</p>
+          <p><strong>Total Runs:</strong> {evalItem.totalRuns}</p>
+          <p><strong>Total Wickets:</strong> {evalItem.totalWickets}</p>
 
-          {evalItem.categories && (
-            <div className="mt-4 space-y-4">
-              {evalItem.categories.batting && (
-                <div>
-                  <p className="font-semibold text-gray-700">Batting:</p>
-                  <ul className="list-disc list-inside text-sm text-gray-800">
-                    {Object.entries(evalItem.categories.batting).map(([skill, level]) => (
-                      <li key={skill}>
-                        <span className="font-medium capitalize">{skill}:</span> {level}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+          {['batting', 'bowling', 'mindset', 'fitness'].map((category) => {
+            const cat = evalItem.categories?.[category];
+            if (!cat) return null;
 
-              {evalItem.categories.bowling && (
-                <div>
-                  <p className="font-semibold text-gray-700">Bowling:</p>
-                  <ul className="list-disc list-inside text-sm text-gray-800">
-                    {Object.entries(evalItem.categories.bowling).map(([skill, level]) => (
-                      <li key={skill}>
-                        <span className="font-medium capitalize">{skill}:</span> {level}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            return (
+              <div key={category}>
+                <p className="text-lg font-semibold text-gray-800 capitalize">{category}</p>
+                <p><strong>Score:</strong> {cat.score}</p>
+                <p><strong>Comments:</strong> {cat.comments || '—'}</p>
+                <ul className="list-disc list-inside text-sm text-gray-800 mt-2 space-y-1">
+                  {Object.entries(cat.skills || {}).map(([skill, data]) => (
+                    <li key={skill}>
+                      <span className="font-medium capitalize">{skill}:</span> {data.level}
+                      <div className="ml-4 text-sm text-gray-600">
+                        <p><strong>Coach Comment:</strong> {data.comment || '—'}</p>
+                        <p><strong>Player Stat:</strong> {data.stat ?? '—'}</p>
+                        <p><strong>Result:</strong> {data.result || '—'}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
 
-              {evalItem.playerResponded && (
-                <div className="mt-4">
-                  <p className="font-semibold text-gray-700">Player Response:</p>
-                  <p className="text-gray-800 text-sm bg-gray-100 p-2 rounded">
-                    {evalItem.playerResponse || 'No response text provided.'}
-                  </p>
-                </div>
-              )}
+          {evalItem.playerResponded && (
+            <div className="mt-4">
+              <p className="font-semibold text-gray-700">Player Response:</p>
+              <p className="text-gray-800 text-sm bg-gray-100 p-2 rounded">
+                {evalItem.playerResponse || 'No response text provided.'}
+              </p>
+            </div>
+          )}
 
-              {role === 'player' && !evalItem.playerResponded && (
-                <div className="space-y-2 mt-4">
-                  <textarea
-                    value={playerResponse}
-                    onChange={(e) => setPlayerResponse(e.target.value)}
-                    placeholder="Write your response..."
-                    className="w-full border rounded p-2"
-                  />
-                  <button
-                    onClick={() => handleSubmitResponse(evalItem._id)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  >
-                    Submit Response
-                  </button>
-                </div>
-              )}
+          {role === 'player' && !evalItem.playerResponded && (
+            <div className="space-y-2 mt-4">
+              <textarea
+                value={playerResponse}
+                onChange={(e) => setPlayerResponse(e.target.value)}
+                placeholder="Write your response..."
+                className="w-full border rounded p-2"
+              />
+              <button
+                onClick={() => handleSubmitResponse(evalItem._id)}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Submit Response
+              </button>
             </div>
           )}
         </div>
