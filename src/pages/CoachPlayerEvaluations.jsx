@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const BASE_URL = 'https://cricket-academy-backend.onrender.com';
@@ -8,7 +8,6 @@ const CoachPlayerEvaluations = ({ viewer }) => {
   const role = viewer || localStorage.getItem('role');
   const token = localStorage.getItem('token');
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [evaluations, setEvaluations] = useState([]);
   const [playerResponse, setPlayerResponse] = useState('');
@@ -75,23 +74,19 @@ const CoachPlayerEvaluations = ({ viewer }) => {
           <p><strong>Total Wickets:</strong> {evalItem.totalWickets}</p>
 
           {['batting', 'bowling', 'mindset', 'fitness'].map((category) => {
-            const cat = evalItem.categories?.[category];
-            if (!cat) return null;
+            const catSkills = evalItem.categories?.[category];
+            const catFeedback = evalItem.feedback?.[category];
+            if (!catSkills) return null;
 
             return (
               <div key={category}>
                 <p className="text-lg font-semibold text-gray-800 capitalize">{category}</p>
-                <p><strong>Score:</strong> {cat.score}</p>
-                <p><strong>Comments:</strong> {cat.comments || '—'}</p>
+                <p><strong>Score:</strong> {catFeedback?.score ?? '—'}</p>
+                <p><strong>Comments:</strong> {catFeedback?.comments || '—'}</p>
                 <ul className="list-disc list-inside text-sm text-gray-800 mt-2 space-y-1">
-                  {Object.entries(cat.skills || {}).map(([skill, data]) => (
+                  {Object.entries(catSkills).map(([skill, level]) => (
                     <li key={skill}>
-                      <span className="font-medium capitalize">{skill}:</span> {data.level}
-                      <div className="ml-4 text-sm text-gray-600">
-                        <p><strong>Coach Comment:</strong> {data.comment || '—'}</p>
-                        <p><strong>Player Stat:</strong> {data.stat ?? '—'}</p>
-                        <p><strong>Result:</strong> {data.result || '—'}</p>
-                      </div>
+                      <span className="font-medium capitalize">{skill}:</span> {level || '—'}
                     </li>
                   ))}
                 </ul>
