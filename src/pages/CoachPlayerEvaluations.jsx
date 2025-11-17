@@ -70,12 +70,29 @@ const CoachPlayerEvaluations = ({ viewer }) => {
           <p><strong>Coach Comments:</strong> {evalItem.coachComments}</p>
           <p><strong>Submitted On:</strong> {new Date(evalItem.createdAt).toLocaleDateString()}</p>
 
-          {role === 'coach' && (
-            <div>
-              <p><strong>Categories:</strong></p>
-              <pre className="bg-gray-100 p-2 rounded text-sm">
-                {JSON.stringify(evalItem.categories, null, 2)}
-              </pre>
+          {role === 'coach' && evalItem.categories && (
+            <div className="mt-4 space-y-4">
+              <div>
+                <p className="font-semibold text-gray-700">Batting:</p>
+                <ul className="list-disc list-inside text-sm text-gray-800">
+                  {Object.entries(evalItem.categories.batting || {}).map(([skill, level]) => (
+                    <li key={skill}>
+                      <span className="font-medium">{skill}:</span> {level}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <p className="font-semibold text-gray-700">Bowling:</p>
+                <ul className="list-disc list-inside text-sm text-gray-800">
+                  {Object.entries(evalItem.categories.bowling || {}).map(([skill, level]) => (
+                    <li key={skill}>
+                      <span className="font-medium">{skill}:</span> {level}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           )}
 
