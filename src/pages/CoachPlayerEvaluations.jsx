@@ -43,7 +43,13 @@ const CoachPlayerEvaluations = ({ viewer }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       alert('Response submitted!');
-      navigate('/player/dashboard');
+      await axios.post(...);
+alert('Response submitted!');
+setEvaluations((prev) =>
+  prev.map((e) =>
+    e._id === evaluationId ? { ...e, playerResponded: true } : e
+  )
+);
     } catch (err) {
       console.error('Submit response error:', err.response?.data || err.message);
       alert('Failed to submit response.');
