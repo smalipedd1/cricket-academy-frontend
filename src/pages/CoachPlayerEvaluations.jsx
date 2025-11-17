@@ -43,9 +43,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       alert('Response submitted!');
-      await axios.post(...);
-alert('Response submitted!');
-setEvaluations((prev) =>
+  setEvaluations((prev) =>
   prev.map((e) =>
     e._id === evaluationId ? { ...e, playerResponded: true } : e
   )
