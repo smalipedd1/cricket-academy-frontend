@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
 const BASE_URL = 'https://cricket-academy-backend.onrender.com';
@@ -7,8 +7,7 @@ const BASE_URL = 'https://cricket-academy-backend.onrender.com';
 const CoachPlayerEvaluations = ({ viewer }) => {
   const role = viewer || localStorage.getItem('role');
   const token = localStorage.getItem('token');
-  const { id } = useParams(); // only used for player route
-  const navigate = useNavigate();
+  const { id } = useParams();
 
   const [evaluations, setEvaluations] = useState([]);
   const [playerResponse, setPlayerResponse] = useState('');
@@ -37,6 +36,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
 
     fetchEvaluations();
   }, [id, role, token]);
+
   const handleSubmitResponse = async (evaluationId) => {
     try {
       await axios.post(
@@ -47,7 +47,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
       alert('Response submitted!');
       setEvaluations((prev) =>
         prev.map((e) =>
-          e._id === evaluationId ? { ...e, playerResponded: true } : e
+          e._id === evaluationId ? { ...e, playerResponded: true, playerResponse } : e
         )
       );
     } catch (err) {
@@ -65,17 +65,41 @@ const CoachPlayerEvaluations = ({ viewer }) => {
       </h1>
 
       {evaluations.map((evalItem) => (
-        <div key={evalItem._id} className="border rounded p-4 shadow space-y-2">
-          <p><strong>Player:</strong> {evalItem.playerName}</p>
-          <p><strong>Coach Comments:</strong> {evalItem.coachComments}</p>
-          <p><strong>Submitted On:</strong> {new Date(evalItem.createdAt).toLocaleDateString()}</p>
+        <div key={evalItem._id} className="border rounded p-4 shadow space-y-4">
+          <p><strong>Evaluation Date:</strong> {new Date(evalItem.createdAt).toLocaleDateString()}</p>
+          <p><strong>Coach:</strong> {evalItem.coachName}</p>
+          <p><strong>Coach Comments:</strong> {evalItem.coachComments || '—'}</p>
+          <p><strong>Games Played:</strong> {evalItem.gamesPlayed}</p>
+          <p><strong>Total Runs:</strong> {evalItem.totalRuns}</p>
+          <p><strong>Total Wickets:</strong> {evalItem.totalWickets}</p>
 
-          {role === 'coach' && (
-            <div>
-              <p><strong>Categories:</strong></p>
-              <pre className="bg-gray-100 p-2 rounded text-sm">
-                {JSON.stringify(evalItem.categories, null, 2)}
-              </pre>
+          {['batting', 'bowling', 'mindset', 'fitness'].map((category) => {
+            const catSkills = evalItem.categories?.[category];
+            const catFeedback = evalItem.feedback?.[category];
+            if (!catSkills) return null;
+
+            return (
+              <div key={category}>
+                <p className="text-lg font-semibold text-gray-800 capitalize">{category}</p>
+                <p><strong>Score:</strong> {catFeedback?.score ?? '—'}</p>
+                <p><strong>Comments:</strong> {catFeedback?.comments || '—'}</p>
+                <ul className="list-disc list-inside text-sm text-gray-800 mt-2 space-y-1">
+                  {Object.entries(catSkills).map(([skill, level]) => (
+                    <li key={skill}>
+                      <span className="font-medium capitalize">{skill}:</span> {level || '—'}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+
+          {evalItem.playerResponded && (
+            <div className="mt-4">
+              <p className="font-semibold text-gray-700">Player Response:</p>
+              <p className="text-gray-800 text-sm bg-gray-100 p-2 rounded">
+                {evalItem.playerResponse || 'No response text provided.'}
+              </p>
             </div>
           )}
 
@@ -95,14 +119,11 @@ const CoachPlayerEvaluations = ({ viewer }) => {
               </button>
             </div>
           )}
-
-          {role === 'player' && evalItem.playerResponded && (
-            <p className="text-green-700 font-semibold">✅ You have already responded.</p>
-          )}
         </div>
       ))}
     </div>
   );
 };
+
 
 export default CoachPlayerEvaluations;
