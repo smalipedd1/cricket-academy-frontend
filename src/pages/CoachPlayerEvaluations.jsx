@@ -37,6 +37,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
 
     fetchEvaluations();
   }, [id, role, token]);
+
   const handleSubmitResponse = async (evaluationId) => {
     try {
       await axios.post(
@@ -47,7 +48,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
       alert('Response submitted!');
       setEvaluations((prev) =>
         prev.map((e) =>
-          e._id === evaluationId ? { ...e, playerResponded: true } : e
+          e._id === evaluationId ? { ...e, playerResponded: true, playerResponse } : e
         )
       );
     } catch (err) {
@@ -70,51 +71,60 @@ const CoachPlayerEvaluations = ({ viewer }) => {
           <p><strong>Coach Comments:</strong> {evalItem.coachComments}</p>
           <p><strong>Submitted On:</strong> {new Date(evalItem.createdAt).toLocaleDateString()}</p>
 
-          {role === 'coach' && evalItem.categories && (
+          {evalItem.categories && (
             <div className="mt-4 space-y-4">
-              <div>
-                <p className="font-semibold text-gray-700">Batting:</p>
-                <ul className="list-disc list-inside text-sm text-gray-800">
-                  {Object.entries(evalItem.categories.batting || {}).map(([skill, level]) => (
-                    <li key={skill}>
-                      <span className="font-medium">{skill}:</span> {level}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {evalItem.categories.batting && (
+                <div>
+                  <p className="font-semibold text-gray-700">Batting:</p>
+                  <ul className="list-disc list-inside text-sm text-gray-800">
+                    {Object.entries(evalItem.categories.batting).map(([skill, level]) => (
+                      <li key={skill}>
+                        <span className="font-medium capitalize">{skill}:</span> {level}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-              <div>
-                <p className="font-semibold text-gray-700">Bowling:</p>
-                <ul className="list-disc list-inside text-sm text-gray-800">
-                  {Object.entries(evalItem.categories.bowling || {}).map(([skill, level]) => (
-                    <li key={skill}>
-                      <span className="font-medium">{skill}:</span> {level}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {evalItem.categories.bowling && (
+                <div>
+                  <p className="font-semibold text-gray-700">Bowling:</p>
+                  <ul className="list-disc list-inside text-sm text-gray-800">
+                    {Object.entries(evalItem.categories.bowling).map(([skill, level]) => (
+                      <li key={skill}>
+                        <span className="font-medium capitalize">{skill}:</span> {level}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {evalItem.playerResponded && (
+                <div className="mt-4">
+                  <p className="font-semibold text-gray-700">Player Response:</p>
+                  <p className="text-gray-800 text-sm bg-gray-100 p-2 rounded">
+                    {evalItem.playerResponse || 'No response text provided.'}
+                  </p>
+                </div>
+              )}
+
+              {role === 'player' && !evalItem.playerResponded && (
+                <div className="space-y-2 mt-4">
+                  <textarea
+                    value={playerResponse}
+                    onChange={(e) => setPlayerResponse(e.target.value)}
+                    placeholder="Write your response..."
+                    className="w-full border rounded p-2"
+                  />
+                  <button
+                    onClick={() => handleSubmitResponse(evalItem._id)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Submit Response
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-
-          {role === 'player' && !evalItem.playerResponded && (
-            <div className="space-y-2 mt-4">
-              <textarea
-                value={playerResponse}
-                onChange={(e) => setPlayerResponse(e.target.value)}
-                placeholder="Write your response..."
-                className="w-full border rounded p-2"
-              />
-              <button
-                onClick={() => handleSubmitResponse(evalItem._id)}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-              >
-                Submit Response
-              </button>
-            </div>
-          )}
-
-          {role === 'player' && evalItem.playerResponded && (
-            <p className="text-green-700 font-semibold">✅ You have already responded.</p>
           )}
         </div>
       ))}
