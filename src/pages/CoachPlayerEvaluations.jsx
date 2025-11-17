@@ -74,8 +74,9 @@ const CoachPlayerEvaluations = ({ viewer }) => {
           <p><strong>Total Wickets:</strong> {evalItem.totalWickets}</p>
 
           {['batting', 'bowling', 'mindset', 'fitness'].map((category) => {
-            const catSkills = evalItem.categories?.[category];
+            const catSection = evalItem.categories?.[category];
             const catFeedback = evalItem.feedback?.[category];
+            const catSkills = catSection?.skills;
             if (!catSkills || typeof catSkills !== 'object') return null;
 
             return (
@@ -84,9 +85,9 @@ const CoachPlayerEvaluations = ({ viewer }) => {
                 <p><strong>Score:</strong> {catFeedback?.score ?? '—'}</p>
                 <p><strong>Comments:</strong> {catFeedback?.comments || '—'}</p>
                 <ul className="list-disc list-inside text-sm text-gray-800 mt-2 space-y-1">
-                  {Object.entries(catSkills).map(([skill, level]) => (
+                  {Object.entries(catSkills).map(([skill, obj]) => (
                     <li key={skill}>
-                      <span className="font-medium capitalize">{skill}:</span> {level || '—'}
+                      <span className="font-medium capitalize">{skill}:</span> {obj?.level || '—'}
                     </li>
                   ))}
                 </ul>
