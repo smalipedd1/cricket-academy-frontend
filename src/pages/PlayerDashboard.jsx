@@ -484,9 +484,9 @@ const PlayerDashboard = () => {
 
                     {['batting', 'bowling', 'mindset', 'fitness'].map((group) => {
                       const feedback = ev.feedback?.[group];
-                      const skills = ev.categories?.[group] || {};
+                      const skills = ev.categories?.[group];
 
-                      if (!feedback && Object.keys(skills).length === 0) return null;
+                      if (!feedback && (!skills || typeof skills !== 'object')) return null;
 
                       return (
                         <div key={group} className="mt-4">
