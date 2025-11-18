@@ -484,9 +484,9 @@ const PlayerDashboard = () => {
 
                     {['batting', 'bowling', 'mindset', 'fitness'].map((group) => {
                       const feedback = ev.feedback?.[group];
-                      const skills = ev.categories?.[group];
+                      const skills = ev.categories?.[group] || {};
 
-                      if (!feedback && !skills) return null;
+                      if (!feedback && Object.keys(skills).length === 0) return null;
 
                       return (
                         <div key={group} className="mt-4">
@@ -501,19 +501,21 @@ const PlayerDashboard = () => {
 
                           {skills && typeof skills === 'object' && (
                             <div className="ml-2 mt-2">
-                              <p className="font-semibold text-gray-600">Skills:</p>
-                              <ul className="list-disc ml-6 text-sm text-gray-700">
+                              <p className="font-semibold text-gray-600 mb-1">Skills:</p>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 {Object.entries(skills).map(([skillName, rating]) => {
-                                  const displayValue = typeof rating === 'string'
-                                    ? rating
-                                    : JSON.stringify(rating);
+                                  const label = skillName
+                                    .replace(/([A-Z])/g, ' $1')
+                                    .replace(/^./, (str) => str.toUpperCase());
                                   return (
-                                    <li key={skillName}>
-                                      {skillName.replace(/([A-Z])/g, ' $1')}: {displayValue}
-                                    </li>
+                                    <div key={skillName} className="bg-gray-100 p-2 rounded shadow-sm">
+                                      <p className="text-sm text-gray-700">
+                                        <strong>{label}:</strong> {rating}
+                                      </p>
+                                    </div>
                                   );
                                 })}
-                              </ul>
+                              </div>
                             </div>
                           )}
                         </div>
