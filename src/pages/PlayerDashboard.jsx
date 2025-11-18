@@ -100,7 +100,6 @@ const PlayerDashboard = () => {
       })
       .then((res) => setEvaluations(res.data));
   }, [profile._id]);
-
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
