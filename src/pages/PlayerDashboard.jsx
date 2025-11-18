@@ -482,7 +482,7 @@ const PlayerDashboard = () => {
                       </div>
                     </div>
 
-                    {/* Section-level feedback + skill-level proficiency */}
+                    {/* Section-level feedback + flat skill ratings */}
                     {['batting', 'bowling', 'mindset', 'fitness'].map((group) => {
                       const feedback = ev.feedback?.[group];
                       const skills = ev.categories?.[group];
@@ -498,11 +498,12 @@ const PlayerDashboard = () => {
                             <p className="text-sm text-gray-700"><strong>Comments:</strong> {feedback.comments}</p>
                           )}
 
-                          {skills && Object.keys(skills).length > 0 && (
+                          {skills && typeof skills === 'object' && Object.keys(skills).length > 0 && (
                             <ul className="list-disc ml-6 text-sm text-gray-700 mt-2">
-                              {Object.entries(skills).map(([skillName, ratingObj]) => {
-                                const label = skillName.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                                const level = ratingObj?.level || 'N/A';
+                              {Object.entries(skills).map(([skillName, level]) => {
+                                const label = skillName
+                                  .replace(/([A-Z])/g, ' $1')
+                                  .replace(/^./, str => str.toUpperCase());
                                 return <li key={skillName}>{label}: {level}</li>;
                               })}
                             </ul>
