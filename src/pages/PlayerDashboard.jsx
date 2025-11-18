@@ -440,56 +440,75 @@ const PlayerDashboard = () => {
                 return (!start || date >= start) && (!end || date <= end);
               })
               .map((ev) => (
-                <div key={ev._id} className="border p-4 rounded bg-gray-50">
+                <div key={ev._id} className="border p-4 rounded bg-gray-50 space-y-4">
                   <h3 className="text-lg font-semibold text-blue-700">
                     Evaluation on {new Date(ev.dateOfEvaluation).toLocaleDateString()}
                   </h3>
-                  <p><strong>Coach:</strong> {ev.coachName || '—'}</p>
-                  <p><strong>Coach Comments:</strong> {ev.coachComments || '—'}</p>
+                  <p><strong>Coach:</strong> {ev.coachName}</p>
+                  <p><strong>Coach Comments:</strong> {ev.coachComments}</p>
                   <p><strong>Games Played:</strong> {ev.gamesPlayed}</p>
                   <p><strong>Total Runs:</strong> {ev.totalRuns}</p>
                   <p><strong>Total Wickets:</strong> {ev.totalWickets}</p>
 
-                  {['batting', 'bowling', 'mindset', 'fitness'].map((group) => (
-                    <div key={group} className="mt-4">
-                      <h4 className="text-md font-semibold text-gray-700 capitalize">{group}</h4>
-                      <p><strong>Score:</strong> {ev.feedback?.[group]?.score}</p>
-                      <p><strong>Comments:</strong> {ev.feedback?.[group]?.comments}</p>
-                      <div className="grid grid-cols-2 gap-2 text-sm text-gray-700 mt-2">
-                        {ev.categories?.[group] &&
-                          Object.entries(ev.categories[group]).map(([field, value]) => {
-                            const level = typeof value === 'object' ? value?.level : value;
-                            return (
-                              <div key={field}>
-                                <strong>{field.replace(/([A-Z])/g, ' $1')}:</strong> {level || '—'}
-                              </div>
-                            );
-                          })}
+                  {['batting', 'bowling', 'mindset', 'fitness'].map((group) => {
+                    const feedback = ev.feedback?.[group];
+                    const skills = ev.categories?.[group];
+
+                    if (!feedback && !skills) return null;
+
+                    return (
+                      <div key={group} className="mt-4">
+                        <h4 className="text-md font-semibold text-gray-700 capitalize">{group}</h4>
+
+                        {feedback && (
+                          <div className="ml-2 space-y-1">
+                            <p><strong>Score:</strong> {feedback.score}</p>
+                            <p><strong>Comments:</strong> {feedback.comments}</p>
+                          </div>
+                        )}
+
+                        {skills && (
+                          <div className="ml-2 mt-2">
+                            <p className="font-semibold text-gray-600">Skills:</p>
+                            <ul className="list-disc ml-6 text-sm text-gray-700">
+                              {Object.entries(skills).map(([skillName, value]) => {
+                                const level = typeof value === 'object' ? value?.level : value;
+                                return (
+                                  <li key={skillName}>
+                                    {skillName.replace(/([A-Z])/g, ' $1')}: {level}
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
 
-                  <p className="mt-4"><strong>Your Response:</strong> {ev.playerResponse || 'No response yet'}</p>
+                  <div className="mt-4">
+                    <p><strong>Your Response:</strong> {ev.playerResponse || 'No response yet'}</p>
 
-                  {!ev.playerResponse && (
-                    <>
-                      <textarea
-                        placeholder="Write your response to the coach..."
-                        value={selectedEvalId === ev._id ? evalResponseText : ''}
-                        onChange={(e) => {
-                          setSelectedEvalId(ev._id);
-                          setEvalResponseText(e.target.value);
-                        }}
-                        className="border w-full p-2 mt-2 rounded"
-                      />
-                      <button
-                        onClick={() => handleEvaluationResponseSubmit(ev._id)}
-                        className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                      >
-                        Submit Response
-                      </button>
-                    </>
-                  )}
+                    {!ev.playerResponse && (
+                      <>
+                        <textarea
+                          placeholder="Write your response to the coach..."
+                          value={selectedEvalId === ev._id ? evalResponseText : ''}
+                          onChange={(e) => {
+                            setSelectedEvalId(ev._id);
+                            setEvalResponseText(e.target.value);
+                          }}
+                          className="border w-full p-2 mt-2 rounded"
+                        />
+                        <button
+                          onClick={() => handleEvaluationResponseSubmit(ev._id)}
+                          className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                        >
+                          Submit Response
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
               ))}
           </div>
