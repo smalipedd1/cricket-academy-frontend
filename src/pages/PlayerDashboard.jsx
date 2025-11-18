@@ -489,15 +489,20 @@ const PlayerDashboard = () => {
                             </div>
                           )}
 
-                          {skills && (
+                          {skills && typeof skills === 'object' && (
                             <div className="ml-2 mt-2">
                               <p className="font-semibold text-gray-600">Skills:</p>
                               <ul className="list-disc ml-6 text-sm text-gray-700">
-                                {Object.entries(skills).map(([skillName, rating]) => (
-                                  <li key={skillName}>
-                                    {skillName.replace(/([A-Z])/g, ' $1')}: {rating}
-                                  </li>
-                                ))}
+                                {Object.entries(skills).map(([skillName, rating]) => {
+                                  const displayValue = typeof rating === 'string'
+                                    ? rating
+                                    : JSON.stringify(rating);
+                                  return (
+                                    <li key={skillName}>
+                                      {skillName.replace(/([A-Z])/g, ' $1')}: {displayValue}
+                                    </li>
+                                  );
+                                })}
                               </ul>
                             </div>
                           )}
