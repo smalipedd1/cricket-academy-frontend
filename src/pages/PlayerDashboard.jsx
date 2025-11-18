@@ -142,6 +142,253 @@ const PlayerDashboard = () => {
             Logout
           </button>
         </div>
+
+        {/* ✅ Section Toggle Buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <button
+            onClick={() => setActiveSection('profile')}
+            className={`p-6 rounded-xl shadow text-center font-semibold ${
+              activeSection === 'profile' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'
+            }`}
+          >
+            🧍 My Profile
+          </button>
+          <button
+            onClick={() => setActiveSection('feedback')}
+            className={`p-6 rounded-xl shadow text-center font-semibold ${
+              activeSection === 'feedback' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'
+            }`}
+          >
+            🧠 Session Feedback
+          </button>
+          <button
+            onClick={() => setActiveSection('evaluations')}
+            className={`p-6 rounded-xl shadow text-center font-semibold ${
+              activeSection === 'evaluations' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'
+            }`}
+          >
+            📋 Coach Evaluations
+          </button>
+        </div>
+
+        {/* 👤 Profile Section */}
+        {activeSection === 'profile' && (
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-2xl font-semibold text-blue-600 mb-4">My Profile</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <p><strong>First Name:</strong> {profile.firstName}</p>
+              <p><strong>Last Name:</strong> {profile.lastName}</p>
+              {dob && (
+                <>
+                  <p><strong>Date of Birth:</strong> {new Date(dob).toLocaleDateString()}</p>
+                  <p><strong>Age:</strong> {
+                    (() => {
+                      const birthDate = new Date(dob);
+                      const today = new Date();
+                      let age = today.getFullYear() - birthDate.getFullYear();
+                      const m = today.getMonth() - birthDate.getMonth();
+                      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                      }
+                      return age;
+                    })()
+                  }</p>
+                </>
+              )}
+              <p><strong>Role:</strong> {profile.role}</p>
+              <p><strong>Academy Level:</strong> {profile.academyLevel}</p>
+              <p><strong>CricClubs ID:</strong> {profile.cricclubsID}</p>
+              <p><strong>Status:</strong> {profile.status}</p>
+
+              {editMode ? (
+                <>
+                  <input
+                    type="email"
+                    name="emailAddress"
+                    placeholder="Email"
+                    defaultValue={profile.emailAddress}
+                    onChange={handleContactChange}
+                    className="border px-3 py-2 rounded"
+                  />
+                  <button
+                    onClick={handleContactSave}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Save
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p><strong>Email:</strong> {profile.emailAddress}</p>
+                  <button
+                    onClick={() => setEditMode(true)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Edit Email
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+        {/* 🧠 Session Feedback Section */}
+        {activeSection === 'feedback' && (
+          <div className="bg-white rounded-xl shadow p-6 space-y-6">
+            <h2 className="text-2xl font-semibold text-blue-600">Session Feedback</h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <input
+                type="date"
+                value={feedbackStartDate}
+                onChange={(e) => setFeedbackStartDate(e.target.value)}
+                className="border px-4 py-2 rounded"
+              />
+              <input
+                type="date"
+                value={feedbackEndDate}
+                onChange={(e) => setFeedbackEndDate(e.target.value)}
+                className="border px-4 py-2 rounded"
+              />
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={showUnrespondedOnly}
+                  onChange={(e) => setShowUnrespondedOnly(e.target.checked)}
+                  className="h-4 w-4"
+                />
+                <span className="text-sm text-gray-700">Show only unresponded</span>
+              </label>
+            </div>
+
+            {feedback
+              .filter((fb) => {
+                const sessionDate = new Date(fb.sessionDate);
+                const start = feedbackStartDate ? new Date(feedbackStartDate) : null;
+                const end = feedbackEndDate ? new Date(feedbackEndDate) : null;
+                const withinDateRange =
+                  (!start || sessionDate >= start) &&
+                  (!end || sessionDate <= end);
+                const matchesResponseFilter =
+                  !showUnrespondedOnly || !fb.playerResponse;
+                return withinDateRange && matchesResponseFilter;
+              })
+              .map((fb) => (
+                <div key={fb.sessionId} className="border p-4 rounded mb-4 bg-gray-50">
+                  <h3 className="text-lg font-semibold text-blue-700">
+                    Session on {new Date(fb.sessionDate).toLocaleDateString()}
+                  </h3>
+                  <p><strong>Focus Area:</strong> {fb.focusArea}</p>
+                  <p><strong>Coach Notes:</strong> {fb.notes}</p>
+                  <p><strong>Coach Rating:</strong></p>
+                  <ul className="list-disc ml-6">
+                    {Object.entries(fb.rating || {}).map(([skill, value]) => (
+                      <li key={skill}>{skill}: {value}</li>
+                    ))}
+                  </ul>
+                  <p><strong>Your Response:</strong> {fb.playerResponse || 'No response yet'}</p>
+
+                  {!fb.playerResponse && (
+                    <>
+                      <textarea
+                        placeholder="Write your response..."
+                        value={selectedSessionId === fb.sessionId ? responseText : ''}
+                        onChange={(e) => {
+                          setSelectedSessionId(fb.sessionId);
+                          setResponseText(e.target.value);
+                        }}
+                        className="border w-full p-2 mt-2 rounded"
+                      />
+                      <button
+                        onClick={() => handleResponseSubmit(fb.sessionId)}
+                        className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                      >
+                        Submit Response
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))}
+
+            {feedback.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Skill Progress Chart</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <select
+                    value={skill}
+                    onChange={(e) => setSkill(e.target.value)}
+                    className="border px-4 py-2 rounded"
+                  >
+                    <option value="batting">Batting</option>
+                    <option value="bowling">Bowling</option>
+                    <option value="wicketkeeping">Wicketkeeping</option>
+                    <option value="fielding">Fielding</option>
+                  </select>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="border px-4 py-2 rounded"
+                  />
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="border px-4 py-2 rounded"
+                  />
+                </div>
+                <Line
+                  data={{
+                    labels: feedback
+                      .filter((e) => {
+                        const date = new Date(e.sessionDate);
+                        return (
+                          (!startDate || date >= new Date(startDate)) &&
+                          (!endDate || date <= new Date(endDate)) &&
+                          e.rating?.[skill] > 0
+                        );
+                      })
+                      .map((e) => new Date(e.sessionDate).toLocaleDateString()),
+                    datasets: [
+                      {
+                        label: `${skill.charAt(0).toUpperCase() + skill.slice(1)} Progress`,
+                        data: feedback
+                          .filter((e) => {
+                            const date = new Date(e.sessionDate);
+                            return (
+                              (!startDate || date >= new Date(startDate)) &&
+                              (!endDate || date <= new Date(endDate)) &&
+                              e.rating?.[skill] > 0
+                            );
+                          })
+                          .map((e) => e.rating[skill]),
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37,99,235,0.1)',
+                        tension: 0.3,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    scales: {
+                      y: {
+                        min: 1,
+                        max: 10,
+                        ticks: { stepSize: 1 },
+                        title: { display: true, text: 'Rating (1–10)' },
+                      },
+                      x: {
+                        title: { display: true, text: 'Session Date' },
+                      },
+                    },
+                    plugins: {
+                      legend: { display: true, position: 'top' },
+                    },
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        )}
         {/* 📋 Coach Evaluations Section */}
         {activeSection === 'evaluations' && (
           <div className="bg-white rounded-xl shadow p-6 space-y-6">
