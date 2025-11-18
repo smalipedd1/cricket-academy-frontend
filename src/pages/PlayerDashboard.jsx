@@ -482,45 +482,18 @@ const PlayerDashboard = () => {
                       </div>
                     </div>
 
-                    {['batting', 'bowling', 'mindset', 'fitness'].map((group) => {
-                      const feedback = ev.feedback?.[group];
-                      const skills = ev.categories?.[group];
-
-                      if (!feedback && (!skills || typeof skills !== 'object')) return null;
-
-                      return (
-                        <div key={group} className="mt-4">
-                          <h4 className="text-md font-semibold text-gray-700 capitalize">{group}</h4>
-
-                          {feedback && (
-                            <div className="ml-2 space-y-1">
-                              <p><strong>Score:</strong> {feedback.score}</p>
-                              <p><strong>Comments:</strong> {feedback.comments}</p>
-                            </div>
-                          )}
-
-                          {skills && typeof skills === 'object' && (
-                            <div className="ml-2 mt-2">
-                              <p className="font-semibold text-gray-600 mb-1">Skills:</p>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                {Object.entries(skills).map(([skillName, rating]) => {
-                                  const label = skillName
-                                    .replace(/([A-Z])/g, ' $1')
-                                    .replace(/^./, (str) => str.toUpperCase());
-                                  return (
-                                    <div key={skillName} className="bg-gray-100 p-2 rounded shadow-sm">
-                                      <p className="text-sm text-gray-700">
-                                        <strong>{label}:</strong> {rating}
-                                      </p>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                    {Object.entries(ev.categories || {}).map(([group, skills]) => (
+                      <div key={group} className="mt-4">
+                        <h4 className="text-md font-semibold text-gray-700 capitalize">{group}</h4>
+                        <ul className="list-disc ml-6 text-sm text-gray-700">
+                          {Object.entries(skills || {}).map(([skillName, rating]) => (
+                            <li key={skillName}>
+                              {skillName.replace(/([A-Z])/g, ' $1')}: {typeof rating === 'object' ? JSON.stringify(rating) : rating}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
 
                     <div className="mt-4">
                       <p><strong>Your Response:</strong> {ev.playerResponse || 'No response yet'}</p>
