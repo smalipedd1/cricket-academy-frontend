@@ -482,26 +482,31 @@ const PlayerDashboard = () => {
                       </div>
                     </div>
 
-                    {Object.entries(ev.categories || {}).map(([group, skills]) => (
-                      <div key={group} className="mt-4">
-                        <h4 className="text-md font-semibold text-gray-700 capitalize">{group}</h4>
-                        <ul className="list-disc ml-6 text-sm text-gray-700">
-                          {Object.entries(skills || {}).map(([skillName, rating]) => (
-                            <li key={skillName}>
-                              {skillName.replace(/([A-Z])/g, ' $1')}: {typeof rating === 'object' ? JSON.stringify(rating) : rating}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
+                    {['batting', 'bowling', 'mindset', 'fitness'].map((group) => {
+                      const skills = ev.categories?.[group] || {};
+                      const feedback = ev.feedback?.[group];
 
-                    {Object.entries(ev.feedback || {}).map(([group, feedback]) => (
-                      <div key={group} className="mt-4">
-                        <h4 className="text-md font-semibold text-gray-700 capitalize">{group} Feedback</h4>
-                        <p className="text-sm text-gray-700">Score: {feedback.score}</p>
-                        <p className="text-sm text-gray-700">Comments: {feedback.comments}</p>
-                      </div>
-                    ))}
+                      return (
+                        <div key={group} className="mt-4">
+                          <h4 className="text-md font-semibold text-gray-700 capitalize">{group}</h4>
+
+                          <ul className="list-disc ml-6 text-sm text-gray-700">
+                            {Object.entries(skills).map(([skillName, ratingObj]) => {
+                              const label = skillName.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                              const level = ratingObj?.level || 'N/A';
+                              return <li key={skillName}>{label}: {level}</li>;
+                            })}
+                          </ul>
+
+                          {feedback && (
+                            <div className="ml-2 mt-2 text-sm text-gray-700">
+                              <p><strong>Score:</strong> {feedback.score}</p>
+                              <p><strong>Comments:</strong> {feedback.comments}</p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
 
                     <div className="mt-4">
                       <p><strong>Your Response:</strong> {ev.playerResponse || 'No response yet'}</p>
