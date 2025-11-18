@@ -495,6 +495,14 @@ const PlayerDashboard = () => {
                       </div>
                     ))}
 
+                    {Object.entries(ev.feedback || {}).map(([group, feedback]) => (
+                      <div key={group} className="mt-4">
+                        <h4 className="text-md font-semibold text-gray-700 capitalize">{group} Feedback</h4>
+                        <p className="text-sm text-gray-700">Score: {feedback.score}</p>
+                        <p className="text-sm text-gray-700">Comments: {feedback.comments}</p>
+                      </div>
+                    ))}
+
                     <div className="mt-4">
                       <p><strong>Your Response:</strong> {ev.playerResponse || 'No response yet'}</p>
 
