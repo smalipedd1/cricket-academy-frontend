@@ -1,112 +1,151 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import NotificationBell from './NotificationBell';
 
+ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
+
 const PlayerDashboard = () => {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState({});
-  const [dob, setDob] = useState('');
+  const [dob, setDob] = useState(null);
   const [editMode, setEditMode] = useState(false);
+  const [contactUpdates, setContactUpdates] = useState({});
+  const [sessions, setSessions] = useState([]);
   const [feedback, setFeedback] = useState([]);
+  const [entries, setEntries] = useState([]);
   const [evaluations, setEvaluations] = useState([]);
+  const [skill, setSkill] = useState('batting');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [responseText, setResponseText] = useState('');
   const [selectedSessionId, setSelectedSessionId] = useState(null);
   const [evalResponseText, setEvalResponseText] = useState('');
   const [selectedEvalId, setSelectedEvalId] = useState(null);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [evalStartDate, setEvalStartDate] = useState('');
-  const [evalEndDate, setEvalEndDate] = useState('');
   const [feedbackStartDate, setFeedbackStartDate] = useState('');
   const [feedbackEndDate, setFeedbackEndDate] = useState('');
+  const [evalStartDate, setEvalStartDate] = useState('');
+  const [evalEndDate, setEvalEndDate] = useState('');
   const [showUnrespondedOnly, setShowUnrespondedOnly] = useState(false);
-  const [skill, setSkill] = useState('batting');
   const [activeSection, setActiveSection] = useState('profile');
 
   const token = localStorage.getItem('token');
 
-  useEffect(() => {
-    const savedSection = localStorage.getItem('activeSection');
-    if (savedSection) setActiveSection(savedSection);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('activeSection', activeSection);
-  }, [activeSection]);
+  const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
   useEffect(() => {
     axios
       .get('https://cricket-academy-backend.onrender.com/api/player/profile', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => {
-        console.log('✅ Player profile loaded:', res.data);
-        setProfile(res.data);
+      .then((res) => setProfile(res.data));
+
+    axios
+      .get('https://cricket-academy-backend.onrender.com/api/player/dob', {
+        headers: { Authorization: `Bearer ${token}` },
       })
-      .catch((err) => {
-        console.error('❌ Profile fetch error:', err.response?.data || err.message);
+      .then((res) => {
+        if (!res.data.dob) {
+          navigate('/enter-dob');
+        } else {
+          setDob(res.data.dob);
+        }
       });
+
+    axios
+      .get('https://cricket-academy-backend.onrender.com/api/player/sessions/upcoming', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setSessions(res.data));
+
+    axios
+      .get('https://cricket-academy-backend.onrender.com/api/player/feedback', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setFeedback(res.data));
+
+    axios
+      .get('https://cricket-academy-backend.onrender.com/api/player/performance-chart', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setEntries(res.data.entries));
   }, []);
 
   useEffect(() => {
-    if (!profile._id) {
-      console.warn('⏳ Waiting for profile._id before fetching evaluations');
-      return;
-    }
-
-    console.log('📥 Fetching evaluations for player:', profile._id);
+    if (!profile._id) return;
 
     axios
       .get(`https://cricket-academy-backend.onrender.com/api/evaluations/player/${profile._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => {
-        console.log('✅ Evaluations loaded:', res.data);
-        setEvaluations(res.data);
-      })
-      .catch((err) => {
-        console.error('❌ Evaluation fetch error:', err.response?.data || err.message);
-      });
+      .then((res) => setEvaluations(res.data));
   }, [profile._id]);
   const handleLogout = () => {
     localStorage.removeItem('token');
-    window.location.href = '/';
+    localStorage.removeItem('role');
+    navigate('/login', { replace: true });
   };
 
   const handleContactChange = (e) => {
-    setProfile({ ...profile, emailAddress: e.target.value });
+    setContactUpdates({ ...contactUpdates, [e.target.name]: e.target.value });
   };
 
   const handleContactSave = () => {
     axios
-      .put(
-        'https://cricket-academy-backend.onrender.com/api/player/update-contact',
-        { emailAddress: profile.emailAddress },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then(() => setEditMode(false))
-      .catch((err) => console.error('Contact update error:', err));
+      .patch('https://cricket-academy-backend.onrender.com/api/player/profile', contactUpdates, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        setProfile(res.data.player);
+        setEditMode(false);
+        setContactUpdates({});
+      })
+      .catch((err) => {
+        console.error('Update error:', err.response?.data || err.message);
+        alert('Failed to update profile.');
+      });
   };
 
   const handleResponseSubmit = (sessionId) => {
     axios
       .patch(
-        `https://cricket-academy-backend.onrender.com/api/player/respond/${sessionId}`,
-        { playerResponse: responseText },
+        `https://cricket-academy-backend.onrender.com/api/player/feedback-response/${sessionId}`,
+        { playerId: profile._id, responseText },
         { headers: { Authorization: `Bearer ${token}` } }
       )
       .then(() => {
-        setFeedback((prev) =>
-          prev.map((fb) =>
-            fb.sessionId === sessionId
-              ? { ...fb, playerResponse: responseText }
-              : fb
-          )
-        );
+        alert('Response submitted!');
         setResponseText('');
         setSelectedSessionId(null);
+        return axios.get('https://cricket-academy-backend.onrender.com/api/player/feedback', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
       })
-      .catch((err) => console.error('Response submit error:', err));
+      .then((res) => setFeedback(res.data))
+      .catch((err) => {
+        console.error('Response error:', err);
+        alert('Failed to submit response.');
+      });
   };
 
   const handleEvaluationResponseSubmit = (evaluationId) => {
@@ -130,6 +169,19 @@ const PlayerDashboard = () => {
       .catch((err) => console.error('Evaluation response error:', err));
   };
 
+  const filteredEntries = entries.filter((e) => {
+    const date = new Date(e.date);
+    return (
+      (!startDate || date >= new Date(startDate)) &&
+      (!endDate || date <= new Date(endDate))
+    );
+  });
+
+  const validEntries = filteredEntries.filter((e) => {
+    const rating = e.rating?.[skill];
+    return rating !== undefined && rating !== null && rating > 0;
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6 space-y-10">
       <div className="max-w-6xl mx-auto space-y-10">
@@ -143,7 +195,7 @@ const PlayerDashboard = () => {
           </button>
         </div>
 
-        {/* ✅ Section Toggle Buttons */}
+        {/* Section Toggle Buttons */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <button
             onClick={() => setActiveSection('profile')}
@@ -171,7 +223,7 @@ const PlayerDashboard = () => {
           </button>
         </div>
 
-        {/* 👤 Profile Section */}
+        {/* Profile Section */}
         {activeSection === 'profile' && (
           <div className="bg-white rounded-xl shadow p-6">
             <h2 className="text-2xl font-semibold text-blue-600 mb-4">My Profile</h2>
@@ -181,18 +233,7 @@ const PlayerDashboard = () => {
               {dob && (
                 <>
                   <p><strong>Date of Birth:</strong> {new Date(dob).toLocaleDateString()}</p>
-                  <p><strong>Age:</strong> {
-                    (() => {
-                      const birthDate = new Date(dob);
-                      const today = new Date();
-                      let age = today.getFullYear() - birthDate.getFullYear();
-                      const m = today.getMonth() - birthDate.getMonth();
-                      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                        age--;
-                      }
-                      return age;
-                    })()
-                  }</p>
+                  <p><strong>Age:</strong> {calculateAge(dob)}</p>
                 </>
               )}
               <p><strong>Role:</strong> {profile.role}</p>
@@ -309,7 +350,7 @@ const PlayerDashboard = () => {
                 </div>
               ))}
 
-            {feedback.length > 0 && (
+            {validEntries.length > 0 && (
               <div>
                 <h3 className="text-lg font-semibold text-gray-700 mb-2">Skill Progress Chart</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -338,29 +379,11 @@ const PlayerDashboard = () => {
                 </div>
                 <Line
                   data={{
-                    labels: feedback
-                      .filter((e) => {
-                        const date = new Date(e.sessionDate);
-                        return (
-                          (!startDate || date >= new Date(startDate)) &&
-                          (!endDate || date <= new Date(endDate)) &&
-                          e.rating?.[skill] > 0
-                        );
-                      })
-                      .map((e) => new Date(e.sessionDate).toLocaleDateString()),
+                    labels: validEntries.map((e) => new Date(e.date).toLocaleDateString()),
                     datasets: [
                       {
                         label: `${skill.charAt(0).toUpperCase() + skill.slice(1)} Progress`,
-                        data: feedback
-                          .filter((e) => {
-                            const date = new Date(e.sessionDate);
-                            return (
-                              (!startDate || date >= new Date(startDate)) &&
-                              (!endDate || date <= new Date(endDate)) &&
-                              e.rating?.[skill] > 0
-                            );
-                          })
-                          .map((e) => e.rating[skill]),
+                        data: validEntries.map((e) => e.rating[skill]),
                         borderColor: '#2563eb',
                         backgroundColor: 'rgba(37,99,235,0.1)',
                         tension: 0.3,
