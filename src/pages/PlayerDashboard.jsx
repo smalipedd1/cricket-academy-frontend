@@ -53,6 +53,14 @@ const PlayerDashboard = () => {
     return age;
   };
 
+  const getCategoryTarget = (age) => {
+    if (age < 11) return 15;
+    if (age < 13) return 30;
+    if (age < 15) return 45;
+    if (age < 17) return 60;
+    return 60;
+  };
+
   useEffect(() => {
     axios
       .get('https://cricket-academy-backend.onrender.com/api/player/profile', {
@@ -440,11 +448,13 @@ const PlayerDashboard = () => {
                 return (!start || date >= start) && (!end || date <= end);
               })
               .map((ev) => {
-                const target = 45;
-                const gapPercent = ev.totalRuns
-                  ? Math.round(((ev.totalRuns - target) / target) * 100)
-                  : 0;
-                const gameTimeStatus = ev.gamesPlayed >= 50 ? 'On Track' : 'Needs More Play';
+                const age = calculateAge(dob);
+                const target = getCategoryTarget(age);
+                const gapPercent = Math.round(((target - ev.gamesPlayed) / target) * 100);
+                const gameTime =
+                  gapPercent >= 80 ? 'Major Gap' :
+                  gapPercent >= 50 ? 'Need Some More' :
+                  'On Track';
 
                 return (
                   <div key={ev._id} className="border p-4 rounded bg-gray-50 space-y-4">
@@ -468,7 +478,7 @@ const PlayerDashboard = () => {
                       </div>
                       <div className="bg-blue-50 p-3 rounded shadow text-center">
                         <p className="text-sm text-gray-600">Game Time</p>
-                        <p className="text-xl font-bold text-blue-700">{gameTimeStatus}</p>
+                        <p className="text-xl font-bold text-blue-700">{gameTime}</p>
                       </div>
                     </div>
 
