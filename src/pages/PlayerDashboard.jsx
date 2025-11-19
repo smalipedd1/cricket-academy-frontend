@@ -26,15 +26,6 @@ const PlayerDashboard = () => {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    const savedSection = localStorage.getItem('activeSection');
-    if (savedSection) setActiveSection(savedSection);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('activeSection', activeSection);
-  }, [activeSection]);
-
-  useEffect(() => {
     axios
       .get('https://cricket-academy-backend.onrender.com/api/player/profile', {
         headers: { Authorization: `Bearer ${token}` },
@@ -70,6 +61,7 @@ const PlayerDashboard = () => {
       .then((res) => setEvaluations(res.data))
       .catch((err) => console.error('Evaluation fetch error:', err));
   }, [profile._id]);
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     window.location.href = '/';
@@ -98,15 +90,9 @@ const PlayerDashboard = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       )
       .then(() => {
-        setFeedback((prev) =>
-          prev.map((fb) =>
-            fb.sessionId === sessionId
-              ? { ...fb, playerResponse: responseText }
-              : fb
-          )
-        );
         setResponseText('');
         setSelectedSessionId(null);
+        window.location.reload();
       })
       .catch((err) => console.error('Response submit error:', err));
   };
@@ -119,15 +105,9 @@ const PlayerDashboard = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       )
       .then(() => {
-        setEvaluations((prev) =>
-          prev.map((ev) =>
-            ev._id === evaluationId
-              ? { ...ev, playerResponse: evalResponseText }
-              : ev
-          )
-        );
         setEvalResponseText('');
         setSelectedEvalId(null);
+        window.location.reload();
       })
       .catch((err) => console.error('Evaluation response error:', err));
   };
@@ -145,6 +125,7 @@ const PlayerDashboard = () => {
           </button>
         </div>
 
+        {/* 🔹 Section Tiles */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <button
             onClick={() => setActiveSection('profile')}
@@ -237,6 +218,7 @@ const PlayerDashboard = () => {
           <div className="bg-white rounded-xl shadow p-6 space-y-6">
             <h2 className="text-2xl font-semibold text-blue-600">Session Feedback</h2>
 
+            {/* 📅 Date Filter and Response Toggle */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <input
                 type="date"
@@ -260,6 +242,7 @@ const PlayerDashboard = () => {
                 <span className="text-sm text-gray-700">Show only unresponded</span>
               </label>
             </div>
+            {/* 📝 Feedback Entries */}
             {feedback
               .filter((fb) => {
                 const sessionDate = new Date(fb.sessionDate);
@@ -309,6 +292,7 @@ const PlayerDashboard = () => {
                 </div>
               ))}
 
+            {/* 📊 Skill Progress Chart — now at the bottom */}
             {feedback.length > 0 && (
               <div>
                 <h3 className="text-lg font-semibold text-gray-700 mb-2">Skill Progress Chart</h3>
