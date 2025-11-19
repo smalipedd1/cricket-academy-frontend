@@ -1,20 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  LineElement,
-  PointElement,
-  CategoryScale,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
 import NotificationBell from './NotificationBell';
-
-ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
 const PlayerDashboard = () => {
   const navigate = useNavigate();
@@ -24,11 +11,7 @@ const PlayerDashboard = () => {
   const [contactUpdates, setContactUpdates] = useState({});
   const [sessions, setSessions] = useState([]);
   const [feedback, setFeedback] = useState([]);
-  const [entries, setEntries] = useState([]);
   const [evaluations, setEvaluations] = useState([]);
-  const [skill, setSkill] = useState('batting');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
   const [responseText, setResponseText] = useState('');
   const [selectedSessionId, setSelectedSessionId] = useState(null);
   const [evalResponseText, setEvalResponseText] = useState('');
@@ -91,12 +74,6 @@ const PlayerDashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setFeedback(res.data));
-
-    axios
-      .get('https://cricket-academy-backend.onrender.com/api/player/performance-chart', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setEntries(res.data.entries));
   }, []);
 
   useEffect(() => {
@@ -133,62 +110,6 @@ const PlayerDashboard = () => {
         alert('Failed to update profile.');
       });
   };
-
-  const handleResponseSubmit = (sessionId) => {
-    axios
-      .patch(
-        `https://cricket-academy-backend.onrender.com/api/player/feedback-response/${sessionId}`,
-        { playerId: profile._id, responseText },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then(() => {
-        alert('Response submitted!');
-        setResponseText('');
-        setSelectedSessionId(null);
-        return axios.get('https://cricket-academy-backend.onrender.com/api/player/feedback', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      })
-      .then((res) => setFeedback(res.data))
-      .catch((err) => {
-        console.error('Response error:', err);
-        alert('Failed to submit response.');
-      });
-  };
-
-  const handleEvaluationResponseSubmit = (evaluationId) => {
-    axios
-      .post(
-        `https://cricket-academy-backend.onrender.com/api/evaluations/${evaluationId}/respond`,
-        { playerResponse: evalResponseText },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then(() => {
-        setEvaluations((prev) =>
-          prev.map((ev) =>
-            ev._id === evaluationId
-              ? { ...ev, playerResponse: evalResponseText }
-              : ev
-          )
-        );
-        setEvalResponseText('');
-        setSelectedEvalId(null);
-      })
-      .catch((err) => console.error('Evaluation response error:', err));
-  };
-
-  const filteredEntries = entries.filter((e) => {
-    const date = new Date(e.date);
-    return (
-      (!startDate || date >= new Date(startDate)) &&
-      (!endDate || date <= new Date(endDate))
-    );
-  });
-
-  const validEntries = filteredEntries.filter((e) => {
-    const rating = e.rating?.[skill];
-    return rating !== undefined && rating !== null && rating > 0;
-  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6 space-y-10">
@@ -357,67 +278,6 @@ const PlayerDashboard = () => {
                   )}
                 </div>
               ))}
-
-            {validEntries.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">Skill Progress Chart</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <select
-                    value={skill}
-                    onChange={(e) => setSkill(e.target.value)}
-                    className="border px-4 py-2 rounded"
-                  >
-                    <option value="batting">Batting</option>
-                    <option value="bowling">Bowling</option>
-                    <option value="wicketkeeping">Wicketkeeping</option>
-                    <option value="fielding">Fielding</option>
-                  </select>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="border px-4 py-2 rounded"
-                  />
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="border px-4 py-2 rounded"
-                  />
-                </div>
-                <Line
-                  data={{
-                    labels: validEntries.map((e) => new Date(e.date).toLocaleDateString()),
-                    datasets: [
-                      {
-                        label: `${skill.charAt(0).toUpperCase() + skill.slice(1)} Progress`,
-                        data: validEntries.map((e) => e.rating[skill]),
-                        borderColor: '#2563eb',
-                        backgroundColor: 'rgba(37,99,235,0.1)',
-                        tension: 0.3,
-                      },
-                    ],
-                  }}
-                  options={{
-                    responsive: true,
-                    scales: {
-                      y: {
-                        min: 1,
-                        max: 10,
-                        ticks: { stepSize: 1 },
-                        title: { display: true, text: 'Rating (1–10)' },
-                      },
-                      x: {
-                        title: { display: true, text: 'Session Date' },
-                      },
-                    },
-                    plugins: {
-                      legend: { display: true, position: 'top' },
-                    },
-                  }}
-                />
-              </div>
-            )}
           </div>
         )}
         {/* 📋 Coach Evaluations Section */}
@@ -482,7 +342,6 @@ const PlayerDashboard = () => {
                       </div>
                     </div>
 
-                    {/* Section-level feedback + flat skill ratings */}
                     {['batting', 'bowling', 'mindset', 'fitness'].map((group) => {
                       const feedback = ev.feedback?.[group];
                       const skills = ev.categories?.[group];
