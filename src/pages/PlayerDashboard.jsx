@@ -85,6 +85,7 @@ const PlayerDashboard = () => {
       })
       .then((res) => setEvaluations(res.data));
   }, [profile._id]);
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
@@ -111,6 +112,47 @@ const PlayerDashboard = () => {
       });
   };
 
+  const handleResponseSubmit = (sessionId) => {
+    axios
+      .patch(
+        `https://cricket-academy-backend.onrender.com/api/player/feedback/${sessionId}`,
+        { playerResponse: responseText },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .then(() => {
+        const updated = feedback.map((fb) =>
+          fb.sessionId === sessionId ? { ...fb, playerResponse: responseText } : fb
+        );
+        setFeedback(updated);
+        setResponseText('');
+        setSelectedSessionId(null);
+      })
+      .catch((err) => {
+        console.error('Response submit error:', err.response?.data || err.message);
+        alert('Failed to submit response.');
+      });
+  };
+
+  const handleEvaluationResponseSubmit = (evalId) => {
+    axios
+      .patch(
+        `https://cricket-academy-backend.onrender.com/api/evaluations/${evalId}`,
+        { playerResponse: evalResponseText },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .then(() => {
+        const updated = evaluations.map((ev) =>
+          ev._id === evalId ? { ...ev, playerResponse: evalResponseText } : ev
+        );
+        setEvaluations(updated);
+        setEvalResponseText('');
+        setSelectedEvalId(null);
+      })
+      .catch((err) => {
+        console.error('Evaluation response error:', err.response?.data || err.message);
+        alert('Failed to submit evaluation response.');
+      });
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6 space-y-10">
       <div className="max-w-6xl mx-auto space-y-10">
@@ -280,6 +322,7 @@ const PlayerDashboard = () => {
               ))}
           </div>
         )}
+
         {/* 📋 Coach Evaluations Section */}
         {activeSection === 'evaluations' && (
           <div className="bg-white rounded-xl shadow p-6 space-y-6">
