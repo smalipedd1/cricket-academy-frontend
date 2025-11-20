@@ -287,7 +287,7 @@ const PlayerDashboard = () => {
               View your full evaluation history, coach feedback, and skill breakdowns on a dedicated page.
             </p>
             <button
-              onClick={() => navigate('/player/evaluations')}
+              onClick={() => navigate(`/player/evaluation/${profile._id}`)}
               className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700"
             >
               Go to Coach Evaluations
