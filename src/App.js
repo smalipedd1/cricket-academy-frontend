@@ -60,13 +60,10 @@ function AppRoutes() {
 	<Route path="/enter-dob" element={<EnterDOB />} />
 	<Route path="/player-dashboard" element={<PlayerDashboard />} />
 	<Route path="/coach/evaluation" element={<CoachEvaluationForm />} />
-	<Route
-  path="/coach/evaluations/player"
-  element={token && role === 'coach' ? <CoachPlayerEvaluations viewer="coach" /> : <Navigate to="/login" />}
+	<Route path="/coach/evaluations/player" element={token && role === 'coach' ? <CoachPlayerEvaluations viewer="coach" /> : <Navigate to="/login" />} />
+	<Route path="/player/evaluation/:id" element={token && role === 'player' ? <CoachPlayerEvaluations viewer="player" /> : <Navigate to="/login" />}
 />
-	<Route
-  path="/player/evaluation/:id"
-  element={token && role === 'player' ? <CoachPlayerEvaluations viewer="player" /> : <Navigate to="/login" />}
+	<Route path="/player/evaluations" element={token && role === 'player' ? <CoachPlayerEvaluations viewer="player" /> : <Navigate to="/login" />}
 />
     </Routes>
   );
