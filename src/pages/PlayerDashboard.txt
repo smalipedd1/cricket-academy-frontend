@@ -102,8 +102,9 @@ const PlayerDashboard = () => {
   };
 
   const handleResponseSubmit = (sessionId) => {
-    axios.patch(
-  `https://cricket-academy-backend.onrender.com/api/player/feedback-response/${sessionId}`,
+    axios
+      .patch(
+        `https://cricket-academy-backend.onrender.com/api/player/feedback/${sessionId}`,
         { playerResponse: responseText },
         { headers: { Authorization: `Bearer ${token}` } }
       )
