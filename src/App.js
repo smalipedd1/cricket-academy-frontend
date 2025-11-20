@@ -14,9 +14,6 @@ import EnterDOB from './pages/EnterDOB';
 import CoachEvaluationForm from './pages/CoachEvaluationForm';
 import CoachPlayerEvaluations from './pages/CoachPlayerEvaluations';
 
-
-
-
 function AppRoutes() {
   const [token, setToken] = useState(null);
   const [role, setRole] = useState(null);
@@ -31,7 +28,7 @@ function AppRoutes() {
     setLoading(false);
   }, [location.pathname]);
 
-  if (loading) return null; // ⏳ Prevent premature route rendering
+  if (loading) return null;
 
   return (
     <Routes>
@@ -50,25 +47,26 @@ function AppRoutes() {
         path="/player/dashboard"
         element={token && role === 'player' ? <PlayerDashboard /> : <Navigate to="/login" />}
       />
-
       <Route path="/admin/sessions" element={<SessionList />} />
       <Route path="/coach/feedback/:sessionId" element={<CoachFeedbackForm />} />
       <Route path="/coach/feedback-summary" element={<CoachFeedbackSummary />} />
       <Route path="/coach/player-list" element={<CoachPlayerList />} />
       <Route path="/coach/player/:id" element={<CoachPlayerProfile />} />
       <Route path="/player/session/:id" element={<PlayerSessionView />} />
-	<Route path="/enter-dob" element={<EnterDOB />} />
-	<Route path="/player-dashboard" element={<PlayerDashboard />} />
-	<Route path="/coach/evaluation" element={<CoachEvaluationForm />} />
-	<Route path="/coach/evaluations/player" element={token && role === 'coach' ? <CoachPlayerEvaluations viewer="coach" /> : <Navigate to="/login" />} />
-	<Route path="/player/evaluation/:id" element={token && role === 'player' ? <CoachPlayerEvaluations viewer="player" /> : <Navigate to="/login" />}
-/>
-	<Route path="/player/evaluations" element={token && role === 'player' ? <CoachPlayerEvaluations viewer="player" /> : <Navigate to="/login" />}
-/>
+      <Route path="/enter-dob" element={<EnterDOB />} />
+      <Route path="/player-dashboard" element={<PlayerDashboard />} />
+      <Route path="/coach/evaluation" element={<CoachEvaluationForm />} />
+      <Route
+        path="/coach/evaluations/player"
+        element={token && role === 'coach' ? <CoachPlayerEvaluations viewer="coach" /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/player/evaluation/:evaluationId"
+        element={token && role === 'player' ? <CoachPlayerEvaluations viewer="player" /> : <Navigate to="/login" />}
+      />
     </Routes>
   );
 }
-
 function App() {
   return (
     <Router>

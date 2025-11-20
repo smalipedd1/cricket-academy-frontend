@@ -7,7 +7,7 @@ const BASE_URL = 'https://cricket-academy-backend.onrender.com';
 const CoachPlayerEvaluations = ({ viewer }) => {
   const role = viewer || localStorage.getItem('role');
   const token = localStorage.getItem('token');
-  const { id } = useParams();
+  const { evaluationId } = useParams();
 
   const [evaluations, setEvaluations] = useState([]);
   const [playerResponse, setPlayerResponse] = useState('');
@@ -19,7 +19,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
         const endpoint =
           role === 'coach'
             ? `${BASE_URL}/api/evaluations/coach-view`
-            : `${BASE_URL}/api/evaluations/player/${id}`;
+            : `${BASE_URL}/api/evaluations/${evaluationId}`;
 
         const res = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${token}` },
@@ -35,7 +35,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
     };
 
     fetchEvaluations();
-  }, [id, role, token]);
+  }, [evaluationId, role, token]);
 
   const handleSubmitResponse = async (evaluationId) => {
     try {
