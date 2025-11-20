@@ -74,7 +74,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
   };
 
   const filteredEvaluations = evaluations.filter((e) => {
-    const evalDate = new Date(e.dateOfEvaluation);
+    const evalDate = new Date(e.createdAt || e.dateOfEvaluation);
     const afterStart = startDate ? evalDate >= new Date(startDate) : true;
     const beforeEnd = endDate ? evalDate <= new Date(endDate) : true;
     const matchesPlayer =
@@ -148,9 +148,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
                 >
                   <p className="text-sm">
                     {role === 'coach' && <span>{e.playerName} — </span>}
-                    {e.dateOfEvaluation
-                      ? new Date(e.dateOfEvaluation).toLocaleDateString()
-                      : '—'}
+                    {new Date(e.createdAt || e.dateOfEvaluation).toLocaleDateString()}
                   </p>
                 </li>
               ))}
@@ -163,9 +161,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
             <p className="text-gray-500">Select an evaluation to view details.</p>
           ) : (
             <>
-              <p><strong>Evaluation Date:</strong> {selectedEvaluation.dateOfEvaluation
-                ? new Date(selectedEvaluation.dateOfEvaluation).toLocaleDateString()
-                : '—'}</p>
+              <p><strong>Evaluation Date:</strong> {new Date(selectedEvaluation.createdAt || selectedEvaluation.dateOfEvaluation).toLocaleDateString()}</p>
               <p><strong>Coach:</strong> {selectedEvaluation.coachName}</p>
               {role === 'coach' && (
                 <p><strong>Player:</strong> {selectedEvaluation.playerName}</p>
