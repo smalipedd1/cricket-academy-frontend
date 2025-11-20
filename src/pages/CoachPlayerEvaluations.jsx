@@ -74,9 +74,9 @@ const CoachPlayerEvaluations = ({ viewer }) => {
   };
 
   const filteredEvaluations = evaluations.filter((e) => {
-    const evalDate = new Date(e.createdAt || e.dateOfEvaluation);
-    const afterStart = startDate ? evalDate >= new Date(startDate) : true;
-    const beforeEnd = endDate ? evalDate <= new Date(endDate) : true;
+    const created = new Date(e.createdAt);
+    const afterStart = startDate ? created >= new Date(startDate) : true;
+    const beforeEnd = endDate ? created <= new Date(endDate) : true;
     const matchesPlayer =
       role === 'coach'
         ? e.playerName?.toLowerCase().includes(playerFilter.toLowerCase())
@@ -148,7 +148,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
                 >
                   <p className="text-sm">
                     {role === 'coach' && <span>{e.playerName} — </span>}
-                    {new Date(e.createdAt || e.dateOfEvaluation).toLocaleDateString()}
+                    {new Date(e.createdAt).toLocaleDateString()}
                   </p>
                 </li>
               ))}
@@ -161,7 +161,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
             <p className="text-gray-500">Select an evaluation to view details.</p>
           ) : (
             <>
-              <p><strong>Evaluation Date:</strong> {new Date(selectedEvaluation.createdAt || selectedEvaluation.dateOfEvaluation).toLocaleDateString()}</p>
+              <p><strong>Evaluation Date:</strong> {new Date(selectedEvaluation.createdAt).toLocaleDateString()}</p>
               <p><strong>Coach:</strong> {selectedEvaluation.coachName}</p>
               {role === 'coach' && (
                 <p><strong>Player:</strong> {selectedEvaluation.playerName}</p>
@@ -174,7 +174,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
               {['batting', 'bowling', 'mindset', 'fitness'].map((category) => {
                 const catSection = selectedEvaluation.categories?.[category];
                 const catFeedback = selectedEvaluation.feedback?.[category];
-                const catSkills = catSection;
+                const catSkills = catSection?.skills;
                 if (!catSkills || typeof catSkills !== 'object') return null;
 
                 return (
@@ -183,9 +183,9 @@ const CoachPlayerEvaluations = ({ viewer }) => {
                     <p><strong>Score:</strong> {catFeedback?.score ?? '—'}</p>
                     <p><strong>Comments:</strong> {catFeedback?.comments || '—'}</p>
                     <ul className="list-disc list-inside text-sm text-gray-800 mt-2 space-y-1">
-                      {Object.entries(catSkills).map(([skill, level]) => (
+                      {Object.entries(catSkills).map(([skill, obj]) => (
                         <li key={skill}>
-                          <span className="font-medium capitalize">{skill}:</span> {level || '—'}
+                          <span className="font-medium capitalize">{skill}:</span> {obj?.level || '—'}
                         </li>
                       ))}
                     </ul>
