@@ -4,6 +4,16 @@ import axios from 'axios';
 
 const BASE_URL = 'https://cricket-academy-backend.onrender.com';
 
+const decodeToken = (token) => {
+  try {
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded?.id || null;
+  } catch {
+    return null;
+  }
+};
+
 const CoachPlayerEvaluations = ({ viewer }) => {
   const role = viewer || localStorage.getItem('role');
   const token = localStorage.getItem('token');
@@ -17,14 +27,13 @@ const CoachPlayerEvaluations = ({ viewer }) => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [playerFilter, setPlayerFilter] = useState('');
-
   useEffect(() => {
     const fetchEvaluations = async () => {
       try {
         const endpoint =
           role === 'coach'
             ? `${BASE_URL}/api/evaluations/coach-view`
-            : `${BASE_URL}/api/evaluations/player/${localStorage.getItem('userId')}`;
+            : `${BASE_URL}/api/evaluations/player/${decodeToken(token)}`;
 
         const res = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${token}` },
