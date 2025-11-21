@@ -198,8 +198,8 @@ const AdminDashboard = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-purple-700">Session Feedback</h3>
-                    <p className="text-sm text-gray-600">Log or update feedback for sessions.</p>
+                    <h3 className="text-lg font-semibold text-purple-700">Manage Sessions</h3>
+                    <p className="text-sm text-gray-600">Create or update coaching sessions</p>
                   </div>
                 </div>
               </div>
