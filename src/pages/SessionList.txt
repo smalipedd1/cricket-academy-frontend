@@ -68,6 +68,7 @@ const SessionList = () => {
     fetchSessions();
     fetchCoachesAndPlayers();
   }, []);
+
   const handleCreateSession = (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
@@ -78,14 +79,6 @@ const SessionList = () => {
       coach: newSession.coachId,
       players: newSession.playerIds,
       isRecurring: newSession.isRecurring,
-      status: 'Active',
-      notes: '',
-      recurrencePattern: newSession.isRecurring
-        ? {
-            dayOfWeek: new Date(newSession.date).toLocaleDateString('en-US', { weekday: 'long' }),
-            recurrenceGroupId: `${newSession.coachId}-${Date.now()}`,
-          }
-        : undefined,
     };
 
     const sessionDates = [new Date(newSession.date)];
