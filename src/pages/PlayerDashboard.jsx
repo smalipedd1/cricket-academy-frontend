@@ -31,6 +31,178 @@ const PlayerDashboard = () => {
     }
     return age;
   };
+
+  useEffect(() => {
+    axios.get('https://cricket-academy-backend.onrender.com/api/player/profile', {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then((res) => setProfile(res.data));
+
+    axios.get('https://cricket-academy-backend.onrender.com/api/player/dob', {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then((res) => {
+      if (!res.data.dob) {
+        navigate('/enter-dob');
+      } else {
+        setDob(res.data.dob);
+      }
+    });
+
+    axios.get('https://cricket-academy-backend.onrender.com/api/player/sessions/upcoming', {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then((res) => setSessions(res.data));
+
+    axios.get('https://cricket-academy-backend.onrender.com/api/player/feedback', {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then((res) => setFeedback(res.data));
+  }, []);
+
+  useEffect(() => {
+    if (profile._id) {
+      axios.get(`https://cricket-academy-backend.onrender.com/api/evaluations/player/${profile._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setEvaluations(res.data))
+      .catch((err) => console.error('Evaluation fetch error:', err));
+    }
+  }, [profile._id]);
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    navigate('/login', { replace: true });
+  };
+
+  const handleContactChange = (e) => {
+    setContactUpdates({ ...contactUpdates, [e.target.name]: e.target.value });
+  };
+
+  const handleContactSave = () => {
+    axios.patch('https://cricket-academy-backend.onrender.com/api/player/profile', contactUpdates, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      setProfile(res.data.player);
+      setEditMode(false);
+      setContactUpdates({});
+    })
+    .catch((err) => {
+      console.error('Update error:', err.response?.data || err.message);
+      alert('Failed to update profile.');
+    });
+  };
+
+  const handleResponseSubmit = (sessionId) => {
+    axios.patch(
+      `https://cricket-academy-backend.onrender.com/api/player/feedback-response/${sessionId}`,
+      { responseText },   // ✅ corrected payload
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    .then(() => {
+      const updated = feedback.map((fb) =>
+        fb.sessionId === sessionId ? { ...fb, playerResponse: responseText } : fb
+      );
+      setFeedback(updated);
+      setResponseText('');
+      setSelectedSessionId(null);
+    })
+    .catch((err) => {
+      console.error('Response submit error:', err.response?.data || err.message);
+      alert('Failed to submit response.');
+    });
+  };
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6 space-y-10">
+      <div className="max-w-6xl mx-auto space-y-10">
+        <div className="flex justify-end items-center space-x-4">
+          <NotificationBell />
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          >
+            Logout
+          </button>
+        </div>
+
+        {/* Section Toggle Buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <button
+            onClick={() => setActiveSection('profile')}
+            className={`p-6 rounded-xl shadow text-center font-semibold ${
+              activeSection === 'profile' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'
+            }`}
+          >
+            🧍 My Profile
+          </button>
+          <button
+            onClick={() => setActiveSection('feedback')}
+            className={`p-6 rounded-xl shadow text-center font-semibold ${
+              activeSection === 'feedback' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'
+            }`}
+          >
+            🧠 Session Feedback
+          </button>
+          <button
+            onClick={() => {
+              if (evaluations.length > 0) {
+                navigate(`/player/evaluation/${evaluations[0]._id}`);
+              } else {
+                alert('No evaluations available yet.');
+              }
+            }}
+            className="p-6 rounded-xl shadow text-center font-semibold bg-white text-blue-600 hover:bg-blue-50"
+          >
+            📋 Coach Evaluations
+          </button>
+        </div>
+        {/* Profile Section */}
+        {activeSection === 'profile' && (
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-2xl font-semibold text-blue-600 mb-4">My Profile</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <p><strong>First Name:</strong> {profile.firstName}</p>
+              <p><strong>Last Name:</strong> {profile.lastName}</p>
+              {dob && (
+                <>
+                  <p><strong>Date of Birth:</strong> {new Date(dob).toLocaleDateString()}</p>
+                  <p><strong>Age:</strong> {calculateAge(dob)}</p>
+                </>
+              )}
+              <p><strong>Role:</strong> {profile.role}</p>
+              <p><strong>Academy Level:</strong> {profile.academyLevel}</p>
+              <p><strong>CricClubs ID:</strong> {profile.cricclubsID}</p>
+              <p><strong>Status:</strong> {profile.status}</p>
+
+              {editMode ? (
+                <>
+                  <input
+                    type="email"
+                    name="emailAddress"
+                    placeholder="Email"
+                    defaultValue={profile.emailAddress}
+                    onChange={handleContactChange}
+                    className="border px-3 py-2 rounded"
+                  />
+                  <button
+                    onClick={handleContactSave}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Save
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p><strong>Email:</strong> {profile.emailAddress}</p>
+                  <button
+                    onClick={() => setEditMode(true)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  >
+                    Edit Email
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+        {/* 🧠 Session Feedback Section */}
         {activeSection === 'feedback' && (
           <div className="bg-white rounded-xl shadow p-6 space-y-6">
             <h2 className="text-2xl font-semibold text-blue-600">Session Feedback</h2>
@@ -107,55 +279,6 @@ const PlayerDashboard = () => {
                   )}
                 </div>
               ))}
-          </div>
-        )}
-        {/* Profile Section */}
-        {activeSection === 'profile' && (
-          <div className="bg-white rounded-xl shadow p-6">
-            <h2 className="text-2xl font-semibold text-blue-600 mb-4">My Profile</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <p><strong>First Name:</strong> {profile.firstName}</p>
-              <p><strong>Last Name:</strong> {profile.lastName}</p>
-              {dob && (
-                <>
-                  <p><strong>Date of Birth:</strong> {new Date(dob).toLocaleDateString()}</p>
-                  <p><strong>Age:</strong> {calculateAge(dob)}</p>
-                </>
-              )}
-              <p><strong>Role:</strong> {profile.role}</p>
-              <p><strong>Academy Level:</strong> {profile.academyLevel}</p>
-              <p><strong>CricClubs ID:</strong> {profile.cricclubsID}</p>
-              <p><strong>Status:</strong> {profile.status}</p>
-
-              {editMode ? (
-                <>
-                  <input
-                    type="email"
-                    name="emailAddress"
-                    placeholder="Email"
-                    defaultValue={profile.emailAddress}
-                    onChange={handleContactChange}
-                    className="border px-3 py-2 rounded"
-                  />
-                  <button
-                    onClick={handleContactSave}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  >
-                    Save
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p><strong>Email:</strong> {profile.emailAddress}</p>
-                  <button
-                    onClick={() => setEditMode(true)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  >
-                    Edit Email
-                  </button>
-                </>
-              )}
-            </div>
           </div>
         )}
       </div>
