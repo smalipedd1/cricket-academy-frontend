@@ -96,7 +96,7 @@ const PlayerDashboard = () => {
       { responseText },   // ✅ corrected payload
       { headers: { Authorization: `Bearer ${token}` } }
     )
-    .then(() => {
+    .then((res) => {
       const updated = feedback.map((fb) =>
         fb.sessionId === sessionId ? { ...fb, playerResponse: responseText } : fb
       );
