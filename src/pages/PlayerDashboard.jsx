@@ -103,6 +103,8 @@ const PlayerDashboard = () => {
       setFeedback(updated);
       setResponseText('');
       setSelectedSessionId(null);
+alert(res.data.message || 'Response saved successfully!');
+
     })
     .catch((err) => {
       console.error('Response submit error:', err.response?.data || err.message);
