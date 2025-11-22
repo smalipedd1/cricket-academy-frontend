@@ -28,7 +28,7 @@ const AdminDashboard = () => {
     }
 
     axios
-      .get('https://cricket-academy-backend.onrender.com/api/dashboard?role=admin', {
+      .get('https://cricket-academy-backend.onrender.com/api/admin/dashboard?role=admin', {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setData(res.data))
