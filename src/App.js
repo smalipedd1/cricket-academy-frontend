@@ -13,6 +13,7 @@ import PlayerSessionView from './pages/PlayerSessionView';
 import EnterDOB from './pages/EnterDOB';
 import CoachEvaluationForm from './pages/CoachEvaluationForm';
 import CoachPlayerEvaluations from './pages/CoachPlayerEvaluations';
+import ChangePassword from './pages/ChangePassword';
 
 function AppRoutes() {
   const [token, setToken] = useState(null);
@@ -64,6 +65,14 @@ function AppRoutes() {
         path="/player/evaluation/:evaluationId"
         element={token && role === 'player' ? <CoachPlayerEvaluations viewer="player" /> : <Navigate to="/login" />}
       />
+<Route
+  path="/coach/change-password"
+  element={token && role === 'coach' ? <ChangePassword /> : <Navigate to="/login" />}
+/>
+<Route
+  path="/player/change-password"
+  element={token && role === 'player' ? <ChangePassword /> : <Navigate to="/login" />}
+/>
     </Routes>
   );
 }
