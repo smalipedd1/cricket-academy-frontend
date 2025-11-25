@@ -14,7 +14,7 @@ import EnterDOB from './pages/EnterDOB';
 import CoachEvaluationForm from './pages/CoachEvaluationForm';
 import CoachPlayerEvaluations from './pages/CoachPlayerEvaluations';
 import ChangePassword from './pages/ChangePassword';
-import Layout from './components/Layout';
+import Layout from './pages/Layout';
 
 function AppRoutes() {
   const [token, setToken] = useState(null);
