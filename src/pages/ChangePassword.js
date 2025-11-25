@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 function ChangePassword() {
@@ -6,6 +7,8 @@ function ChangePassword() {
   const [newPassword, setNewPassword] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const role = localStorage.getItem('role'); // 'coach' or 'player'
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,6 +87,15 @@ function ChangePassword() {
     textAlign: 'center'
   };
 
+  const linkStyle = {
+    display: 'block',
+    marginTop: '20px',
+    textAlign: 'center',
+    color: '#007bff',
+    textDecoration: 'none',
+    fontWeight: '500'
+  };
+
   return (
     <div style={containerStyle}>
       <h2 style={titleStyle}>Change Password</h2>
@@ -116,6 +128,18 @@ function ChangePassword() {
 
         {message && <div style={feedbackStyle}>{message}</div>}
       </form>
+
+      {/* Back to dashboard link */}
+      {role === 'coach' && (
+        <Link to="/coach/dashboard" style={linkStyle}>
+          ⬅ Back to Coach Dashboard
+        </Link>
+      )}
+      {role === 'player' && (
+        <Link to="/player/dashboard" style={linkStyle}>
+          ⬅ Back to Player Dashboard
+        </Link>
+      )}
     </div>
   );
 }
