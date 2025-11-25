@@ -54,7 +54,6 @@ const CoachDashboard = () => {
     localStorage.removeItem('role');
     navigate('/login', { replace: true });
   };
-
   return (
     <div className="p-6 max-w-6xl mx-auto bg-white rounded shadow space-y-6">
       <div className="flex justify-between items-center mb-6">
@@ -69,6 +68,7 @@ const CoachDashboard = () => {
           </button>
         </div>
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
         <div
           onClick={() => {
@@ -129,18 +129,7 @@ const CoachDashboard = () => {
           <h2 className="text-xl font-semibold text-indigo-700">View Evaluations</h2>
           <p className="text-gray-600 mt-1 text-sm">Browse submitted evaluations by player</p>
         </div>
-
-        {/* 🔑 New Change Password Card */}
-        <div
-          onClick={() => navigate('/coach/change-password')}
-          className="bg-red-100 hover:bg-red-200 cursor-pointer p-6 rounded shadow text-center"
-        >
-          <div className="text-4xl mb-2">🔒</div>
-          <h2 className="text-xl font-semibold text-red-700">Change Password</h2>
-          <p className="text-gray-600 mt-1 text-sm">Update your login credentials securely</p>
-        </div>
       </div>
-
       {showPlayers && (
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-gray-800">All Players</h2>
@@ -193,7 +182,7 @@ const CoachDashboard = () => {
                 <p className="text-gray-600 mb-2">Focus Area: {session.focusArea}</p>
                 <p className="text-gray-600 mb-4">Players Assigned: {session.playerCount}</p>
 
-                                <button
+                <button
                   onClick={() => navigate(`/coach/feedback/${session._id}`)}
                   className={`px-6 py-2 rounded ${
                     session.feedbackStatus === 'Complete'
