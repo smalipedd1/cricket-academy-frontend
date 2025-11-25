@@ -65,7 +65,6 @@ const PlayerDashboard = () => {
       .catch((err) => console.error('Evaluation fetch error:', err));
     }
   }, [profile._id]);
-
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
@@ -94,7 +93,7 @@ const PlayerDashboard = () => {
   const handleResponseSubmit = (sessionId) => {
     axios.patch(
       `https://cricket-academy-backend.onrender.com/api/player/feedback-response/${sessionId}`,
-      { responseText },
+      { responseText },   // ✅ corrected payload
       { headers: { Authorization: `Bearer ${token}` } }
     )
     .then((res) => {
@@ -104,7 +103,8 @@ const PlayerDashboard = () => {
       setFeedback(updated);
       setResponseText('');
       setSelectedSessionId(null);
-      alert(res.data.message || 'Response saved successfully!');
+alert(res.data.message || 'Response saved successfully!');
+
     })
     .catch((err) => {
       console.error('Response submit error:', err.response?.data || err.message);
@@ -125,7 +125,7 @@ const PlayerDashboard = () => {
         </div>
 
         {/* Section Toggle Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <button
             onClick={() => setActiveSection('profile')}
             className={`p-6 rounded-xl shadow text-center font-semibold ${
@@ -153,13 +153,6 @@ const PlayerDashboard = () => {
             className="p-6 rounded-xl shadow text-center font-semibold bg-white text-blue-600 hover:bg-blue-50"
           >
             📋 Coach Evaluations
-          </button>
-          {/* 🔑 New Change Password Button */}
-          <button
-            onClick={() => navigate('/player/change-password')}
-            className="p-6 rounded-xl shadow text-center font-semibold bg-white text-red-600 hover:bg-red-50"
-          >
-            🔒 Change Password
           </button>
         </div>
         {/* Profile Section */}
@@ -211,11 +204,11 @@ const PlayerDashboard = () => {
             </div>
           </div>
         )}
-
         {/* 🧠 Session Feedback Section */}
         {activeSection === 'feedback' && (
           <div className="bg-white rounded-xl shadow p-6 space-y-6">
             <h2 className="text-2xl font-semibold text-blue-600">Session Feedback</h2>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <input
                 type="date"
