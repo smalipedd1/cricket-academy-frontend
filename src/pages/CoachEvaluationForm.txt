@@ -121,36 +121,38 @@ const CoachEvaluationForm = () => {
     setDerivedStats({ target, gapPercent, gameTime });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Replace your existing handleSubmit with this:
+const handleSubmit = async (status = 'Submitted') => {
+  if (!coachProfile._id) {
+    alert('Coach profile not loaded yet. Please wait a moment and try again.');
+    return;
+  }
 
-    if (!coachProfile._id) {
-      alert('Coach profile not loaded yet. Please wait a moment and try again.');
-      return;
-    }
+  try {
+    await axios.post(
+      'https://cricket-academy-backend.onrender.com/api/evaluations',
+      {
+        player: selectedPlayerId,
+        coach: coachProfile._id,
+        feedback,
+        categories,
+        coachComments,
+        gamesPlayed: parseInt(manualStats.gamesPlayed) || 0,
+        totalRuns: parseInt(manualStats.totalRuns) || 0,
+        totalWickets: parseInt(manualStats.totalWickets) || 0,
+        status, // <-- Draft or Submitted
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    alert(status === 'Draft' ? 'Draft saved!' : 'Evaluation submitted!');
+    navigate('/coach/dashboard');
+  } catch (err) {
+    console.error('Evaluation submission error:', err.response?.data || err.message || err.toString());
+    alert('Failed to save evaluation.');
+  }
+};
 
-    try {
-      await axios.post(
-        'https://cricket-academy-backend.onrender.com/api/evaluations',
-        {
-          player: selectedPlayerId,
-          coach: coachProfile._id,
-          feedback,
-          categories,
-          coachComments,
-          gamesPlayed: parseInt(manualStats.gamesPlayed) || 0,
-          totalRuns: parseInt(manualStats.totalRuns) || 0,
-          totalWickets: parseInt(manualStats.totalWickets) || 0,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      alert('Evaluation submitted!');
-      navigate('/coach/dashboard');
-    } catch (err) {
-      console.error('Evaluation submission error:', err.response?.data || err.message || err.toString());
-      alert('Failed to submit evaluation.');
-    }
-  };
+
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow space-y-6">
       <div className="flex justify-between items-center">
@@ -361,19 +363,33 @@ const CoachEvaluationForm = () => {
           />
         </div>
 
-        <div className="text-right">
-          <button
-            type="submit"
-            disabled={!coachProfile._id || !selectedPlayerId}
-            className={`px-6 py-2 rounded transition ${
-              !coachProfile._id || !selectedPlayerId
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-            }`}
-          >
-            Submit Evaluation
-          </button>
-        </div>
+<div className="text-right space-x-3">
+  <button
+    type="button"
+    disabled={!coachProfile._id || !selectedPlayerId}
+    onClick={() => handleSubmit('Draft')}
+    className={`px-6 py-2 rounded transition ${
+      !coachProfile._id || !selectedPlayerId
+        ? 'bg-gray-400 cursor-not-allowed'
+        : 'bg-yellow-500 text-white hover:bg-yellow-600'
+    }`}
+  >
+    Save Draft
+  </button>
+
+  <button
+    type="button"
+    disabled={!coachProfile._id || !selectedPlayerId}
+    onClick={() => handleSubmit('Submitted')}
+    className={`px-6 py-2 rounded transition ${
+      !coachProfile._id || !selectedPlayerId
+        ? 'bg-gray-400 cursor-not-allowed'
+        : 'bg-blue-600 text-white hover:bg-blue-700'
+    }`}
+  >
+    Submit Evaluation
+  </button>
+</div>
       </form>
     </div>
   );
