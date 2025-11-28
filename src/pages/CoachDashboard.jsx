@@ -21,7 +21,6 @@ const CoachDashboard = () => {
       return navigate('/login');
     }
 
-    // ✅ Only fetch players — no /api/coach/dashboard call
     axios
       .get('https://cricket-academy-backend.onrender.com/api/coach/players', {
         headers: { Authorization: `Bearer ${token}` },
@@ -305,6 +304,9 @@ const CoachDashboard = () => {
             )}
           </div>
         )}
+        {/* ✅ Conditional rendering */}
+        {players.length > 0 ? (
+          <></>  {/* Dashboard content already rendered above */}
         ) : (
           <p className="text-gray-600">Loading dashboard...</p>
         )}
