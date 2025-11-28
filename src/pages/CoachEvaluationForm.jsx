@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const ratingOptions = ['Beginner', 'Tenured', 'Advanced', 'N/A'];
 
@@ -65,7 +65,6 @@ const CoachEvaluationForm = () => {
 
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
-  const { draftId } = useParams();
 
   useEffect(() => {
     axios
@@ -88,26 +87,25 @@ const CoachEvaluationForm = () => {
   useEffect(() => {
     if (!selectedPlayerId) return;
 
+    // Fetch player details
     axios
       .get(`https://cricket-academy-backend.onrender.com/api/player/${selectedPlayerId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setSelectedPlayer(res.data))
       .catch((err) => console.error('Player detail fetch error:', err));
-  }, [selectedPlayerId]);
 
-  // Load draft if draftId is provided
-  useEffect(() => {
-    if (draftId) {
-      axios
-        .get(`https://cricket-academy-backend.onrender.com/api/evaluations/${draftId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => {
-          const ev = res.data;
+    // Fetch latest evaluation for this player
+    axios
+      .get(`https://cricket-academy-backend.onrender.com/api/evaluations/player/${selectedPlayerId}/latest`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const ev = res.data;
+        if (ev && ev.status === 'Draft') {
+          // Load draft into form
           setEvaluationId(ev._id);
           setStatus(ev.status);
-          setSelectedPlayerId(ev.player?._id || '');
           setFeedback(ev.feedback || initialFeedback);
           setCategories(ev.categories || initialCategories);
           setCoachComments(ev.coachComments || '');
@@ -116,10 +114,18 @@ const CoachEvaluationForm = () => {
             totalRuns: ev.totalRuns || '',
             totalWickets: ev.totalWickets || '',
           });
-        })
-        .catch((err) => console.error('Draft fetch error:', err));
-    }
-  }, [draftId]);
+        } else {
+          // Reset to blank if no draft
+          setEvaluationId(null);
+          setStatus(null);
+          setFeedback(initialFeedback);
+          setCategories(initialCategories);
+          setCoachComments('');
+          setManualStats({ gamesPlayed: '', totalRuns: '', totalWickets: '' });
+        }
+      })
+      .catch((err) => console.error('Latest evaluation fetch error:', err));
+  }, [selectedPlayerId]);
 
   const derivedCategory = (() => {
     const age = selectedPlayer?.age;
@@ -238,7 +244,7 @@ const CoachEvaluationForm = () => {
           : 'Loading...'}
       </div>
 
-      <label className="block font-medium text-gray-700 mt-4">
+            <label className="block font-medium text-gray-700 mt-4">
         Select Player
         <select
           value={selectedPlayerId}
@@ -246,7 +252,7 @@ const CoachEvaluationForm = () => {
           className="border px-3 py-2 rounded w-full mt-1"
           required
         >
-                    <option value="">Choose a player</option>
+          <option value="">Choose a player</option>
           {players.map((p) => (
             <option key={p._id} value={p._id}>
               {p.firstName} {p.lastName}
