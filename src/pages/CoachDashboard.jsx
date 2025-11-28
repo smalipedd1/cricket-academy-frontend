@@ -4,208 +4,325 @@ import { useNavigate } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 
 const CoachDashboard = () => {
-  const [sessions, setSessions] = useState([]);
+  const [data, setData] = useState(null);
   const [players, setPlayers] = useState([]);
-  const [coachName, setCoachName] = useState('');
-  const [showSessions, setShowSessions] = useState(false);
-  const [showPlayers, setShowPlayers] = useState(false);
+  const [showPlayerList, setShowPlayerList] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [editedPlayer, setEditedPlayer] = useState({});
+  const [isAddingPlayer, setIsAddingPlayer] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios
-      .get('https://cricket-academy-backend.onrender.com/api/coach/dashboard-ui', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        const sorted = res.data.recentSessions.sort(
-          (a, b) => new Date(b.date) - new Date(a.date)
-        );
-        setSessions(sorted);
-        setCoachName(res.data.coachName || 'Coach');
-      })
-      .catch((err) => {
-        console.error('Dashboard fetch error:', err.response?.data || err.message);
-        alert('Failed to load dashboard.');
-      });
-  }, []);
-  const fetchPlayers = () => {
-    const token = localStorage.getItem('token');
-    axios
-      .get('https://cricket-academy-backend.onrender.com/api/coach/player-list', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        const sorted = res.data.sort((a, b) =>
-          a.firstName.localeCompare(b.firstName)
-        );
-        setPlayers(sorted);
-        setShowPlayers(true);
-      })
-      .catch((err) => {
-        console.error('Player list fetch error:', err.response?.data || err.message);
-        alert('Failed to load player list.');
-      });
-  };
+    const role = localStorage.getItem('role')?.toLowerCase();
 
+    if (!token || role !== 'coach') {
+      console.warn('🔒 Unauthorized access attempt');
+      return navigate('/login');
+    }
+
+    axios
+      .get('https://cricket-academy-backend.onrender.com/api/coach/dashboard?role=coach', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setData(res.data))
+      .catch((err) => {
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          console.warn('🔐 Token expired or unauthorized');
+          navigate('/login');
+        } else {
+          console.error('Dashboard fetch error:', err);
+        }
+      });
+
+    axios
+      .get('https://cricket-academy-backend.onrender.com/api/coach/players', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setPlayers(res.data))
+      .catch((err) => console.error('Player fetch error:', err));
+  }, [navigate]);
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     navigate('/login', { replace: true });
   };
+
+  const handlePlayerUpdate = () => {
+    const token = localStorage.getItem('token');
+    const method = isAddingPlayer ? 'post' : 'put';
+    const url = isAddingPlayer
+      ? 'https://cricket-academy-backend.onrender.com/api/coach/players'
+      : `https://cricket-academy-backend.onrender.com/api/coach/players/${editedPlayer._id}`;
+
+    axios({
+      method,
+      url,
+      data: editedPlayer,
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(() => {
+        alert(isAddingPlayer ? 'Player added!' : 'Player updated!');
+        setSelectedPlayer(null);
+        setEditedPlayer({});
+        setIsAddingPlayer(false);
+        return axios.get('https://cricket-academy-backend.onrender.com/api/coach/players', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      })
+      .then((res) => setPlayers(res.data))
+      .catch((err) => {
+        console.error('Player save error:', err);
+        alert('Failed to save player.');
+      });
+  };
   return (
-    <div className="p-6 max-w-6xl mx-auto bg-white rounded shadow space-y-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-blue-700">Welcome, {coachName}</h1>
-        <div className="flex items-center space-x-4">
-          <NotificationBell />
-          <button
-            onClick={handleLogout}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
-        <div
-          onClick={() => {
-            setShowPlayers(true);
-            setShowSessions(false);
-            fetchPlayers();
-          }}
-          className="bg-blue-100 hover:bg-blue-200 cursor-pointer p-6 rounded shadow text-center"
-        >
-          <div className="text-4xl mb-2">👥</div>
-          <h2 className="text-xl font-semibold text-blue-700">Manage Players</h2>
-          <p className="text-gray-600 mt-1 text-sm">View and update player profiles</p>
-        </div>
-
-        <div
-          onClick={() => {
-            setShowSessions(true);
-            setShowPlayers(false);
-          }}
-          className="bg-yellow-100 hover:bg-yellow-200 cursor-pointer p-6 rounded shadow text-center"
-        >
-          <div className="text-4xl mb-2">📝</div>
-          <h2 className="text-xl font-semibold text-yellow-700">Session Feedback</h2>
-          <p className="text-gray-600 mt-1 text-sm">Log or update feedback for sessions</p>
-        </div>
-
-        <div
-          onClick={() => navigate('/coach/feedback-summary')}
-          className="bg-purple-100 hover:bg-purple-200 cursor-pointer p-6 rounded shadow text-center"
-        >
-          <div className="text-4xl mb-2">📊</div>
-          <h2 className="text-xl font-semibold text-purple-700">Player Progress</h2>
-          <p className="text-gray-600 mt-1 text-sm">View performance graphs and analytics</p>
-        </div>
-
-        <div
-          onClick={() => navigate('/coach/evaluation')}
-          className="bg-green-100 hover:bg-green-200 cursor-pointer p-6 rounded shadow text-center"
-        >
-          <div className="text-4xl mb-2">🧾</div>
-          <h2 className="text-xl font-semibold text-green-700">Player Evaluation</h2>
-          <p className="text-gray-600 mt-1 text-sm">Submit detailed player evaluations</p>
-        </div>
-
-        <div
-          onClick={() => {
-            const token = localStorage.getItem('token');
-            if (token) {
-              navigate('/coach/evaluations/player');
-            } else {
-              alert('Session expired. Please log in again.');
-              navigate('/login', { replace: true });
-            }
-          }}
-          className="bg-indigo-100 hover:bg-indigo-200 cursor-pointer p-6 rounded shadow text-center"
-        >
-          <div className="text-4xl mb-2">📁</div>
-          <h2 className="text-xl font-semibold text-indigo-700">View Evaluations</h2>
-          <p className="text-gray-600 mt-1 text-sm">Browse submitted evaluations by player</p>
-        </div>
-
-        <div
-          onClick={() => navigate('/coach/change-password')}
-          className="bg-red-100 hover:bg-red-200 cursor-pointer p-6 rounded shadow text-center"
-        >
-          <div className="text-4xl mb-2">🔒</div>
-          <h2 className="text-xl font-semibold text-red-700">Change Password</h2>
-          <p className="text-gray-600 mt-1 text-sm">Update your login credentials securely</p>
-        </div>
-      </div>
-      {showPlayers && (
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-gray-800">All Players</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {players.map((player) => (
-              <div key={player._id} className="border p-4 rounded shadow-sm">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  {player.firstName} {player.lastName}
-                </h3>
-                <p className="text-gray-600">Age: {player.age ?? 'N/A'}</p>
-                <p className="text-gray-600">Specialization: {player.role ?? 'N/A'}</p>
-                <p className="text-gray-600">Academy Level: {player.academyLevel ?? 'N/A'}</p>
-                <p className="text-gray-600">Status: {player.status ?? 'N/A'}</p>
-                <p className="text-gray-600">
-                  Competitive Start Year: {player.competitiveStartYear ?? 'N/A'}
-                </p>
-
-                <button
-                  onClick={() => navigate(`/coach/player/${player._id}`)}
-                  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  View / Update
-                </button>
-              </div>
-            ))}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-6">
+      <div className="max-w-6xl mx-auto space-y-10">
+        {/* 🔷 Top Bar */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-blue-700">Welcome Coach</h1>
+          <div className="flex items-center space-x-4">
+            <NotificationBell />
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            >
+              Logout
+            </button>
           </div>
         </div>
-      )}
-            {showSessions && (
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-gray-800">Your Sessions</h2>
-          {sessions.length === 0 ? (
-            <p className="text-gray-600">No sessions assigned yet.</p>
-          ) : (
-            sessions.map((session) => (
-              <div key={session._id} className="border p-4 rounded shadow-sm">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-xl font-semibold text-gray-800">
-                    {new Date(session.date).toLocaleDateString()}
-                  </h3>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      session.feedbackStatus === 'Complete'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-yellow-100 text-yellow-700'
-                    }`}
+
+        {data ? (
+          <>
+            {/* 🧩 Dashboard Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Manage Players */}
+              <div
+                onClick={() => {
+                  setShowPlayerList(true);
+                  setSelectedPlayer(null);
+                  setEditedPlayer({});
+                  setIsAddingPlayer(false);
+                }}
+                className="cursor-pointer bg-white rounded-xl shadow p-6 hover:shadow-lg transition"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="bg-green-100 p-3 rounded-full">
+                    <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M13 7a3 3 0 11-6 0 3 3 0 016 0zM4 14a4 4 0 018 0H4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-green-700">Manage Players</h3>
+                    <p className="text-sm text-gray-600">View and update player profiles.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Manage Sessions */}
+              <div
+                onClick={() => {
+                  setShowPlayerList(false);
+                  navigate('/coach/sessions');
+                }}
+                className="cursor-pointer bg-white rounded-xl shadow p-6 hover:shadow-lg transition"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="bg-purple-100 p-3 rounded-full">
+                    <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm2 3h8v2H6V6zm0 4h5v2H6v-2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-purple-700">Manage Sessions</h3>
+                    <p className="text-sm text-gray-600">Create or update coaching sessions</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* 🏏 Player List */}
+            {showPlayerList && (
+              <div className="mt-10 bg-white rounded-xl shadow p-6 space-y-4">
+                <h2 className="text-xl font-bold text-green-700">Player List</h2>
+                <div className="flex flex-wrap gap-4">
+                  <button
+                    onClick={() => {
+                      setIsAddingPlayer(true);
+                      setSelectedPlayer(null);
+                      setEditedPlayer({
+                        username: '',
+                        password: '',
+                        firstName: '',
+                        lastName: '',
+                        age: '',
+                        competitiveStartYear: '',
+                        emailAddress: '',
+                        role: 'Batsman',
+                        academyLevel: 'Beginner',
+                        cricclubsID: '',
+                        status: 'Active',
+                      });
+                    }}
+                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                   >
-                    {session.feedbackStatus}
-                  </span>
+                    Add New Player
+                  </button>
                 </div>
 
-                <p className="text-gray-600 mb-2">Focus Area: {session.focusArea}</p>
-                <p className="text-gray-600 mb-4">Players Assigned: {session.playerCount}</p>
+                <ul className="mt-4 space-y-2">
+                  {players.map((player) => (
+                    <li
+                      key={player._id}
+                      className="border p-4 rounded hover:bg-green-50 cursor-pointer"
+                      onClick={() => {
+                        setSelectedPlayer(player);
+                        setEditedPlayer(player);
+                        setIsAddingPlayer(false);
+                      }}
+                    >
+                      {player.firstName} {player.lastName} — {player.role}
+                    </li>
+                  ))}
+                </ul>
 
-                <button
-                  onClick={() => navigate(`/coach/feedback/${session._id}`)}
-                  className={`px-6 py-2 rounded ${
-                    session.feedbackStatus === 'Complete'
-                      ? 'bg-purple-600 text-white hover:bg-purple-700'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  {session.feedbackStatus === 'Complete' ? 'Update Feedback' : 'Log Feedback'}
-                </button>
+                {(selectedPlayer || isAddingPlayer) && (
+                  <div className="mt-6 space-y-4">
+                    <h3 className="text-lg font-semibold text-green-600">
+                      {isAddingPlayer ? 'Add New Player' : 'Edit Player'}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <label>
+                        Username
+                        <input
+                          type="text"
+                          value={editedPlayer.username}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, username: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                      </label>
+                      <label>
+                        Password
+                        <input
+                          type="password"
+                          value={editedPlayer.password}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, password: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                      </label>
+                      <label>
+                        First Name
+                        <input
+                          type="text"
+                          value={editedPlayer.firstName}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, firstName: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                      </label>
+                      <label>
+                        Last Name
+                        <input
+                          type="text"
+                          value={editedPlayer.lastName}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, lastName: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                      </label>
+                      <label>
+                        Age
+                        <input
+                          type="number"
+                          value={editedPlayer.age}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, age: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                      </label>
+                      <label>
+                        Competitive Start Year
+                        <input
+                          type="number"
+                          value={editedPlayer.competitiveStartYear || ''}
+                          onChange={(e) =>
+                            setEditedPlayer({ ...editedPlayer, competitiveStartYear: e.target.value })
+                          }
+                          min="2010"
+                          max={new Date().getFullYear() + 5}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                      </label>
+                      <label>
+                        Role
+                        <select
+                          value={editedPlayer.role}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, role: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        >
+                          <option value="Batsman">Batsman</option>
+                          <option value="Bowler">Bowler</option>
+                          <option value="All-Rounder">All-Rounder</option>
+                          <option value="Wicketkeeper">Wicketkeeper</option>
+                        </select>
+                      </label>
+                      <label>
+                        Academy Level
+                        <select
+                          value={editedPlayer.academyLevel}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, academyLevel: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        >
+                          <option value="Beginner">Beginner</option>
+                          <option value="Intermediate">Intermediate</option>
+                          <option value="Advanced">Advanced</option>
+                        </select>
+                      </label>
+                      <label>
+                        Email Address
+                        <input
+                          type="email"
+                          value={editedPlayer.emailAddress}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, emailAddress: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                      </label>
+                      <label>
+                        Cricclubs ID
+                        <input
+                          type="text"
+                          value={editedPlayer.cricclubsID}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, cricclubsID: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        />
+                      </label>
+                      <label>
+                        Status
+                        <select
+                          value={editedPlayer.status}
+                          onChange={(e) => setEditedPlayer({ ...editedPlayer, status: e.target.value })}
+                          className="border px-3 py-2 rounded w-full"
+                        >
+                          <option value="Active">Active</option>
+                          <option value="Inactive">Inactive</option>
+                          <option value="Suspended">Suspended</option>
+                          <option value="Graduated">Graduated</option>
+                        </select>
+                      </label>
+                    </div>
+                    <button
+                      onClick={handlePlayerUpdate}
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    >
+                      {isAddingPlayer ? 'Save New Player' : 'Update Player'}
+                    </button>
+                  </div>
+                )}
               </div>
-            ))
-          )}
-        </div>
-      )}
+            )}
+          </>
+        ) : (
+          <p className="text-gray-600">Loading dashboard...</p>
+        )}
+      </div>
     </div>
   );
 };
