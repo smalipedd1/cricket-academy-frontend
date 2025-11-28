@@ -305,7 +305,6 @@ const CoachDashboard = () => {
             )}
           </div>
         )}
-          
         ) : (
           <p className="text-gray-600">Loading dashboard...</p>
         )}
