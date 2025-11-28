@@ -55,7 +55,6 @@ const AdminDashboard = () => {
       .then((res) => setPlayers(res.data))
       .catch((err) => console.error('Player fetch error:', err));
   }, [navigate]);
-
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
@@ -181,6 +180,56 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Manage Sessions */}
+              <div
+                onClick={() => {
+                  setShowCoachList(false);
+                  setShowPlayerList(false);
+                  navigate('/admin/sessions');
+                }}
+                className="cursor-pointer bg-white rounded-xl shadow p-6 hover:shadow-lg transition"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="bg-purple-100 p-3 rounded-full">
+                    <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm2 3h8v2H6V6zm0 4h5v2H6v-2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-purple-700">Manage Sessions</h3>
+                    <p className="text-sm text-gray-600">Create or update coaching sessions</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Manage Coaches */}
+              <div
+                onClick={() => {
+                  setShowCoachList(true);
+                  setShowPlayerList(false);
+                  setSelectedCoach(null);
+                  setEditedCoach({});
+                  setIsAddingCoach(false);
+                  setSelectedPlayer(null);
+                  setEditedPlayer({});
+                  setIsAddingPlayer(false);
+                }}
+                className="cursor-pointer bg-white rounded-xl shadow p-6 hover:shadow-lg transition"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="bg-blue-100 p-3 rounded-full">
+                    <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M13 7a3 3 0 11-6 0 3 3 0 016 0zM4 14a4 4 0 018 0H4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-700">Manage Coaches</h3>
+                    <p className="text-sm text-gray-600">View and update coach profiles.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             {/* 👥 Coach List */}
             {showCoachList && (
               <div className="mt-10 bg-white rounded-xl shadow p-6 space-y-4">
