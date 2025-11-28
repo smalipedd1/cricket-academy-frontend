@@ -60,6 +60,9 @@ const CoachEvaluationForm = () => {
     gameTime: '',
   });
 
+  const [evaluationId, setEvaluationId] = useState(null);
+  const [status, setStatus] = useState(null);
+
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
@@ -84,12 +87,44 @@ const CoachEvaluationForm = () => {
   useEffect(() => {
     if (!selectedPlayerId) return;
 
+    // Fetch player details
     axios
       .get(`https://cricket-academy-backend.onrender.com/api/player/${selectedPlayerId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setSelectedPlayer(res.data))
       .catch((err) => console.error('Player detail fetch error:', err));
+
+    // Fetch latest evaluation for this player
+    axios
+      .get(`https://cricket-academy-backend.onrender.com/api/evaluations/player/${selectedPlayerId}/latest`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const ev = res.data;
+        if (ev && ev.status === 'Draft') {
+          // Load draft into form
+          setEvaluationId(ev._id);
+          setStatus(ev.status);
+          setFeedback(ev.feedback || initialFeedback);
+          setCategories(ev.categories || initialCategories);
+          setCoachComments(ev.coachComments || '');
+          setManualStats({
+            gamesPlayed: ev.gamesPlayed || '',
+            totalRuns: ev.totalRuns || '',
+            totalWickets: ev.totalWickets || '',
+          });
+        } else {
+          // Reset to blank if no draft
+          setEvaluationId(null);
+          setStatus(null);
+          setFeedback(initialFeedback);
+          setCategories(initialCategories);
+          setCoachComments('');
+          setManualStats({ gamesPlayed: '', totalRuns: '', totalWickets: '' });
+        }
+      })
+      .catch((err) => console.error('Latest evaluation fetch error:', err));
   }, [selectedPlayerId]);
 
   const derivedCategory = (() => {
@@ -121,38 +156,74 @@ const CoachEvaluationForm = () => {
     setDerivedStats({ target, gapPercent, gameTime });
   };
 
-  // Replace your existing handleSubmit with this:
-const handleSubmit = async (status = 'Submitted') => {
-  if (!coachProfile._id) {
-    alert('Coach profile not loaded yet. Please wait a moment and try again.');
-    return;
-  }
+  const handleSubmit = async (statusOverride = 'Submitted') => {
+    if (!coachProfile._id) {
+      alert('Coach profile not loaded yet. Please wait a moment and try again.');
+      return;
+    }
 
-  try {
-    await axios.post(
-      'https://cricket-academy-backend.onrender.com/api/evaluations',
-      {
-        player: selectedPlayerId,
-        coach: coachProfile._id,
-        feedback,
-        categories,
-        coachComments,
-        gamesPlayed: parseInt(manualStats.gamesPlayed) || 0,
-        totalRuns: parseInt(manualStats.totalRuns) || 0,
-        totalWickets: parseInt(manualStats.totalWickets) || 0,
-        status, // <-- Draft or Submitted
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    alert(status === 'Draft' ? 'Draft saved!' : 'Evaluation submitted!');
-    navigate('/coach/dashboard');
-  } catch (err) {
-    console.error('Evaluation submission error:', err.response?.data || err.message || err.toString());
-    alert('Failed to save evaluation.');
-  }
-};
+    try {
+      if (evaluationId && status === 'Draft') {
+        if (statusOverride === 'Draft') {
+          // Update existing draft
+          await axios.put(
+            `https://cricket-academy-backend.onrender.com/api/evaluations/${evaluationId}`,
+            {
+              player: selectedPlayerId,
+              coach: coachProfile._id,
+              feedback,
+              categories,
+              coachComments,
+              gamesPlayed: parseInt(manualStats.gamesPlayed) || 0,
+              totalRuns: parseInt(manualStats.totalRuns) || 0,
+              totalWickets: parseInt(manualStats.totalWickets) || 0,
+              status: 'Draft',
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          alert('Draft updated!');
+        } else {
+          // Submit draft
+          await axios.put(
+            `https://cricket-academy-backend.onrender.com/api/evaluations/${evaluationId}/submit`,
+            {
+              feedback,
+              categories,
+              coachComments,
+              gamesPlayed: parseInt(manualStats.gamesPlayed) || 0,
+              totalRuns: parseInt(manualStats.totalRuns) || 0,
+              totalWickets: parseInt(manualStats.totalWickets) || 0,
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          alert('Draft submitted!');
+        }
+      } else {
+        // New evaluation
+        await axios.post(
+          'https://cricket-academy-backend.onrender.com/api/evaluations',
+          {
+            player: selectedPlayerId,
+            coach: coachProfile._id,
+            feedback,
+            categories,
+            coachComments,
+            gamesPlayed: parseInt(manualStats.gamesPlayed) || 0,
+            totalRuns: parseInt(manualStats.totalRuns) || 0,
+            totalWickets: parseInt(manualStats.totalWickets) || 0,
+            status: statusOverride,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        alert(statusOverride === 'Draft' ? 'Draft saved!' : 'Evaluation submitted!');
+      }
 
-
+      navigate('/coach/dashboard');
+    } catch (err) {
+      console.error('Evaluation submission error:', err.response?.data || err.message || err.toString());
+      alert('Failed to save evaluation.');
+    }
+  };
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded shadow space-y-6">
       <div className="flex justify-between items-center">
@@ -173,7 +244,7 @@ const handleSubmit = async (status = 'Submitted') => {
           : 'Loading...'}
       </div>
 
-      <label className="block font-medium text-gray-700 mt-4">
+            <label className="block font-medium text-gray-700 mt-4">
         Select Player
         <select
           value={selectedPlayerId}
@@ -273,7 +344,8 @@ const handleSubmit = async (status = 'Submitted') => {
           )}
         </div>
       )}
-      <form onSubmit={handleSubmit} className="space-y-8 mt-6">
+
+      <form className="space-y-8 mt-6">
         {['batting', 'bowling', 'mindset', 'fitness'].map((group) => (
           <div key={group} className="bg-white p-6 rounded-lg shadow space-y-4">
             <h3 className="text-xl font-semibold text-blue-700 capitalize">{group} Evaluation</h3>
@@ -363,33 +435,33 @@ const handleSubmit = async (status = 'Submitted') => {
           />
         </div>
 
-<div className="text-right space-x-3">
-  <button
-    type="button"
-    disabled={!coachProfile._id || !selectedPlayerId}
-    onClick={() => handleSubmit('Draft')}
-    className={`px-6 py-2 rounded transition ${
-      !coachProfile._id || !selectedPlayerId
-        ? 'bg-gray-400 cursor-not-allowed'
-        : 'bg-yellow-500 text-white hover:bg-yellow-600'
-    }`}
-  >
-    Save Draft
-  </button>
+        <div className="text-right space-x-3">
+          <button
+            type="button"
+            disabled={!coachProfile._id || !selectedPlayerId}
+            onClick={() => handleSubmit('Draft')}
+            className={`px-6 py-2 rounded transition ${
+              !coachProfile._id || !selectedPlayerId
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-yellow-500 text-white hover:bg-yellow-600'
+            }`}
+          >
+            {evaluationId && status === 'Draft' ? 'Update Draft' : 'Save Draft'}
+          </button>
 
-  <button
-    type="button"
-    disabled={!coachProfile._id || !selectedPlayerId}
-    onClick={() => handleSubmit('Submitted')}
-    className={`px-6 py-2 rounded transition ${
-      !coachProfile._id || !selectedPlayerId
-        ? 'bg-gray-400 cursor-not-allowed'
-        : 'bg-blue-600 text-white hover:bg-blue-700'
-    }`}
-  >
-    Submit Evaluation
-  </button>
-</div>
+          <button
+            type="button"
+            disabled={!coachProfile._id || !selectedPlayerId}
+            onClick={() => handleSubmit('Submitted')}
+            className={`px-6 py-2 rounded transition ${
+              !coachProfile._id || !selectedPlayerId
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            {evaluationId && status === 'Draft' ? 'Submit Draft' : 'Submit Evaluation'}
+          </button>
+        </div>
       </form>
     </div>
   );

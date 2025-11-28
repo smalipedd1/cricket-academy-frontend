@@ -72,6 +72,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
       alert('Failed to submit response.');
     }
   };
+
   const filteredEvaluations = evaluations.filter((e) => {
     const created = new Date(e.createdAt || e.dateOfEvaluation);
     const afterStart = startDate ? created >= new Date(startDate) : true;
@@ -125,6 +126,8 @@ const CoachPlayerEvaluations = ({ viewer }) => {
           />
         )}
       </div>
+
+      {/* 📋 Evaluation List + Detail View */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Evaluation List */}
         <div className="md:col-span-1 border rounded p-4 bg-gray-50 max-h-[600px] overflow-y-auto">
@@ -168,10 +171,6 @@ const CoachPlayerEvaluations = ({ viewer }) => {
               <p><strong>Total Runs:</strong> {selectedEvaluation.totalRuns}</p>
               <p><strong>Total Wickets:</strong> {selectedEvaluation.totalWickets}</p>
 
-              {/* ✅ New fields */}
-              <p><strong>Age Category:</strong> {selectedEvaluation.ageCategory || '—'}</p>
-              <p><strong>Target Games:</strong> {selectedEvaluation.targetGames ?? '—'}</p>
-              <p><strong>Gap Percent:</strong> {selectedEvaluation.gapPercent ?? '—'}%</p>
               {['batting', 'bowling', 'mindset', 'fitness'].map((category) => {
                 const catSection = selectedEvaluation.categories?.[category];
                 const catFeedback = selectedEvaluation.feedback?.[category];
@@ -194,7 +193,7 @@ const CoachPlayerEvaluations = ({ viewer }) => {
                 );
               })}
 
-                            {selectedEvaluation.playerResponded && (
+              {selectedEvaluation.playerResponded && (
                 <div className="mt-4">
                   <p className="font-semibold text-gray-700">Player Response:</p>
                   <p className="text-gray-800 text-sm bg-gray-100 p-2 rounded">
@@ -228,4 +227,3 @@ const CoachPlayerEvaluations = ({ viewer }) => {
 };
 
 export default CoachPlayerEvaluations;
-
