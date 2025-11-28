@@ -304,9 +304,11 @@ const CoachDashboard = () => {
             )}
           </div>
         )}
+        )}
+
         {/* ✅ Conditional rendering */}
         {players.length > 0 ? (
-          <></>  {/* Dashboard content already rendered above */}
+          <p className="text-gray-600">Players loaded successfully.</p>
         ) : (
           <p className="text-gray-600">Loading dashboard...</p>
         )}
