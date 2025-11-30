@@ -196,7 +196,7 @@ const CoachEvaluationForm = () => {
         ageCategory: derivedCategory,
         targetGames: derivedStats.target,
         gapPercent: derivedStats.gapPercent,
-        gameTime: deriverStats.gameTime,
+        gameTime: derivedStats.gameTime,
       };
 
       if (evaluationId && status === 'Draft') {
