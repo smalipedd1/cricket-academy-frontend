@@ -57,6 +57,7 @@ const CoachPlayerProfile = () => {
         <Input label="First Name" name="firstName" value={form.firstName} onChange={handleChange} />
         <Input label="Last Name" name="lastName" value={form.lastName} onChange={handleChange} />
         <Input label="Age" name="age" type="number" value={form.age} onChange={handleChange} />
+        <Input label="competitiveStartYear" name="competitiveStartYear" type="number" value={form.competitiveStartYear} onChange={handleChange} />
         <Input label="Email Address" name="emailAddress" type="email" value={form.emailAddress} onChange={handleChange} />
         <Input label="CricClubs ID" name="cricclubsID" value={form.cricclubsID} onChange={handleChange} />
 
