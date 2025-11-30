@@ -172,7 +172,6 @@ const CoachPlayerEvaluations = ({ viewer }) => {
               <p><strong>Age Category:</strong> {selectedEvaluation.ageCategory || '—'}</p>
               <p><strong>Target Games:</strong> {selectedEvaluation.targetGames ?? '—'}</p>
               <p><strong>Gap Percent:</strong> {selectedEvaluation.gapPercent ?? '—'}%</p>
-	      <p><strong>Game Time:</strong> {selectedEvaluation.gameTime || '—'}</p>
               {['batting', 'bowling', 'mindset', 'fitness'].map((category) => {
                 const catSection = selectedEvaluation.categories?.[category];
                 const catFeedback = selectedEvaluation.feedback?.[category];
