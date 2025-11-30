@@ -269,10 +269,11 @@ const handlePlayerUpdate = () => {
                       key={coach._id}
                       className="border p-4 rounded hover:bg-blue-50 cursor-pointer"
                       onClick={() => {
-                        setSelectedCoach(coach);
-                        setEditedCoach(coach);
-                        setIsAddingCoach(false);
-                      }}
+  			const { password, ...rest } = coach;
+  			setSelectedCoach(coach);
+  			setEditedCoach(rest); // ✅ don’t carry over hashed password
+  			setIsAddingCoach(false);
+			}}
                     >
                       {coach.firstName} {coach.lastName}
                     </li>
@@ -414,10 +415,11 @@ const handlePlayerUpdate = () => {
                       key={player._id}
                       className="border p-4 rounded hover:bg-green-50 cursor-pointer"
                       onClick={() => {
-                        setSelectedPlayer(player);
-                        setEditedPlayer(player);
-                        setIsAddingPlayer(false);
-                      }}
+			  const { password, ...rest } = player;
+			  setSelectedPlayer(player);
+ 			  setEditedPlayer(rest); // ✅ don’t carry over hashed password
+			  setIsAddingPlayer(false);
+			}}
                     >
                       {player.firstName} {player.lastName} — {player.role}
                     </li>
