@@ -14,10 +14,11 @@ const CoachPlayerProfile = () => {
       .get(`https://cricket-academy-backend.onrender.com/api/coach/player/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => {
-        setForm(res.data);
-        setLoading(false);
-      })
+.then((res) => {
+  const { password, ...rest } = res.data;
+  setForm(rest); // ✅ don’t carry over hashed password
+  setLoading(false);
+})
       .catch((err) => {
         console.error('Player fetch error:', err.response?.data || err.message);
         alert('Failed to load player profile.');
@@ -29,21 +30,26 @@ const CoachPlayerProfile = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleUpdate = () => {
-    const token = localStorage.getItem('token');
-    axios
-      .patch(`https://cricket-academy-backend.onrender.com/api/coach/player/${id}`, form, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(() => {
-        alert('Player updated successfully');
-        navigate('/coach/dashboard');
-      })
-      .catch((err) => {
-        console.error('Player update error:', err.response?.data || err.message);
-        alert('Failed to update player.');
-      });
-  };
+const handleUpdate = () => {
+  const token = localStorage.getItem('token');
+
+  // ✅ Only include password if coach typed a new one
+  const { password, ...rest } = form;
+  const payload = password && password.trim() !== '' ? form : rest;
+
+  axios
+    .patch(`https://cricket-academy-backend.onrender.com/api/coach/player/${id}`, payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then(() => {
+      alert('Player updated successfully');
+      navigate('/coach/dashboard');
+    })
+    .catch((err) => {
+      console.error('Player update error:', err.response?.data || err.message);
+      alert('Failed to update player.');
+    });
+};
 
   if (loading) return <p className="p-6">Loading player profile...</p>;
 
