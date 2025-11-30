@@ -153,6 +153,7 @@ const CoachDashboard = () => {
                 <p className="text-gray-600">Age: {player.age ?? 'N/A'}</p>
                 <p className="text-gray-600">Specialization: {player.role ?? 'N/A'}</p>
                 <p className="text-gray-600">Academy Level: {player.academyLevel ?? 'N/A'}</p>
+		<p className="text-gray-600">competitiveStartYear: {player.competitiveStartYear ?? 'N/A'}</p>
                 <p className="text-gray-600">Status: {player.status ?? 'N/A'}</p>
 
                 <button
